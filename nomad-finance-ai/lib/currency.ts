@@ -51,3 +51,9 @@ export function formatCompact(
   if (abs >= 1_000) return `${symbol}${(amount / 1_000).toFixed(1)}K`;
   return `${symbol}${amount.toFixed(2)}`;
 }
+export type Currency = {
+  code: string;
+  symbol: string;
+  name: string;
+  flag: string;
+};
