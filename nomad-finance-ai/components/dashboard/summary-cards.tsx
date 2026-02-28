@@ -7,7 +7,7 @@ import { useWallets } from "@/lib/hooks/use-wallets";
 import { useTransactions } from "@/lib/hooks/use-transactions";
 import { useDisplayCurrency } from "@/lib/hooks/use-profile";
 import { useTimeRange, type TimeRange } from "@/lib/time-range-context";
-import { convertCurrency, convertToBase, formatCurrency } from "@/lib/currency";
+import { convertCurrency, formatCurrency, formatCompact } from "@/lib/currency";
 import type { SupportedCurrency } from "@/lib/constants";
 import {
   Banknote,
@@ -139,10 +139,15 @@ export function SummaryCards() {
       ? ((incomeInRange - expensesInRange) / incomeInRange) * 100
       : 0;
 
+  const totalBalanceFormatted =
+    Math.abs(totalBalance) >= 1_000_000
+      ? formatCompact(totalBalance, displayCurrency)
+      : formatCurrency(totalBalance, displayCurrency);
+
   const cards = [
     {
       title: "Total Balance",
-      value: formatCurrency(totalBalance, displayCurrency),
+      value: totalBalanceFormatted,
       subtitle: `Across ${wallets?.length ?? 0} wallets`,
       icon: Banknote,
       accent: "cyan" as const,
@@ -179,8 +184,9 @@ export function SummaryCards() {
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.4, delay: i * 0.08, ease: "easeOut" }}
           whileHover={{ scale: 1.02 }}
+          className="min-w-0"
         >
-          <Card className={`glass-card glass-card-hover ${CARD_ACCENTS[card.accent]}`}>
+          <Card className={`glass-card glass-card-hover overflow-hidden ${CARD_ACCENTS[card.accent]}`}>
             <CardHeader className="flex flex-row items-center justify-between pb-2">
               <CardTitle className="text-xs font-medium uppercase tracking-wider text-muted-foreground">
                 {card.title}
@@ -190,7 +196,11 @@ export function SummaryCards() {
               </div>
             </CardHeader>
             <CardContent>
-              <div className="text-3xl font-semibold tracking-tight text-foreground sm:text-4xl lg:text-5xl" style={{ letterSpacing: "-1.5px" }}>
+              <div
+                className="min-w-0 truncate text-3xl font-semibold tracking-tight text-foreground sm:text-4xl lg:text-5xl"
+                style={{ letterSpacing: "-1.5px" }}
+                title={card.value}
+              >
                 {card.value}
               </div>
               <p className="mt-1 text-xs text-muted-foreground">{card.subtitle}</p>
