@@ -1,0 +1,203 @@
+"use client";
+
+import { motion } from "framer-motion";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Skeleton } from "@/components/ui/skeleton";
+import { useWallets } from "@/lib/hooks/use-wallets";
+import { useTransactions } from "@/lib/hooks/use-transactions";
+import { useDisplayCurrency } from "@/lib/hooks/use-profile";
+import { useTimeRange, type TimeRange } from "@/lib/time-range-context";
+import { convertCurrency, convertToBase, formatCurrency } from "@/lib/currency";
+import type { SupportedCurrency } from "@/lib/constants";
+import {
+  Banknote,
+  TrendingUp,
+  TrendingDown,
+  PiggyBank,
+} from "lucide-react";
+
+function getDateRange(timeRange: TimeRange): { start: Date; end: Date } {
+  const now = new Date();
+  const end = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 23, 59, 59, 999);
+
+  switch (timeRange) {
+    case "Today": {
+      const start = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 0, 0, 0, 0);
+      return { start, end };
+    }
+    case "This Week": {
+      const day = now.getDay();
+      const sundayOffset = day === 0 ? 6 : day - 1;
+      const monday = new Date(now);
+      monday.setDate(now.getDate() - sundayOffset);
+      const start = new Date(monday.getFullYear(), monday.getMonth(), monday.getDate(), 0, 0, 0, 0);
+      return { start, end };
+    }
+    case "This Month": {
+      const start = new Date(now.getFullYear(), now.getMonth(), 1, 0, 0, 0, 0);
+      return { start, end };
+    }
+  }
+}
+
+function getPeriodLabel(timeRange: TimeRange): string {
+  switch (timeRange) {
+    case "Today":
+      return "Today";
+    case "This Week":
+      return "This Week";
+    case "This Month":
+      return "This Month";
+  }
+}
+
+function getSavingsSubtitle(timeRange: TimeRange, hasIncome: boolean): string {
+  if (!hasIncome) return "No income yet";
+  switch (timeRange) {
+    case "Today":
+      return "Of daily income";
+    case "This Week":
+      return "Of weekly income";
+    case "This Month":
+      return "Of monthly income";
+  }
+}
+
+const CARD_ACCENTS = {
+  cyan: "border-l-2 border-l-cyan-400",
+  emerald: "border-l-2 border-l-emerald-400",
+  amber: "border-l-2 border-l-amber-500",
+  violet: "border-l-2 border-l-violet-400",
+} as const;
+
+const ICON_COLORS = {
+  cyan: "text-cyan-400",
+  emerald: "text-emerald-400",
+  amber: "text-amber-500",
+  violet: "text-violet-400",
+} as const;
+
+export function SummaryCards() {
+  const { data: wallets, isLoading: walletsLoading } = useWallets();
+  const { data: transactions, isLoading: txLoading } = useTransactions();
+  const { timeRange } = useTimeRange();
+  const displayCurrency = useDisplayCurrency();
+
+  const isLoading = walletsLoading || txLoading;
+
+  if (isLoading) {
+    return (
+      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+        {Array.from({ length: 4 }).map((_, i) => (
+          <Card key={i} className="glass-card glass-card-hover">
+            <CardHeader className="flex flex-row items-center justify-between pb-2">
+              <Skeleton className="h-3 w-24" />
+              <Skeleton className="h-5 w-5 rounded-full" />
+            </CardHeader>
+            <CardContent>
+              <Skeleton className="h-10 w-36" />
+              <Skeleton className="mt-2 h-3 w-20" />
+            </CardContent>
+          </Card>
+        ))}
+      </div>
+    );
+  }
+
+  const periodLabel = getPeriodLabel(timeRange);
+  const { start: rangeStart, end: rangeEnd } = getDateRange(timeRange);
+
+  const totalBalance = (wallets ?? []).reduce(
+    (sum, w) =>
+      sum + convertCurrency(w.balance, w.currency as SupportedCurrency, displayCurrency),
+    0
+  );
+
+  const rangeTransactions = (transactions ?? []).filter((t) => {
+    const d = new Date(t.date);
+    return d >= rangeStart && d <= rangeEnd;
+  });
+
+  const incomeInRange = rangeTransactions
+    .filter((t) => t.type === "income")
+    .reduce(
+      (sum, t) =>
+        sum + convertCurrency(t.amount, t.currency as SupportedCurrency, displayCurrency),
+      0
+    );
+
+  const expensesInRange = rangeTransactions
+    .filter((t) => t.type === "expense")
+    .reduce(
+      (sum, t) =>
+        sum + convertCurrency(t.amount, t.currency as SupportedCurrency, displayCurrency),
+      0
+    );
+
+  const savingsRate =
+    incomeInRange > 0
+      ? ((incomeInRange - expensesInRange) / incomeInRange) * 100
+      : 0;
+
+  const cards = [
+    {
+      title: "Total Balance",
+      value: formatCurrency(totalBalance, displayCurrency),
+      subtitle: `Across ${wallets?.length ?? 0} wallets`,
+      icon: Banknote,
+      accent: "cyan" as const,
+    },
+    {
+      title: `Income ${periodLabel}`,
+      value: formatCurrency(incomeInRange, displayCurrency),
+      subtitle: `${rangeTransactions.filter((t) => t.type === "income").length} transactions`,
+      icon: TrendingUp,
+      accent: "emerald" as const,
+    },
+    {
+      title: `Expenses ${periodLabel}`,
+      value: formatCurrency(expensesInRange, displayCurrency),
+      subtitle: `${rangeTransactions.filter((t) => t.type === "expense").length} transactions`,
+      icon: TrendingDown,
+      accent: "amber" as const,
+    },
+    {
+      title: "Savings Rate",
+      value: `${savingsRate.toFixed(1)}%`,
+      subtitle: getSavingsSubtitle(timeRange, incomeInRange > 0),
+      icon: PiggyBank,
+      accent: "violet" as const,
+    },
+  ];
+
+  return (
+    <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+      {cards.map((card, i) => (
+        <motion.div
+          key={card.title}
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.4, delay: i * 0.08, ease: "easeOut" }}
+          whileHover={{ scale: 1.02 }}
+        >
+          <Card className={`glass-card glass-card-hover ${CARD_ACCENTS[card.accent]}`}>
+            <CardHeader className="flex flex-row items-center justify-between pb-2">
+              <CardTitle className="text-xs font-medium uppercase tracking-wider text-muted-foreground">
+                {card.title}
+              </CardTitle>
+              <div className={`rounded-full bg-background/50 p-1.5 ${ICON_COLORS[card.accent]}`}>
+                <card.icon className="h-4 w-4" />
+              </div>
+            </CardHeader>
+            <CardContent>
+              <div className="text-3xl font-semibold tracking-tight text-foreground sm:text-4xl lg:text-5xl" style={{ letterSpacing: "-1.5px" }}>
+                {card.value}
+              </div>
+              <p className="mt-1 text-xs text-muted-foreground">{card.subtitle}</p>
+            </CardContent>
+          </Card>
+        </motion.div>
+      ))}
+    </div>
+  );
+}
