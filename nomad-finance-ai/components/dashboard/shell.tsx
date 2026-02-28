@@ -16,6 +16,9 @@ import {
 import { Sheet, SheetContent, SheetTrigger, SheetTitle } from "@/components/ui/sheet";
 import { Separator } from "@/components/ui/separator";
 import { ThemeToggle } from "@/components/theme-toggle";
+import { CurrencySelector } from "@/components/ui/currency-selector";
+import { useCurrency } from "@/lib/currency-context";
+import type { SupportedCurrency } from "@/lib/constants";
 import {
   Brain,
   LayoutDashboard,
@@ -23,6 +26,7 @@ import {
   Wallet,
   LogOut,
   Menu,
+  Settings,
 } from "lucide-react";
 import Link from "next/link";
 import { cn } from "@/lib/utils";
@@ -34,6 +38,7 @@ const ICONS = {
   ArrowLeftRight,
   Wallet,
   Brain,
+  Settings,
 } as const;
 
 function NavLinks({ onClick }: { onClick?: () => void }) {
@@ -82,6 +87,7 @@ export function DashboardShell({
   const { isDemo } = useDemoMode();
   const [mobileOpen, setMobileOpen] = useState(false);
   const mounted = useMounted();
+  const currencyContext = useCurrency();
 
   const initials = ((user.user_metadata?.full_name as string) || user.email || "U")
     .split(" ")
@@ -150,6 +156,13 @@ export function DashboardShell({
           )}
 
           <div className="flex-1" />
+
+          {mounted && currencyContext && (
+            <CurrencySelector
+              value={currencyContext.displayCurrency}
+              onValueChange={(code) => currencyContext.setDisplayCurrency(code as SupportedCurrency)}
+            />
+          )}
 
           <ThemeToggle />
 

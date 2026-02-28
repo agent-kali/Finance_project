@@ -1,6 +1,7 @@
 "use server";
 
 import { createClient } from "@/lib/supabase/server";
+import type { SupportedCurrency } from "@/lib/constants";
 
 async function ensureProfile(supabase: Awaited<ReturnType<typeof createClient>>, userId: string, fullName?: string | null) {
   const { data } = await supabase
@@ -16,7 +17,7 @@ async function ensureProfile(supabase: Awaited<ReturnType<typeof createClient>>,
   }
 }
 
-export async function createWallet(currency: "EUR" | "USD" | "VND" | "GBP" | "PLN") {
+export async function createWallet(currency: SupportedCurrency) {
   const supabase = await createClient();
   const { data: { user }, error: authError } = await supabase.auth.getUser();
   if (authError || !user) throw new Error("Unauthorized");
@@ -33,9 +34,7 @@ export async function createWallet(currency: "EUR" | "USD" | "VND" | "GBP" | "PL
   return data;
 }
 
-type WalletCurrency = "EUR" | "USD" | "VND" | "GBP" | "PLN";
-
-export async function updateWallet(id: string, updates: { currency?: WalletCurrency }) {
+export async function updateWallet(id: string, updates: { currency?: SupportedCurrency }) {
   const supabase = await createClient();
   const { data: { user }, error: authError } = await supabase.auth.getUser();
   if (authError || !user) throw new Error("Unauthorized");

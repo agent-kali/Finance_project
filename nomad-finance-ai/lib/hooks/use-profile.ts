@@ -5,6 +5,7 @@ import { createClient } from "@/lib/supabase/client";
 import { useDemoMode } from "@/lib/demo-context";
 import { DEMO_PRIMARY_CURRENCY } from "@/lib/demo";
 import type { SupportedCurrency } from "@/lib/constants";
+import { useCurrency } from "@/lib/currency-context";
 
 export function useProfile() {
   const { isDemo } = useDemoMode();
@@ -32,9 +33,11 @@ export function useProfile() {
 }
 
 export function useDisplayCurrency(): SupportedCurrency {
+  const currencyContext = useCurrency();
   const { isDemo } = useDemoMode();
   const { data: profile } = useProfile();
 
+  if (currencyContext) return currencyContext.displayCurrency;
   if (isDemo) return DEMO_PRIMARY_CURRENCY;
   if (profile?.primary_currency) return profile.primary_currency as SupportedCurrency;
   return "EUR";

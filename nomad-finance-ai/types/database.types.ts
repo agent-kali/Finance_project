@@ -1,14 +1,16 @@
+import type { SupportedCurrency } from "@/lib/constants";
+
 export type Profile = {
   id: string;
   full_name: string | null;
-  primary_currency: "EUR" | "USD" | "VND" | "GBP" | "PLN";
+  primary_currency: SupportedCurrency;
   created_at: string;
 };
 
 export type Wallet = {
   id: string;
   user_id: string;
-  currency: "EUR" | "USD" | "VND" | "GBP" | "PLN";
+  currency: SupportedCurrency;
   balance: number;
   created_at: string;
 };
@@ -19,7 +21,7 @@ export type Transaction = {
   wallet_id: string;
   type: "income" | "expense";
   amount: number;
-  currency: "EUR" | "USD" | "VND" | "GBP" | "PLN";
+  currency: SupportedCurrency;
   category: string;
   description: string | null;
   date: string;

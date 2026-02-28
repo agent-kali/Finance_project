@@ -4,6 +4,7 @@ import { createClient } from "@/lib/supabase/server";
 import { DashboardShell } from "@/components/dashboard/shell";
 import { DemoProvider } from "@/lib/demo-context";
 import { TimeRangeProvider } from "@/lib/time-range-context";
+import { CurrencyProvider } from "@/lib/currency-context";
 import { DEMO_COOKIE, DEMO_USER } from "@/lib/demo";
 
 export default async function DashboardLayout({
@@ -17,9 +18,11 @@ export default async function DashboardLayout({
   if (isDemoMode) {
     return (
       <DemoProvider initialValue>
-        <TimeRangeProvider>
-          <DashboardShell user={DEMO_USER}>{children}</DashboardShell>
-        </TimeRangeProvider>
+        <CurrencyProvider>
+          <TimeRangeProvider>
+            <DashboardShell user={DEMO_USER}>{children}</DashboardShell>
+          </TimeRangeProvider>
+        </CurrencyProvider>
       </DemoProvider>
     );
   }
@@ -33,9 +36,11 @@ export default async function DashboardLayout({
 
   return (
     <DemoProvider>
-      <TimeRangeProvider>
-        <DashboardShell user={user}>{children}</DashboardShell>
-      </TimeRangeProvider>
+      <CurrencyProvider>
+        <TimeRangeProvider>
+          <DashboardShell user={user}>{children}</DashboardShell>
+        </TimeRangeProvider>
+      </CurrencyProvider>
     </DemoProvider>
   );
 }
