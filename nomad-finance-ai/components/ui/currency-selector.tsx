@@ -23,7 +23,16 @@ import {
   getOtherCurrencies,
 } from "@/lib/currencies";
 import { useCurrency } from "@/lib/currency-context";
+import { useCurrencyConversion } from "@/lib/currency-conversion-context";
 import type { SupportedCurrency } from "@/lib/constants";
+
+function formatRatesDate(dateStr: string | null): string {
+  if (!dateStr) return "";
+  const d = new Date(dateStr);
+  const today = new Date();
+  if (d.toDateString() === today.toDateString()) return "Rates updated today";
+  return `Rates from ${d.toLocaleDateString("en-US", { month: "short", day: "numeric" })}`;
+}
 
 export interface CurrencySelectorProps {
   value?: string;
@@ -38,6 +47,7 @@ export function CurrencySelector({
 }: CurrencySelectorProps) {
   const [open, setOpen] = React.useState(false);
   const currencyContext = useCurrency();
+  const { ratesDate, error } = useCurrencyConversion() ?? { ratesDate: null, error: null };
 
   const isControlled =
     valueProp !== undefined && onValueChangeProp !== undefined;
@@ -102,6 +112,7 @@ export function CurrencySelector({
         sideOffset={6}
         onOpenAutoFocus={(e) => e.preventDefault()}
       >
+        <div className="flex flex-col">
         <Command shouldFilter={true}>
           <CommandInput
             placeholder="Search currencies..."
@@ -179,6 +190,12 @@ export function CurrencySelector({
             </CommandGroup>
           </CommandList>
         </Command>
+        {(ratesDate || error) && (
+          <p className="border-t border-border px-3 py-2 text-center text-xs text-muted-foreground shrink-0">
+            {error ? "Using approximate rates" : formatRatesDate(ratesDate!)}
+          </p>
+        )}
+        </div>
       </PopoverContent>
     </Popover>
   );

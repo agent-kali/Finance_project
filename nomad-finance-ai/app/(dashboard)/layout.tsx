@@ -5,6 +5,7 @@ import { DashboardShell } from "@/components/dashboard/shell";
 import { DemoProvider } from "@/lib/demo-context";
 import { TimeRangeProvider } from "@/lib/time-range-context";
 import { CurrencyProvider } from "@/lib/currency-context";
+import { CurrencyConversionProvider } from "@/lib/currency-conversion-context";
 import { DefaultWalletProvider } from "@/lib/default-wallet-context";
 import { DEMO_COOKIE, DEMO_USER } from "@/lib/demo";
 
@@ -20,11 +21,13 @@ export default async function DashboardLayout({
     return (
       <DemoProvider initialValue>
         <CurrencyProvider>
-          <DefaultWalletProvider>
-            <TimeRangeProvider>
-              <DashboardShell user={DEMO_USER}>{children}</DashboardShell>
-            </TimeRangeProvider>
-          </DefaultWalletProvider>
+          <CurrencyConversionProvider>
+            <DefaultWalletProvider>
+              <TimeRangeProvider>
+                <DashboardShell user={DEMO_USER}>{children}</DashboardShell>
+              </TimeRangeProvider>
+            </DefaultWalletProvider>
+          </CurrencyConversionProvider>
         </CurrencyProvider>
       </DemoProvider>
     );
@@ -40,11 +43,13 @@ export default async function DashboardLayout({
   return (
     <DemoProvider>
       <CurrencyProvider>
-        <DefaultWalletProvider>
-          <TimeRangeProvider>
-            <DashboardShell user={user}>{children}</DashboardShell>
-          </TimeRangeProvider>
-        </DefaultWalletProvider>
+        <CurrencyConversionProvider>
+          <DefaultWalletProvider>
+            <TimeRangeProvider>
+              <DashboardShell user={user}>{children}</DashboardShell>
+            </TimeRangeProvider>
+          </DefaultWalletProvider>
+        </CurrencyConversionProvider>
       </CurrencyProvider>
     </DemoProvider>
   );

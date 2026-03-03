@@ -156,7 +156,10 @@ export function CategoryChart() {
                       />
                     </div>
                   </div>
-                  <span className="w-14 shrink-0 text-right text-sm font-medium tabular-nums text-foreground sm:w-20">
+                  <span
+                    className="w-14 shrink-0 text-right text-sm font-medium tabular-nums text-foreground sm:w-20"
+                    title="Converted at Frankfurter rate"
+                  >
                     {formatCurrency(entry.value, displayCurrency)}
                   </span>
                 </li>

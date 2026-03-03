@@ -25,7 +25,8 @@ import {
 import { useWallets } from "@/lib/hooks/use-wallets";
 import { useDemoMode } from "@/lib/demo-context";
 import { useDefaultWallet, useEffectiveDefaultWalletId } from "@/lib/default-wallet-context";
-import { formatCurrency, convertToBase } from "@/lib/currency";
+import { useDisplayCurrency } from "@/lib/hooks/use-profile";
+import { formatCurrency, convertCurrency } from "@/lib/currency";
 import {
   SUPPORTED_CURRENCIES,
   CURRENCY_SYMBOLS,
@@ -50,6 +51,7 @@ const DEFAULT_ACCENT = { border: "border-l-cyan-400", text: "text-cyan-400" };
 export function WalletsContent() {
   const { data: wallets, isLoading } = useWallets();
   const { isDemo } = useDemoMode();
+  const displayCurrency = useDisplayCurrency();
   const { setDefaultWallet } = useDefaultWallet() ?? {};
   const effectiveDefaultId = useEffectiveDefaultWalletId();
   const queryClient = useQueryClient();
@@ -101,8 +103,9 @@ export function WalletsContent() {
     },
   });
 
-  const totalEur = (wallets ?? []).reduce(
-    (sum, w) => sum + convertToBase(w.balance, w.currency as SupportedCurrency),
+  const totalInDisplay = (wallets ?? []).reduce(
+    (sum, w) =>
+      sum + convertCurrency(w.balance, w.currency as SupportedCurrency, displayCurrency),
     0
   );
 
@@ -126,6 +129,7 @@ export function WalletsContent() {
             initial={{ opacity: 0, scale: 0.95 }}
             animate={{ opacity: 1, scale: 1 }}
             className="glass-card glass-card-hover rounded-xl px-5 py-3"
+            title="Converted at Frankfurter rate"
           >
             <p className="text-xs font-medium uppercase tracking-wider text-muted-foreground">
               Total Balance
@@ -134,7 +138,7 @@ export function WalletsContent() {
               className="text-4xl font-semibold text-foreground sm:text-5xl md:text-6xl"
               style={{ letterSpacing: "-1.5px" }}
             >
-              {formatCurrency(totalEur, "EUR")}
+              {formatCurrency(totalInDisplay, displayCurrency)}
             </p>
           </motion.div>
         )}
@@ -159,7 +163,7 @@ export function WalletsContent() {
           {wallets.map((w, i) => {
             const currency = w.currency as SupportedCurrency;
             const symbol = CURRENCY_SYMBOLS[currency] ?? "";
-            const eurValue = convertToBase(w.balance, currency);
+            const displayValue = convertCurrency(w.balance, currency, displayCurrency);
             const accent = CURRENCY_ACCENTS[currency] ?? DEFAULT_ACCENT;
 
             return (
@@ -212,8 +216,11 @@ export function WalletsContent() {
                     >
                       {formatCurrency(w.balance, currency)}
                     </div>
-                    <p className="mt-1 text-sm text-muted-foreground">
-                      ≈ {formatCurrency(eurValue, "EUR")}
+                    <p
+                      className="mt-1 text-sm text-muted-foreground"
+                      title="Converted at Frankfurter rate"
+                    >
+                      ≈ {formatCurrency(displayValue, displayCurrency)}
                     </p>
                   </CardContent>
                 </Card>

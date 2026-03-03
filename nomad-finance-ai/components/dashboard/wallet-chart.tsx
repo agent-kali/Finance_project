@@ -113,7 +113,7 @@ export function WalletChart() {
                     if (!active || !payload?.length) return null;
                     const item = payload[0].payload as (typeof chartData)[number];
                     return (
-                      <div className="glass-tooltip rounded-xl px-4 py-3">
+                      <div className="glass-tooltip rounded-xl px-4 py-3" title="Converted at Frankfurter rate">
                         <p className="text-sm font-semibold text-foreground">{item.name}</p>
                         <p className="text-sm font-medium text-foreground">
                           {formatCurrency(item.original, item.currency)}

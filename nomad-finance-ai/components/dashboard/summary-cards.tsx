@@ -7,7 +7,8 @@ import { useWallets } from "@/lib/hooks/use-wallets";
 import { useTransactions } from "@/lib/hooks/use-transactions";
 import { useDisplayCurrency } from "@/lib/hooks/use-profile";
 import { useTimeRange, type TimeRange } from "@/lib/time-range-context";
-import { convertCurrency, formatCurrency, formatCompact } from "@/lib/currency";
+import { useCurrencyConversion } from "@/lib/currency-conversion-context";
+import { convertCurrency, formatCurrency } from "@/lib/currency";
 import type { SupportedCurrency } from "@/lib/constants";
 import {
   Banknote,
@@ -78,11 +79,20 @@ const ICON_COLORS = {
   violet: "text-violet-400",
 } as const;
 
+function formatRatesDate(dateStr: string | null): string {
+  if (!dateStr) return "";
+  const d = new Date(dateStr);
+  const today = new Date();
+  if (d.toDateString() === today.toDateString()) return "Rates updated today";
+  return `Rates from ${d.toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })}`;
+}
+
 export function SummaryCards() {
   const { data: wallets, isLoading: walletsLoading } = useWallets();
   const { data: transactions, isLoading: txLoading } = useTransactions();
   const { timeRange } = useTimeRange();
   const displayCurrency = useDisplayCurrency();
+  const { ratesDate } = useCurrencyConversion() ?? { ratesDate: null };
 
   const isLoading = walletsLoading || txLoading;
 
@@ -140,10 +150,7 @@ export function SummaryCards() {
       ? ((incomeInRange - expensesInRange) / incomeInRange) * 100
       : 0;
 
-  const totalBalanceFormatted =
-    Math.abs(totalBalance) >= 1_000_000
-      ? formatCompact(totalBalance, displayCurrency)
-      : formatCurrency(totalBalance, displayCurrency);
+  const totalBalanceFormatted = formatCurrency(totalBalance, displayCurrency);
 
   const totalBalanceCard = {
     title: "Total Balance",
@@ -204,14 +211,25 @@ export function SummaryCards() {
               </div>
             </CardHeader>
             <CardContent>
-              <div
-                className="min-w-0 truncate text-3xl font-semibold tracking-tight text-foreground sm:text-4xl lg:text-5xl"
-                style={{ letterSpacing: "-1.5px" }}
-                title={card.value}
-              >
-                {card.value}
+              <div className="min-w-0">
+                <motion.div
+                  key={displayCurrency}
+                  initial={{ opacity: 0.5 }}
+                  animate={{ opacity: 1 }}
+                  transition={{ duration: 0.2 }}
+                  className="min-w-0 truncate font-semibold tracking-tight text-foreground"
+                  style={{ fontSize: "clamp(1.25rem, 4vw, 2.25rem)", letterSpacing: "-1.5px" }}
+                  title={ratesDate ? `Converted at Frankfurter rate. ${formatRatesDate(ratesDate)}` : "Converted amount"}
+                >
+                  {card.value}
+                </motion.div>
               </div>
-              <p className="mt-1 text-xs text-muted-foreground">{card.subtitle}</p>
+              <p className="mt-1 text-xs text-muted-foreground">
+                {card.subtitle}
+                {"showDefaultWalletSelector" in card && card.showDefaultWalletSelector && ratesDate && (
+                  <> • <span title="Converted at Frankfurter rate">{formatRatesDate(ratesDate)}</span></>
+                )}
+              </p>
               {"showDefaultWalletSelector" in card && card.showDefaultWalletSelector && (wallets?.length ?? 0) > 0 && (
                 <div className="mt-3">
                   <DefaultWalletSelector variant="compact" showTooltip={true} />

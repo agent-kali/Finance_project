@@ -118,6 +118,7 @@ export function RecentActivity() {
                 className={`shrink-0 text-right text-sm font-medium tabular-nums ${
                   tx.type === "income" ? "text-emerald-400" : "text-amber-500"
                 }`}
+                title="Converted at Frankfurter rate"
               >
                 {tx.type === "income" ? "+" : "-"}
                 {formatCurrency(

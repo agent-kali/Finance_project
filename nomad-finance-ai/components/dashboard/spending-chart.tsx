@@ -258,7 +258,7 @@ export function SpendingChart() {
                     content={({ active, payload, label }) => {
                       if (!active || !payload?.length) return null;
                       return (
-                        <div className="glass-tooltip rounded-xl px-4 py-3">
+                        <div className="glass-tooltip rounded-xl px-4 py-3" title="Converted at Frankfurter rate">
                           <p className="mb-1 text-sm font-semibold text-foreground">{label}</p>
                           {payload.map((entry) => (
                             <p key={entry.name} className="text-sm text-muted-foreground">
@@ -327,7 +327,7 @@ export function SpendingChart() {
                     content={({ active, payload, label }) => {
                       if (!active || !payload?.length) return null;
                       return (
-                        <div className="glass-tooltip rounded-xl px-4 py-3">
+                        <div className="glass-tooltip rounded-xl px-4 py-3" title="Converted at Frankfurter rate">
                           <p className="mb-1 text-sm font-semibold text-foreground">{label}</p>
                           {payload.map((entry) => (
                             <p key={entry.name} className="text-sm text-muted-foreground">
@@ -414,7 +414,7 @@ export function SpendingChart() {
                     content={({ active, payload, label }) => {
                       if (!active || !payload?.length) return null;
                       return (
-                        <div className="glass-tooltip rounded-xl px-4 py-3">
+                        <div className="glass-tooltip rounded-xl px-4 py-3" title="Converted at Frankfurter rate">
                           <p className="mb-1 text-sm font-semibold text-foreground">{label}</p>
                           {payload.map((entry) => (
                             <p key={entry.name} className="text-sm text-muted-foreground">

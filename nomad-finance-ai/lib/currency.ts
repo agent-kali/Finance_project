@@ -3,6 +3,7 @@ import {
   CURRENCY_SYMBOLS,
   type SupportedCurrency,
 } from "@/lib/constants";
+import { convert as convertLive } from "@/lib/currency-conversion";
 
 export function convertToBase(
   amount: number,
@@ -11,13 +12,16 @@ export function convertToBase(
   return amount / EXCHANGE_RATES[from];
 }
 
+/**
+ * Converts amount from one currency to another. Uses live Frankfurter rates when
+ * available (populated by CurrencyConversionProvider); falls back to static rates.
+ */
 export function convertCurrency(
   amount: number,
   from: SupportedCurrency,
   to: SupportedCurrency
 ): number {
-  const baseAmount = convertToBase(amount, from);
-  return baseAmount * EXCHANGE_RATES[to];
+  return convertLive(amount, from, to);
 }
 
 export function formatCurrency(

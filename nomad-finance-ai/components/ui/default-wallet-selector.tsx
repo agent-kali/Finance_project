@@ -115,7 +115,9 @@ export function DefaultWalletSelector({
           aria-label="Select default wallet"
           aria-expanded={open}
           title={
-            showTooltip ? "New transactions will go here by default" : undefined
+            showTooltip
+              ? "New transactions will go here by default. Converted at Frankfurter rate."
+              : undefined
           }
           className={cn(
             "inline-flex h-9 shrink-0 items-center gap-2 rounded-lg border border-border bg-muted/40 px-3 py-2 text-xs font-medium transition-all duration-150 hover:bg-muted/60 hover:text-foreground dark:border-border dark:bg-muted/20 dark:hover:bg-muted/40 sm:px-4 sm:text-sm",
