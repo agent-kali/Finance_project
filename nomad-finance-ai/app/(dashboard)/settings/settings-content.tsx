@@ -3,6 +3,7 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import { CurrencySelector } from "@/components/ui/currency-selector";
+import { DefaultWalletSelector } from "@/components/ui/default-wallet-selector";
 
 export function SettingsContent() {
   return (
@@ -25,6 +26,21 @@ export function SettingsContent() {
           <div className="space-y-2">
             <Label>Default Currency</Label>
             <CurrencySelector />
+          </div>
+        </CardContent>
+      </Card>
+
+      <Card className="glass-card glass-card-hover">
+        <CardHeader>
+          <CardTitle>Default Wallet</CardTitle>
+          <CardDescription>
+            New transactions will use this wallet by default
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <div className="space-y-2">
+            <Label>Default Wallet</Label>
+            <DefaultWalletSelector />
           </div>
         </CardContent>
       </Card>

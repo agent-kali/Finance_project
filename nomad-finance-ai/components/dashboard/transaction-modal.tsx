@@ -32,6 +32,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { useWallets } from "@/lib/hooks/use-wallets";
+import { useEffectiveDefaultWalletId } from "@/lib/default-wallet-context";
 import {
   EXPENSE_CATEGORIES,
   INCOME_CATEGORIES,
@@ -93,6 +94,7 @@ export function TransactionModal({
 }: TransactionModalProps) {
   const queryClient = useQueryClient();
   const { data: wallets } = useWallets();
+  const effectiveDefaultWalletId = useEffectiveDefaultWalletId();
   const isEditing = !!transaction;
 
   const form = useForm<TransactionFormValues>({
@@ -124,12 +126,12 @@ export function TransactionModal({
         type: "expense",
         amount: 0,
         category: "",
-        wallet_id: wallets?.[0]?.id ?? "",
+        wallet_id: effectiveDefaultWalletId ?? wallets?.[0]?.id ?? "",
         date: new Date().toISOString().split("T")[0],
         description: "",
       });
     }
-  }, [transaction, wallets, form]);
+  }, [transaction, wallets, effectiveDefaultWalletId, form]);
 
   const mutation = useMutation({
     mutationFn: async (values: TransactionFormValues) => {

@@ -15,6 +15,7 @@ import {
   TrendingDown,
   PiggyBank,
 } from "lucide-react";
+import { DefaultWalletSelector } from "@/components/ui/default-wallet-selector";
 
 function getDateRange(timeRange: TimeRange): { start: Date; end: Date } {
   const now = new Date();
@@ -144,20 +145,23 @@ export function SummaryCards() {
       ? formatCompact(totalBalance, displayCurrency)
       : formatCurrency(totalBalance, displayCurrency);
 
-  const cards = [
-    {
-      title: "Total Balance",
-      value: totalBalanceFormatted,
-      subtitle: `Across ${wallets?.length ?? 0} wallets`,
-      icon: Banknote,
-      accent: "cyan" as const,
-    },
+  const totalBalanceCard = {
+    title: "Total Balance",
+    value: totalBalanceFormatted,
+    subtitle: `Across ${wallets?.length ?? 0} wallets`,
+    icon: Banknote,
+    accent: "cyan" as const,
+    showDefaultWalletSelector: true,
+  };
+
+  const otherCards = [
     {
       title: `Income ${periodLabel}`,
       value: formatCurrency(incomeInRange, displayCurrency),
       subtitle: `${rangeTransactions.filter((t) => t.type === "income").length} transactions`,
       icon: TrendingUp,
       accent: "emerald" as const,
+      showDefaultWalletSelector: false,
     },
     {
       title: `Expenses ${periodLabel}`,
@@ -165,6 +169,7 @@ export function SummaryCards() {
       subtitle: `${rangeTransactions.filter((t) => t.type === "expense").length} transactions`,
       icon: TrendingDown,
       accent: "amber" as const,
+      showDefaultWalletSelector: false,
     },
     {
       title: "Savings Rate",
@@ -172,8 +177,11 @@ export function SummaryCards() {
       subtitle: getSavingsSubtitle(timeRange, incomeInRange > 0),
       icon: PiggyBank,
       accent: "violet" as const,
+      showDefaultWalletSelector: false,
     },
   ];
+
+  const cards = [totalBalanceCard, ...otherCards];
 
   return (
     <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
@@ -204,6 +212,11 @@ export function SummaryCards() {
                 {card.value}
               </div>
               <p className="mt-1 text-xs text-muted-foreground">{card.subtitle}</p>
+              {"showDefaultWalletSelector" in card && card.showDefaultWalletSelector && (wallets?.length ?? 0) > 0 && (
+                <div className="mt-3">
+                  <DefaultWalletSelector variant="compact" showTooltip={true} />
+                </div>
+              )}
             </CardContent>
           </Card>
         </motion.div>

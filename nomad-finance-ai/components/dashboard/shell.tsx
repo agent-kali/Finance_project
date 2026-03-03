@@ -17,6 +17,7 @@ import { Sheet, SheetContent, SheetTrigger, SheetTitle } from "@/components/ui/s
 import { Separator } from "@/components/ui/separator";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { CurrencySelector } from "@/components/ui/currency-selector";
+import { DefaultWalletSelector } from "@/components/ui/default-wallet-selector";
 import {
   Brain,
   LayoutDashboard,
@@ -154,7 +155,12 @@ export function DashboardShell({
 
           <div className="flex-1" />
 
-          {mounted && <CurrencySelector />}
+          {mounted && (
+            <>
+              <DefaultWalletSelector variant="compact" />
+              <CurrencySelector />
+            </>
+          )}
 
           <ThemeToggle />
 

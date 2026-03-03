@@ -24,14 +24,17 @@ import {
 } from "@/components/ui/select";
 import { useWallets } from "@/lib/hooks/use-wallets";
 import { useDemoMode } from "@/lib/demo-context";
+import { useDefaultWallet, useEffectiveDefaultWalletId } from "@/lib/default-wallet-context";
 import { formatCurrency, convertToBase } from "@/lib/currency";
 import {
   SUPPORTED_CURRENCIES,
   CURRENCY_SYMBOLS,
   type SupportedCurrency,
 } from "@/lib/constants";
+import { cn } from "@/lib/utils";
 import { createWallet, deleteWallet } from "@/app/actions/wallets";
-import { Wallet, Plus, Trash2, Loader2 } from "lucide-react";
+import { DefaultWalletSelector } from "@/components/ui/default-wallet-selector";
+import { Wallet, Plus, Trash2, Loader2, Star } from "lucide-react";
 import type { Wallet as WalletType } from "@/types/database.types";
 
 const CURRENCY_ACCENTS: Record<string, { border: string; text: string }> = {
@@ -47,6 +50,8 @@ const DEFAULT_ACCENT = { border: "border-l-cyan-400", text: "text-cyan-400" };
 export function WalletsContent() {
   const { data: wallets, isLoading } = useWallets();
   const { isDemo } = useDemoMode();
+  const { setDefaultWallet } = useDefaultWallet() ?? {};
+  const effectiveDefaultId = useEffectiveDefaultWalletId();
   const queryClient = useQueryClient();
   const [createOpen, setCreateOpen] = useState(false);
   const [selectedCurrency, setSelectedCurrency] = useState<SupportedCurrency | "">("");
@@ -104,13 +109,16 @@ export function WalletsContent() {
   return (
     <div className="space-y-8">
       <div className="flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
-        <div className="flex items-center gap-3">
+        <div className="flex flex-wrap items-center gap-3">
           <h1 className="text-3xl font-bold tracking-tight">Wallets</h1>
           {!isDemo && availableCurrencies.length > 0 && (
             <Button size="sm" onClick={() => setCreateOpen(true)}>
               <Plus className="mr-1 h-4 w-4" />
               Add Wallet
             </Button>
+          )}
+          {wallets && wallets.length > 0 && (
+            <DefaultWalletSelector />
           )}
         </div>
         {!isLoading && wallets && wallets.length > 0 && (
@@ -169,6 +177,20 @@ export function WalletsContent() {
                     </CardTitle>
                     <div className="flex items-center gap-2">
                       <span className={`text-2xl font-bold ${accent.text}`}>{symbol}</span>
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className={cn(
+                          "h-7 w-7",
+                          effectiveDefaultId === w.id
+                            ? "text-amber-500 [&>svg]:fill-amber-400 dark:[&>svg]:fill-amber-500"
+                            : "text-muted-foreground hover:text-amber-500"
+                        )}
+                        onClick={() => setDefaultWallet?.(w.id)}
+                        aria-label={effectiveDefaultId === w.id ? "Default wallet" : "Make default"}
+                      >
+                        <Star className={cn("h-3.5 w-3.5", effectiveDefaultId === w.id && "fill-current")} />
+                      </Button>
                       {!isDemo && (
                         <Button
                           variant="ghost"
