@@ -22,23 +22,36 @@ import {
   getPopularCurrencies,
   getOtherCurrencies,
 } from "@/lib/currencies";
+import { useCurrency } from "@/lib/currency-context";
+import type { SupportedCurrency } from "@/lib/constants";
 
 export interface CurrencySelectorProps {
-  value: string;
-  onValueChange: (code: string) => void;
+  value?: string;
+  onValueChange?: (code: string) => void;
   className?: string;
 }
 
 export function CurrencySelector({
-  value,
-  onValueChange,
+  value: valueProp,
+  onValueChange: onValueChangeProp,
   className,
 }: CurrencySelectorProps) {
   const [open, setOpen] = React.useState(false);
+  const currencyContext = useCurrency();
+
+  const isControlled =
+    valueProp !== undefined && onValueChangeProp !== undefined;
+  const value = isControlled
+    ? valueProp
+    : (currencyContext?.displayCurrency ?? "EUR");
+  const onValueChange = isControlled
+    ? (onValueChangeProp as (code: string) => void)
+    : (code: string) => currencyContext?.setDisplayCurrency(code as SupportedCurrency);
+
   const selected = getCurrency(value);
 
   const handleSelect = (code: string) => {
-    onValueChange(code);
+    onValueChange?.(code);
     setOpen(false);
   };
 

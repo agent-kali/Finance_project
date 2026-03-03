@@ -10,8 +10,6 @@ import { WalletChart } from "@/components/dashboard/wallet-chart";
 import { TimeRangeToggle } from "@/components/dashboard/time-range-toggle";
 import { CurrencySelector } from "@/components/ui/currency-selector";
 import { useTimeRange } from "@/lib/time-range-context";
-import { useCurrency } from "@/lib/currency-context";
-import type { SupportedCurrency } from "@/lib/constants";
 
 function TimeRangeContent() {
   const { isTransitioning } = useTimeRange();
@@ -43,22 +41,13 @@ function TimeRangeContent() {
 }
 
 export function DashboardContent() {
-  const currencyContext = useCurrency();
-
   return (
     <div className="space-y-8">
       <div className="flex flex-col gap-3">
         <h1 className="text-2xl font-bold tracking-tight sm:text-3xl">Dashboard</h1>
         <div className="flex flex-wrap items-center gap-3">
           <TimeRangeToggle />
-          {currencyContext && (
-            <CurrencySelector
-              value={currencyContext.displayCurrency}
-              onValueChange={(code) =>
-                currencyContext.setDisplayCurrency(code as SupportedCurrency)
-              }
-            />
-          )}
+          <CurrencySelector />
         </div>
       </div>
       <TimeRangeContent />

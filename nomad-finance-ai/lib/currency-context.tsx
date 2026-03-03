@@ -4,7 +4,25 @@ import * as React from "react";
 import { useProfile } from "@/lib/hooks/use-profile";
 import { useDemoMode } from "@/lib/demo-context";
 import { DEMO_PRIMARY_CURRENCY } from "@/lib/demo";
-import type { SupportedCurrency } from "@/lib/constants";
+import {
+  SUPPORTED_CURRENCIES,
+  type SupportedCurrency,
+} from "@/lib/constants";
+
+const STORAGE_KEY = "nomad-finance-display-currency";
+
+function readStoredCurrency(): SupportedCurrency | null {
+  if (typeof window === "undefined") return null;
+  try {
+    const s = localStorage.getItem(STORAGE_KEY);
+    if (s && SUPPORTED_CURRENCIES.includes(s as SupportedCurrency)) {
+      return s as SupportedCurrency;
+    }
+  } catch {
+    /* ignore */
+  }
+  return null;
+}
 
 type CurrencyContextValue = {
   displayCurrency: SupportedCurrency;
@@ -17,22 +35,46 @@ export function CurrencyProvider({ children }: { children: React.ReactNode }) {
   const { isDemo } = useDemoMode();
   const { data: profile } = useProfile();
 
-  const profileCurrency =
-    (profile?.primary_currency as SupportedCurrency) ?? "EUR";
-  const sourceCurrency: SupportedCurrency = isDemo
-    ? DEMO_PRIMARY_CURRENCY
-    : profileCurrency;
-
-  const [displayCurrency, setDisplayCurrency] =
-    React.useState<SupportedCurrency>(sourceCurrency);
+  const [displayCurrency, setDisplayCurrencyState] =
+    React.useState<SupportedCurrency>("EUR");
 
   React.useEffect(() => {
-    setDisplayCurrency(sourceCurrency);
-  }, [sourceCurrency]);
+    if (isDemo) {
+      setDisplayCurrencyState(DEMO_PRIMARY_CURRENCY);
+      return;
+    }
+    const stored = readStoredCurrency();
+    if (stored) {
+      setDisplayCurrencyState(stored);
+      return;
+    }
+    const profileCurrency = profile?.primary_currency as
+      | SupportedCurrency
+      | undefined;
+    if (profileCurrency) {
+      setDisplayCurrencyState(profileCurrency);
+      try {
+        localStorage.setItem(STORAGE_KEY, profileCurrency);
+      } catch {
+        /* ignore */
+      }
+    }
+  }, [isDemo, profile?.primary_currency]);
+
+  const setDisplayCurrency = React.useCallback((currency: SupportedCurrency) => {
+    setDisplayCurrencyState(currency);
+    if (!isDemo) {
+      try {
+        localStorage.setItem(STORAGE_KEY, currency);
+      } catch {
+        /* ignore */
+      }
+    }
+  }, [isDemo]);
 
   const value = React.useMemo(
     () => ({ displayCurrency, setDisplayCurrency }),
-    [displayCurrency]
+    [displayCurrency, setDisplayCurrency]
   );
 
   return (

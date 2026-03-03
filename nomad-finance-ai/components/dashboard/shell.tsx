@@ -17,8 +17,6 @@ import { Sheet, SheetContent, SheetTrigger, SheetTitle } from "@/components/ui/s
 import { Separator } from "@/components/ui/separator";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { CurrencySelector } from "@/components/ui/currency-selector";
-import { useCurrency } from "@/lib/currency-context";
-import type { SupportedCurrency } from "@/lib/constants";
 import {
   Brain,
   LayoutDashboard,
@@ -87,7 +85,6 @@ export function DashboardShell({
   const { isDemo } = useDemoMode();
   const [mobileOpen, setMobileOpen] = useState(false);
   const mounted = useMounted();
-  const currencyContext = useCurrency();
 
   const initials = ((user.user_metadata?.full_name as string) || user.email || "U")
     .split(" ")
@@ -157,12 +154,7 @@ export function DashboardShell({
 
           <div className="flex-1" />
 
-          {mounted && currencyContext && (
-            <CurrencySelector
-              value={currencyContext.displayCurrency}
-              onValueChange={(code) => currencyContext.setDisplayCurrency(code as SupportedCurrency)}
-            />
-          )}
+          {mounted && <CurrencySelector />}
 
           <ThemeToggle />
 
