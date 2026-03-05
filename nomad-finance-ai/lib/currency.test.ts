@@ -25,8 +25,8 @@ const currencies = Object.keys(EXCHANGE_RATES) as SupportedCurrency[];
 
 // ─── convertToBase ──────────────────────────────────────────────────────────
 describe("convertToBase", () => {
-  it("returns the same amount when converting from USD (base currency)", () => {
-    expect(convertToBase(100, "USD")).toBe(100);
+  it("returns the same amount when converting from EUR (base currency)", () => {
+    expect(convertToBase(100, "EUR")).toBe(100);
   });
 
   it("correctly divides by the exchange rate for non-base currencies", () => {
@@ -41,19 +41,19 @@ describe("convertToBase", () => {
   });
 
   it("handles fractional amounts without precision loss", () => {
-    const result = convertToBase(0.01, "USD");
+    const result = convertToBase(0.01, "EUR");
     expect(result).toBeCloseTo(0.01, 10);
   });
 
   it("handles very large amounts", () => {
     const billion = 1_000_000_000;
-    const result = convertToBase(billion, "USD");
+    const result = convertToBase(billion, "EUR");
     expect(result).toBe(billion);
     expect(Number.isFinite(result)).toBe(true);
   });
 
   it("preserves negative sign (expenses / debits)", () => {
-    const result = convertToBase(-500, "USD");
+    const result = convertToBase(-500, "EUR");
     expect(result).toBe(-500);
   });
 
@@ -158,7 +158,7 @@ describe("formatCompact", () => {
       [999_999, "$1000.0K"],
       [10_000, "$10.0K"],
       [1_000, "$1.0K"],
-      [999.99, "$1000.00"],
+      [999.99, "$999.99"],
       [42.5, "$42.50"],
       [0, "$0.00"],
     ])("formats %d as %s", (input, expected) => {
