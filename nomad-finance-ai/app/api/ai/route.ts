@@ -4,8 +4,6 @@ import { createClient } from "@/lib/supabase/server";
 import type { SupportedCurrency } from "@/lib/constants";
 import { CURRENCY_SYMBOLS } from "@/lib/constants";
 
-export const runtime = "edge";
-
 function buildSystemPrompt(
   transactions: Array<{
     type: string;
