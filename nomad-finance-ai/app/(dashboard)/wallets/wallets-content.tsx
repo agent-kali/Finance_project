@@ -2,8 +2,7 @@
 
 import { useState, useMemo } from "react";
 import { motion } from "framer-motion";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { toast } from "sonner";
+import { useOptimisticMutation } from "@/lib/hooks/use-optimistic-mutation";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -54,7 +53,6 @@ export function WalletsContent() {
   const displayCurrency = useDisplayCurrency();
   const { setDefaultWallet } = useDefaultWallet() ?? {};
   const effectiveDefaultId = useEffectiveDefaultWalletId();
-  const queryClient = useQueryClient();
   const [createOpen, setCreateOpen] = useState(false);
   const [selectedCurrency, setSelectedCurrency] = useState<SupportedCurrency | "">("");
 
@@ -67,40 +65,35 @@ export function WalletsContent() {
     (c) => !existingCurrencies.has(c)
   );
 
-  const createMutation = useMutation({
-    mutationFn: (currency: SupportedCurrency) => createWallet(currency),
+  const createMutation = useOptimisticMutation<WalletType, SupportedCurrency>({
+    queryKey: ["wallets", isDemo],
+    mutationFn: (currency) => createWallet(currency),
+    updateCache: (old, currency) => [
+      {
+        id: `temp-${Date.now()}`,
+        user_id: "",
+        currency,
+        balance: 0,
+        created_at: new Date().toISOString(),
+      },
+      ...(old ?? []),
+    ],
+    successMessage: "Wallet created",
+    errorMessage: "Failed to create wallet. Reverted.",
+    invalidateKeys: [["transactions"]],
     onSuccess: () => {
-      toast.success("Wallet created");
       setCreateOpen(false);
       setSelectedCurrency("");
-      queryClient.invalidateQueries({ queryKey: ["wallets"] });
-    },
-    onError: (err: Error) => {
-      toast.error(err.message || "Failed to create wallet");
     },
   });
 
-  const deleteMutation = useMutation({
-    mutationFn: (id: string) => deleteWallet(id),
-    onMutate: async (id) => {
-      await queryClient.cancelQueries({ queryKey: ["wallets"] });
-      const previous = queryClient.getQueryData<WalletType[]>(["wallets", isDemo]);
-      queryClient.setQueryData<WalletType[]>(["wallets", isDemo], (old) =>
-        old?.filter((w) => w.id !== id) ?? []
-      );
-      return { previous };
-    },
-    onError: (_err, _id, context) => {
-      if (context?.previous) {
-        queryClient.setQueryData(["wallets", isDemo], context.previous);
-      }
-      toast.error("Failed to delete wallet");
-    },
-    onSuccess: () => toast.success("Wallet deleted"),
-    onSettled: () => {
-      queryClient.invalidateQueries({ queryKey: ["wallets"] });
-      queryClient.invalidateQueries({ queryKey: ["transactions"] });
-    },
+  const deleteMutation = useOptimisticMutation<WalletType, string>({
+    queryKey: ["wallets", isDemo],
+    mutationFn: deleteWallet,
+    updateCache: (old, id) => (old ?? []).filter((w) => w.id !== id),
+    successMessage: "Wallet deleted",
+    errorMessage: "Failed to delete wallet. Restored.",
+    invalidateKeys: [["transactions"]],
   });
 
   const totalInDisplay = (wallets ?? []).reduce(
@@ -165,6 +158,7 @@ export function WalletsContent() {
             const symbol = CURRENCY_SYMBOLS[currency] ?? "";
             const displayValue = convertCurrency(w.balance, currency, displayCurrency);
             const accent = CURRENCY_ACCENTS[currency] ?? DEFAULT_ACCENT;
+            const isOptimistic = w.id.startsWith("temp-");
 
             return (
               <motion.div
@@ -172,7 +166,11 @@ export function WalletsContent() {
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.4, delay: i * 0.1, ease: "easeOut" }}
-                whileHover={{ scale: 1.02 }}
+                whileHover={isOptimistic ? undefined : { scale: 1.02 }}
+                className={cn(
+                  "transition-opacity",
+                  isOptimistic && "opacity-50 animate-pulse pointer-events-none"
+                )}
               >
                 <Card className={`glass-card glass-card-hover border-l-2 ${accent.border}`}>
                   <CardHeader className="flex flex-row items-center justify-between pb-2">
@@ -181,6 +179,7 @@ export function WalletsContent() {
                     </CardTitle>
                     <div className="flex items-center gap-2">
                       <span className={`text-2xl font-bold ${accent.text}`}>{symbol}</span>
+                      {!isOptimistic && (
                       <Button
                         variant="ghost"
                         size="icon"
@@ -195,7 +194,8 @@ export function WalletsContent() {
                       >
                         <Star className={cn("h-3.5 w-3.5", effectiveDefaultId === w.id && "fill-current")} />
                       </Button>
-                      {!isDemo && (
+                      )}
+                      {!isDemo && !isOptimistic && (
                         <Button
                           variant="ghost"
                           size="icon"

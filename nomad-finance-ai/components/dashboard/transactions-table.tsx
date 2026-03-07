@@ -1,8 +1,8 @@
 "use client";
 
 import { useState, useMemo } from "react";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { toast } from "sonner";
+import { useOptimisticMutation } from "@/lib/hooks/use-optimistic-mutation";
+import { useDemoMode } from "@/lib/demo-context";
 import {
   Card,
   CardContent,
@@ -34,6 +34,7 @@ import {
   CURRENCY_SYMBOLS,
   type SupportedCurrency,
 } from "@/lib/constants";
+import { cn } from "@/lib/utils";
 import { deleteTransaction } from "@/app/actions/transactions";
 import { TransactionModal } from "./transaction-modal";
 import type { Transaction } from "@/types/database.types";
@@ -55,7 +56,7 @@ const UNIQUE_CATEGORIES = Array.from(new Set(ALL_CATEGORIES));
 export function TransactionsTable() {
   const { data: transactions, isLoading } = useTransactions();
   const { data: wallets } = useWallets();
-  const queryClient = useQueryClient();
+  const { isDemo } = useDemoMode();
 
   const [modalOpen, setModalOpen] = useState(false);
   const [editingTx, setEditingTx] = useState<Transaction | null>(null);
@@ -67,27 +68,13 @@ export function TransactionsTable() {
   const [sortField, setSortField] = useState<SortField>("date");
   const [sortDir, setSortDir] = useState<SortDir>("desc");
 
-  const deleteMutation = useMutation({
+  const deleteMutation = useOptimisticMutation<Transaction, string>({
+    queryKey: ["transactions", isDemo],
     mutationFn: deleteTransaction,
-    onMutate: async (id) => {
-      await queryClient.cancelQueries({ queryKey: ["transactions"] });
-      const previous = queryClient.getQueryData<Transaction[]>(["transactions"]);
-      queryClient.setQueryData<Transaction[]>(["transactions"], (old) =>
-        old?.filter((t) => t.id !== id) ?? []
-      );
-      return { previous };
-    },
-    onError: (_err, _id, context) => {
-      if (context?.previous) {
-        queryClient.setQueryData(["transactions"], context.previous);
-      }
-      toast.error("Failed to delete transaction");
-    },
-    onSuccess: () => toast.success("Transaction deleted"),
-    onSettled: () => {
-      queryClient.invalidateQueries({ queryKey: ["transactions"] });
-      queryClient.invalidateQueries({ queryKey: ["wallets"] });
-    },
+    updateCache: (old, id) => (old ?? []).filter((t) => t.id !== id),
+    successMessage: "Transaction deleted",
+    errorMessage: "Failed to delete. Transaction restored.",
+    invalidateKeys: [["wallets"]],
   });
 
   const filtered = useMemo(() => {
@@ -249,10 +236,15 @@ export function TransactionsTable() {
                       const wallet = wallets?.find(
                         (w) => w.id === tx.wallet_id
                       );
+                      const isOptimistic = tx.id.startsWith("temp-");
                       return (
                         <tr
                           key={tx.id}
-                          className="border-b last:border-0 transition-colors hover:bg-muted/50"
+                          className={cn(
+                            "border-b last:border-0 transition-colors hover:bg-muted/50",
+                            isOptimistic &&
+                              "opacity-50 animate-pulse pointer-events-none"
+                          )}
                         >
                           <td className="px-4 py-3 whitespace-nowrap">
                             {new Date(tx.date).toLocaleDateString("en-US", {

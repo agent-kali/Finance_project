@@ -4,8 +4,8 @@ import { useEffect } from "react";
 import { useForm, useWatch } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { toast } from "sonner";
+import { useOptimisticMutation } from "@/lib/hooks/use-optimistic-mutation";
+import { useDemoMode } from "@/lib/demo-context";
 import {
   Dialog,
   DialogContent,
@@ -92,10 +92,46 @@ export function TransactionModal({
   onOpenChange,
   transaction,
 }: TransactionModalProps) {
-  const queryClient = useQueryClient();
   const { data: wallets } = useWallets();
+  const { isDemo } = useDemoMode();
   const effectiveDefaultWalletId = useEffectiveDefaultWalletId();
   const isEditing = !!transaction;
+
+  const mutation = useOptimisticMutation<Transaction, TransactionFormValues>({
+    queryKey: ["transactions", isDemo],
+    mutationFn: async (values) => {
+      if (isEditing && transaction) {
+        return updateTransaction(transaction.id, values);
+      }
+      return createTransaction(values);
+    },
+    updateCache: (old, values) => {
+      const walletCurrency =
+        wallets?.find((w) => w.id === values.wallet_id)?.currency ?? "EUR";
+      const optimistic: Transaction = {
+        id: transaction?.id ?? `temp-${Date.now()}`,
+        user_id: transaction?.user_id ?? "",
+        wallet_id: values.wallet_id,
+        type: values.type,
+        amount: values.amount,
+        currency: walletCurrency as Transaction["currency"],
+        category: values.category,
+        description: values.description ?? null,
+        date: values.date,
+        created_at: transaction?.created_at ?? new Date().toISOString(),
+      };
+      if (isEditing && transaction) {
+        return (old ?? []).map((t) => (t.id === transaction.id ? optimistic : t));
+      }
+      return [optimistic, ...(old ?? [])];
+    },
+    successMessage: isEditing ? "Transaction updated" : "Transaction added",
+    errorMessage: isEditing
+      ? "Failed to update. Changes reverted."
+      : "Failed to add transaction. Reverted.",
+    invalidateKeys: [["wallets"]],
+    onSuccess: () => onOpenChange(false),
+  });
 
   const form = useForm<TransactionFormValues>({
     resolver: zodResolver(transactionSchema),
@@ -132,60 +168,6 @@ export function TransactionModal({
       });
     }
   }, [transaction, wallets, effectiveDefaultWalletId, form]);
-
-  const mutation = useMutation({
-    mutationFn: async (values: TransactionFormValues) => {
-      if (isEditing) {
-        return updateTransaction(transaction.id, values);
-      }
-      return createTransaction(values);
-    },
-    onMutate: async (values) => {
-      await queryClient.cancelQueries({ queryKey: ["transactions"] });
-      const previous = queryClient.getQueryData<Transaction[]>(["transactions"]);
-
-      const walletCurrency = wallets?.find(
-        (w) => w.id === values.wallet_id
-      )?.currency;
-
-      const optimistic: Transaction = {
-        id: transaction?.id ?? `temp-${Date.now()}`,
-        user_id: transaction?.user_id ?? "",
-        wallet_id: values.wallet_id,
-        type: values.type,
-        amount: values.amount,
-        currency: (walletCurrency ?? "EUR") as Transaction["currency"],
-        category: values.category,
-        description: values.description ?? null,
-        date: values.date,
-        created_at: transaction?.created_at ?? new Date().toISOString(),
-      };
-
-      queryClient.setQueryData<Transaction[]>(["transactions"], (old) => {
-        if (!old) return [optimistic];
-        if (isEditing) {
-          return old.map((t) => (t.id === transaction.id ? optimistic : t));
-        }
-        return [optimistic, ...old];
-      });
-
-      return { previous };
-    },
-    onError: (_err, _values, context) => {
-      if (context?.previous) {
-        queryClient.setQueryData(["transactions"], context.previous);
-      }
-      toast.error("Something went wrong. Please try again.");
-    },
-    onSuccess: () => {
-      toast.success(isEditing ? "Transaction updated" : "Transaction created");
-      onOpenChange(false);
-    },
-    onSettled: () => {
-      queryClient.invalidateQueries({ queryKey: ["transactions"] });
-      queryClient.invalidateQueries({ queryKey: ["wallets"] });
-    },
-  });
 
   function onSubmit(values: TransactionFormValues) {
     mutation.mutate(values);

@@ -2,6 +2,7 @@
 
 import { useMemo } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { cn } from "@/lib/utils";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useTransactions } from "@/lib/hooks/use-transactions";
 import { useDisplayCurrency } from "@/lib/hooks/use-profile";
@@ -100,10 +101,15 @@ export function RecentActivity() {
       </CardHeader>
       <CardContent>
         <ul className="divide-y divide-border/50">
-          {recent.map((tx) => (
+          {recent.map((tx) => {
+            const isOptimistic = tx.id.startsWith("temp-");
+            return (
             <li
               key={tx.id}
-              className="flex flex-wrap items-center gap-x-4 gap-y-1 py-3 first:pt-0 last:pb-0"
+              className={cn(
+                "flex flex-wrap items-center gap-x-4 gap-y-1 py-3 first:pt-0 last:pb-0 transition-opacity",
+                isOptimistic && "opacity-50 animate-pulse pointer-events-none"
+              )}
             >
               <span className="min-w-0 flex-1 truncate text-sm font-medium text-foreground">
                 {getMerchant(tx)}
@@ -127,7 +133,8 @@ export function RecentActivity() {
                 )}
               </span>
             </li>
-          ))}
+          );
+          })}
         </ul>
       </CardContent>
     </Card>
