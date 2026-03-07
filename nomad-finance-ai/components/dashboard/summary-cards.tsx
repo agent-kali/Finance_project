@@ -7,6 +7,11 @@ import { useWallets } from "@/lib/hooks/use-wallets";
 import { useTransactions } from "@/lib/hooks/use-transactions";
 import { useDisplayCurrency } from "@/lib/hooks/use-profile";
 import { useTimeRange, type TimeRange } from "@/lib/time-range-context";
+import {
+  getDateRange,
+  getPeriodLabel,
+  getSavingsSubtitle,
+} from "@/lib/date-utils";
 import { useCurrencyConversion } from "@/lib/currency-conversion-context";
 import { convertCurrency, formatCurrency } from "@/lib/currency";
 import type { SupportedCurrency } from "@/lib/constants";
@@ -17,53 +22,6 @@ import {
   PiggyBank,
 } from "lucide-react";
 import { DefaultWalletSelector } from "@/components/ui/default-wallet-selector";
-
-function getDateRange(timeRange: TimeRange): { start: Date; end: Date } {
-  const now = new Date();
-  const end = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 23, 59, 59, 999);
-
-  switch (timeRange) {
-    case "Today": {
-      const start = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 0, 0, 0, 0);
-      return { start, end };
-    }
-    case "This Week": {
-      const day = now.getDay();
-      const sundayOffset = day === 0 ? 6 : day - 1;
-      const monday = new Date(now);
-      monday.setDate(now.getDate() - sundayOffset);
-      const start = new Date(monday.getFullYear(), monday.getMonth(), monday.getDate(), 0, 0, 0, 0);
-      return { start, end };
-    }
-    case "This Month": {
-      const start = new Date(now.getFullYear(), now.getMonth(), 1, 0, 0, 0, 0);
-      return { start, end };
-    }
-  }
-}
-
-function getPeriodLabel(timeRange: TimeRange): string {
-  switch (timeRange) {
-    case "Today":
-      return "Today";
-    case "This Week":
-      return "This Week";
-    case "This Month":
-      return "This Month";
-  }
-}
-
-function getSavingsSubtitle(timeRange: TimeRange, hasIncome: boolean): string {
-  if (!hasIncome) return "No income yet";
-  switch (timeRange) {
-    case "Today":
-      return "Of daily income";
-    case "This Week":
-      return "Of weekly income";
-    case "This Month":
-      return "Of monthly income";
-  }
-}
 
 const CARD_ACCENTS = {
   cyan: "border-l-2 border-l-cyan-400",

@@ -6,6 +6,11 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { useTransactions } from "@/lib/hooks/use-transactions";
 import { useDisplayCurrency } from "@/lib/hooks/use-profile";
 import { useTimeRange, type TimeRange } from "@/lib/time-range-context";
+import {
+  getDateRange,
+  getPeriodLabel,
+  getEmptyMessage,
+} from "@/lib/date-utils";
 import { convertCurrency, formatCurrency } from "@/lib/currency";
 import type { SupportedCurrency } from "@/lib/constants";
 
@@ -19,52 +24,6 @@ const COLORS = [
   "#38bdf8",
   "#2dd4bf",
 ];
-
-function getDateRange(timeRange: TimeRange): { start: Date; end: Date } {
-  const now = new Date();
-  const end = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 23, 59, 59, 999);
-
-  switch (timeRange) {
-    case "Today": {
-      const start = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 0, 0, 0, 0);
-      return { start, end };
-    }
-    case "This Week": {
-      const day = now.getDay();
-      const mondayOffset = day === 0 ? 6 : day - 1;
-      const monday = new Date(now);
-      monday.setDate(now.getDate() - mondayOffset);
-      const start = new Date(monday.getFullYear(), monday.getMonth(), monday.getDate(), 0, 0, 0, 0);
-      return { start, end };
-    }
-    case "This Month": {
-      const start = new Date(now.getFullYear(), now.getMonth(), 1, 0, 0, 0, 0);
-      return { start, end };
-    }
-  }
-}
-
-function getEmptyMessage(timeRange: TimeRange): string {
-  switch (timeRange) {
-    case "Today":
-      return "No spending today yet!";
-    case "This Week":
-      return "No spending this week yet!";
-    case "This Month":
-      return "No spending this month yet!";
-  }
-}
-
-function getPeriodLabel(timeRange: TimeRange): string {
-  switch (timeRange) {
-    case "Today":
-      return "Today";
-    case "This Week":
-      return "This Week";
-    case "This Month":
-      return "This Month";
-  }
-}
 
 export function CategoryChart() {
   const { data: transactions, isLoading } = useTransactions();
