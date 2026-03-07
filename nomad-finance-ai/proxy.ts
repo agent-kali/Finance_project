@@ -1,7 +1,7 @@
 import { type NextRequest, NextResponse } from "next/server";
 import { createServerClient } from "@supabase/ssr";
 
-// Inlined for Vercel Edge (no @/ imports in middleware)
+// Inlined for Vercel Edge (no @/ imports in proxy)
 const DEMO_COOKIE = "demo_mode";
 const AUTH_ROUTES = ["/login", "/register"] as const;
 const PROTECTED_ROUTES = [
@@ -22,7 +22,7 @@ function getRootRedirectTarget(isDemo: boolean): "/dashboard" | "/login" {
   return isDemo ? "/dashboard" : "/login";
 }
 
-export async function middleware(request: NextRequest) {
+export async function proxy(request: NextRequest) {
   try {
     const { pathname } = request.nextUrl;
     const isDemoMode = request.cookies.has(DEMO_COOKIE);
