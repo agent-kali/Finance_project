@@ -97,7 +97,7 @@ export function CategoryChart() {
                       boxShadow: `0 0 6px ${color}40`,
                     }}
                   />
-                  <span className="min-w-0 flex-1 truncate text-sm font-medium text-foreground">
+                  <span className="min-w-0 flex-1 truncate text-xs font-medium text-foreground sm:text-sm">
                     {entry.name}
                   </span>
                   <div className="flex w-12 shrink-0 items-center sm:w-20">

@@ -1,7 +1,9 @@
 "use client";
 
+import Link from "next/link";
 import { motion } from "framer-motion";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useWallets } from "@/lib/hooks/use-wallets";
 import { useTransactions } from "@/lib/hooks/use-transactions";
@@ -176,7 +178,12 @@ export function SummaryCards() {
                   animate={{ opacity: 1 }}
                   transition={{ duration: 0.2 }}
                   className="min-w-0 truncate font-semibold tracking-tight text-foreground"
-                  style={{ fontSize: "clamp(1.25rem, 4vw, 2.25rem)", letterSpacing: "-1.5px" }}
+                  style={{
+                    fontSize: card.title === "Total Balance"
+                      ? "clamp(1.5rem, 5vw, 2.5rem)"
+                      : "clamp(1.25rem, 4vw, 2.25rem)",
+                    letterSpacing: "-1.5px",
+                  }}
                   title={ratesDate ? `Converted at Frankfurter rate. ${formatRatesDate(ratesDate)}` : "Converted amount"}
                 >
                   {card.value}
@@ -192,6 +199,11 @@ export function SummaryCards() {
                 <div className="mt-3">
                   <DefaultWalletSelector variant="compact" showTooltip={true} />
                 </div>
+              )}
+              {"showDefaultWalletSelector" in card && card.showDefaultWalletSelector && (wallets?.length ?? 0) === 0 && (
+                <Button variant="link" asChild className="mt-2 h-auto p-0 text-xs font-medium text-muted-foreground hover:text-foreground">
+                  <Link href="/wallets">Create a wallet to get started</Link>
+                </Button>
               )}
             </CardContent>
           </Card>

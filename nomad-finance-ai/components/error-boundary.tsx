@@ -28,7 +28,7 @@ export class ErrorBoundary extends Component<Props, State> {
   render() {
     if (this.state.hasError) {
       return (
-        <Card>
+        <Card className="glass-card glass-card-hover">
           <CardContent className="flex flex-col items-center justify-center gap-3 py-12">
             <AlertCircle className="h-10 w-10 text-destructive/60" />
             <h3 className="font-semibold">

@@ -1,6 +1,7 @@
 "use client";
 
 import { useMemo } from "react";
+import Link from "next/link";
 import {
   BarChart,
   Bar,
@@ -12,6 +13,7 @@ import {
 } from "recharts";
 import { useTheme } from "next-themes";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useWallets } from "@/lib/hooks/use-wallets";
 import { useChartDimensions } from "@/lib/hooks/use-chart-dimensions";
@@ -70,13 +72,26 @@ export function WalletChart() {
       </CardHeader>
       <CardContent>
         {chartData.length === 0 ? (
-          <p className="flex h-[300px] items-center justify-center text-sm text-muted-foreground">
-            No wallets yet
-          </p>
+          <div className="flex h-[300px] flex-col items-center justify-center gap-2">
+            <p className="text-center text-sm text-muted-foreground">
+              No wallets yet
+            </p>
+            <Button variant="link" asChild>
+              <Link href="/wallets">Create a wallet</Link>
+            </Button>
+          </div>
         ) : (
           <div ref={ref} className="h-[300px]">
             {width > 0 && height > 0 && (
-              <BarChart width={width} height={height} data={chartData} barSize={52}>
+              <BarChart
+                width={width}
+                height={height}
+                data={chartData}
+                barSize={Math.min(
+                  52,
+                  Math.max(24, Math.floor((width - 60) / Math.max(chartData.length, 1)))
+                )}
+              >
                 <defs>
                   <filter id="barGlow" x="-20%" y="-20%" width="140%" height="140%">
                     <feGaussianBlur stdDeviation="3" result="blur" />
@@ -97,12 +112,12 @@ export function WalletChart() {
                   dataKey="name"
                   axisLine={false}
                   tickLine={false}
-                  tick={{ fill: chartColors.tickFill, fontSize: 12 }}
+                  tick={{ fill: chartColors.tickFill, fontSize: 11 }}
                 />
                 <YAxis
                   axisLine={false}
                   tickLine={false}
-                  tick={{ fill: chartColors.tickFill, fontSize: 12 }}
+                  tick={{ fill: chartColors.tickFill, fontSize: 11 }}
                   tickFormatter={(v: number) => formatCurrency(v, displayCurrency)}
                 />
                 <Tooltip

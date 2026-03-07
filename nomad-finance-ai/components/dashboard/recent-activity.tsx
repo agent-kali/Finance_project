@@ -1,7 +1,9 @@
 "use client";
 
 import { useMemo } from "react";
+import Link from "next/link";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useTransactions } from "@/lib/hooks/use-transactions";
@@ -66,7 +68,7 @@ export function RecentActivity() {
         </CardHeader>
         <CardContent>
           <div className="space-y-2">
-            {Array.from({ length: 4 }).map((_, i) => (
+            {Array.from({ length: 5 }).map((_, i) => (
               <Skeleton key={i} className="h-12 w-full rounded-md" />
             ))}
           </div>
@@ -84,9 +86,14 @@ export function RecentActivity() {
           </CardTitle>
         </CardHeader>
         <CardContent>
-          <p className="py-6 text-center text-sm text-muted-foreground">
-            No recent transactions
-          </p>
+          <div className="flex flex-col items-center justify-center py-6">
+            <p className="text-center text-sm text-muted-foreground">
+              No recent transactions
+            </p>
+            <Button variant="link" asChild className="mt-2">
+              <Link href="/transactions">Add transaction</Link>
+            </Button>
+          </div>
         </CardContent>
       </Card>
     );

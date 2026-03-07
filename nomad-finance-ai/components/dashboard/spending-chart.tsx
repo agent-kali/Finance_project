@@ -19,6 +19,7 @@ import { useTransactions } from "@/lib/hooks/use-transactions";
 import { useChartDimensions } from "@/lib/hooks/use-chart-dimensions";
 import { useDisplayCurrency } from "@/lib/hooks/use-profile";
 import { useTimeRange, type TimeRange } from "@/lib/time-range-context";
+import { getEmptyMessage } from "@/lib/date-utils";
 import { convertCurrency, formatCurrency } from "@/lib/currency";
 import type { SupportedCurrency } from "@/lib/constants";
 
@@ -190,6 +191,18 @@ export function SpendingChart() {
     }
   }, [transactions, timeRange, convert]);
 
+  const hasAnyData = useMemo(() => {
+    if (chartType === "today")
+      return (chartData as { value: number }[]).some((d) => d.value > 0);
+    if (chartType === "week")
+      return (chartData as { thisWeek: number; lastWeek: number }[]).some(
+        (d) => d.thisWeek > 0 || d.lastWeek > 0
+      );
+    return (chartData as { income: number; expenses: number }[]).some(
+      (d) => d.income > 0 || d.expenses > 0
+    );
+  }, [chartData, chartType]);
+
   if (isLoading) {
     return (
       <Card className="glass-card">
@@ -208,7 +221,7 @@ export function SpendingChart() {
   const sharedChartProps = {
     width,
     height,
-    margin: { top: 8, right: 8, left: 0, bottom: 0 },
+    margin: { top: 8, right: 8, left: 28, bottom: 0 },
   };
 
   return (
@@ -220,7 +233,11 @@ export function SpendingChart() {
       </CardHeader>
       <CardContent>
         <div ref={ref} className="h-[300px]">
-          {width > 0 && height > 0 && chartData.length > 0 && (
+          {!hasAnyData ? (
+            <p className="flex h-full items-center justify-center text-sm text-muted-foreground">
+              {getEmptyMessage(timeRange)}
+            </p>
+          ) : width > 0 && height > 0 && chartData.length > 0 ? (
             <>
               {chartType === "today" && (
                 <BarChart {...sharedChartProps} data={chartData}>
@@ -243,12 +260,12 @@ export function SpendingChart() {
                     dataKey="name"
                     axisLine={false}
                     tickLine={false}
-                    tick={{ fill: chartColors.tickFill, fontSize: 12 }}
+                    tick={{ fill: chartColors.tickFill, fontSize: 11 }}
                   />
                   <YAxis
                     axisLine={false}
                     tickLine={false}
-                    tick={{ fill: chartColors.tickFill, fontSize: 12 }}
+                    tick={{ fill: chartColors.tickFill, fontSize: 11 }}
                     tickFormatter={(v: number) => formatCurrency(v, displayCurrency)}
                   />
                   <Tooltip
@@ -312,12 +329,12 @@ export function SpendingChart() {
                     dataKey="name"
                     axisLine={false}
                     tickLine={false}
-                    tick={{ fill: chartColors.tickFill, fontSize: 12 }}
+                    tick={{ fill: chartColors.tickFill, fontSize: 11 }}
                   />
                   <YAxis
                     axisLine={false}
                     tickLine={false}
-                    tick={{ fill: chartColors.tickFill, fontSize: 12 }}
+                    tick={{ fill: chartColors.tickFill, fontSize: 11 }}
                     tickFormatter={(v: number) => formatCurrency(v, displayCurrency)}
                   />
                   <Tooltip
@@ -399,12 +416,12 @@ export function SpendingChart() {
                     dataKey="name"
                     axisLine={false}
                     tickLine={false}
-                    tick={{ fill: chartColors.tickFill, fontSize: 12 }}
+                    tick={{ fill: chartColors.tickFill, fontSize: 11 }}
                   />
                   <YAxis
                     axisLine={false}
                     tickLine={false}
-                    tick={{ fill: chartColors.tickFill, fontSize: 12 }}
+                    tick={{ fill: chartColors.tickFill, fontSize: 11 }}
                     tickFormatter={(v: number) => formatCurrency(v, displayCurrency)}
                   />
                   <Tooltip
@@ -447,7 +464,7 @@ export function SpendingChart() {
                 </AreaChart>
               )}
             </>
-          )}
+          ) : null}
         </div>
       </CardContent>
     </Card>
