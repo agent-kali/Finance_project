@@ -1,11 +1,26 @@
 import { type NextRequest, NextResponse } from "next/server";
 import { createServerClient } from "@supabase/ssr";
-import { DEMO_COOKIE } from "@/lib/demo";
-import {
-  getRootRedirectTarget,
-  isAuthRoute,
-  isProtectedRoute,
-} from "@/lib/auth-routes";
+
+// Inlined for Vercel Edge (no @/ imports in middleware)
+const DEMO_COOKIE = "demo_mode";
+const AUTH_ROUTES = ["/login", "/register"] as const;
+const PROTECTED_ROUTES = [
+  "/dashboard",
+  "/transactions",
+  "/wallets",
+  "/ai-advisor",
+  "/settings",
+] as const;
+
+function isAuthRoute(pathname: string): boolean {
+  return AUTH_ROUTES.some((route) => pathname.startsWith(route));
+}
+function isProtectedRoute(pathname: string): boolean {
+  return PROTECTED_ROUTES.some((route) => pathname.startsWith(route));
+}
+function getRootRedirectTarget(isDemo: boolean): "/dashboard" | "/login" {
+  return isDemo ? "/dashboard" : "/login";
+}
 
 export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
