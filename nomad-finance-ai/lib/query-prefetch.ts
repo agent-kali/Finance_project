@@ -9,7 +9,7 @@ export async function prefetchDashboardData(
 
   await Promise.all([
     queryClient.prefetchQuery({
-      queryKey: ["wallets"] as const,
+      queryKey: ["wallets", false] as const,
       queryFn: async (): Promise<Wallet[]> => {
         const { data, error } = await supabase
           .from("wallets")
@@ -20,7 +20,7 @@ export async function prefetchDashboardData(
       },
     }),
     queryClient.prefetchQuery({
-      queryKey: ["transactions"] as const,
+      queryKey: ["transactions", false] as const,
       queryFn: async (): Promise<Transaction[]> => {
         const { data, error } = await supabase
           .from("transactions")

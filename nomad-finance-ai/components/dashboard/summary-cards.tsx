@@ -1,7 +1,6 @@
 "use client";
 
 import Link from "next/link";
-import { motion } from "framer-motion";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -153,13 +152,14 @@ export function SummaryCards() {
   return (
     <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
       {cards.map((card, i) => (
-        <motion.div
+        <div
           key={card.title}
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.4, delay: i * 0.08, ease: "easeOut" }}
-          whileHover={{ scale: 1.02 }}
-          className="min-w-0"
+          className="min-w-0 animate-in fade-in slide-in-from-bottom-4 transition-transform duration-300 hover:scale-[1.02]"
+          style={{
+            animationDuration: "400ms",
+            animationDelay: `${i * 80}ms`,
+            animationFillMode: "backwards",
+          }}
         >
           <Card className={`glass-card glass-card-hover overflow-hidden ${CARD_ACCENTS[card.accent]}`}>
             <CardHeader className="flex flex-row items-center justify-between pb-2">
@@ -172,12 +172,9 @@ export function SummaryCards() {
             </CardHeader>
             <CardContent>
               <div className="min-w-0">
-                <motion.div
+                <div
                   key={displayCurrency}
-                  initial={{ opacity: 0.5 }}
-                  animate={{ opacity: 1 }}
-                  transition={{ duration: 0.2 }}
-                  className="min-w-0 truncate font-semibold tracking-tight text-foreground"
+                  className="min-w-0 truncate font-semibold tracking-tight text-foreground animate-in fade-in duration-200"
                   style={{
                     fontSize: card.title === "Total Balance"
                       ? "clamp(1.5rem, 5vw, 2.5rem)"
@@ -187,7 +184,7 @@ export function SummaryCards() {
                   title={ratesDate ? `Converted at Frankfurter rate. ${formatRatesDate(ratesDate)}` : "Converted amount"}
                 >
                   {card.value}
-                </motion.div>
+                </div>
               </div>
               <p className="mt-1 text-xs text-muted-foreground">
                 {card.subtitle}
@@ -207,7 +204,7 @@ export function SummaryCards() {
               )}
             </CardContent>
           </Card>
-        </motion.div>
+        </div>
       ))}
     </div>
   );

@@ -1,23 +1,79 @@
 "use client";
 
-import { motion } from "framer-motion";
+import dynamic from "next/dynamic";
 import { ErrorBoundary } from "@/components/error-boundary";
 import { SummaryCards } from "@/components/dashboard/summary-cards";
 import { RecentActivity } from "@/components/dashboard/recent-activity";
-import { SpendingChart } from "@/components/dashboard/spending-chart";
-import { CategoryChart } from "@/components/dashboard/category-chart";
-import { WalletChart } from "@/components/dashboard/wallet-chart";
 import { TimeRangeToggle } from "@/components/dashboard/time-range-toggle";
-import { CurrencySelector } from "@/components/ui/currency-selector";
 import { useTimeRange } from "@/lib/time-range-context";
+import { Skeleton } from "@/components/ui/skeleton";
+import { Card, CardContent, CardHeader } from "@/components/ui/card";
+
+const SpendingChart = dynamic(
+  () =>
+    import("@/components/dashboard/spending-chart").then((m) => ({
+      default: m.SpendingChart,
+    })),
+  {
+    ssr: false,
+    loading: () => (
+      <Card className="glass-card">
+        <CardHeader>
+          <Skeleton className="h-5 w-40" />
+        </CardHeader>
+        <CardContent>
+          <Skeleton className="h-[280px] w-full rounded-lg" />
+        </CardContent>
+      </Card>
+    ),
+  }
+);
+
+const CategoryChart = dynamic(
+  () =>
+    import("@/components/dashboard/category-chart").then((m) => ({
+      default: m.CategoryChart,
+    })),
+  {
+    ssr: false,
+    loading: () => (
+      <Card className="glass-card">
+        <CardHeader>
+          <Skeleton className="h-5 w-40" />
+        </CardHeader>
+        <CardContent>
+          <Skeleton className="h-[280px] w-full rounded-lg" />
+        </CardContent>
+      </Card>
+    ),
+  }
+);
+
+const WalletChart = dynamic(
+  () =>
+    import("@/components/dashboard/wallet-chart").then((m) => ({
+      default: m.WalletChart,
+    })),
+  {
+    ssr: false,
+    loading: () => (
+      <Card className="glass-card">
+        <CardHeader>
+          <Skeleton className="h-5 w-40" />
+        </CardHeader>
+        <CardContent>
+          <Skeleton className="h-[200px] w-full rounded-lg" />
+        </CardContent>
+      </Card>
+    ),
+  }
+);
 
 function TimeRangeContent() {
   const { isTransitioning } = useTimeRange();
   return (
-    <motion.div
-      animate={{ opacity: isTransitioning ? 0.6 : 1 }}
-      transition={{ duration: 0.12, ease: "easeOut" }}
-      className="space-y-8"
+    <div
+      className={`space-y-8 transition-opacity duration-150 ease-out ${isTransitioning ? "opacity-60" : "opacity-100"}`}
     >
       <ErrorBoundary fallbackTitle="Failed to load summary">
         <SummaryCards />
@@ -36,7 +92,7 @@ function TimeRangeContent() {
       <ErrorBoundary fallbackTitle="Failed to load wallet chart">
         <WalletChart />
       </ErrorBoundary>
-    </motion.div>
+    </div>
   );
 }
 
@@ -47,7 +103,6 @@ export function DashboardContent() {
         <h1 className="text-2xl font-bold tracking-tight sm:text-3xl">Dashboard</h1>
         <div className="flex flex-wrap items-center gap-3">
           <TimeRangeToggle />
-          <CurrencySelector />
         </div>
       </div>
       <TimeRangeContent />
