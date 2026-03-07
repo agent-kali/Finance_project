@@ -9,6 +9,6 @@ export default defineConfig({
     setupFiles: ["./vitest.setup.ts"],
     include: ["**/*.{test,spec}.{ts,tsx}"],
     globals: false,
-    passWithNoTests: true,
+    passWithNoTests: false,
   },
 });
