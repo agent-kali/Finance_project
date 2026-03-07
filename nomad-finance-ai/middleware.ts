@@ -1,31 +1,29 @@
 import { type NextRequest, NextResponse } from "next/server";
 import { createServerClient } from "@supabase/ssr";
-
-const DEMO_COOKIE = "demo_mode";
+import { DEMO_COOKIE } from "@/lib/demo";
+import {
+  getRootRedirectTarget,
+  isAuthRoute,
+  isProtectedRoute,
+} from "@/lib/auth-routes";
 
 export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
   const isDemoMode = request.cookies.has(DEMO_COOKIE);
+  const authRoute = isAuthRoute(pathname);
+  const protectedRoute = isProtectedRoute(pathname);
 
-  const isAuthRoute = pathname.startsWith("/login") || pathname.startsWith("/register");
-  const isProtectedRoute =
-    pathname.startsWith("/dashboard") ||
-    pathname.startsWith("/transactions") ||
-    pathname.startsWith("/wallets") ||
-    pathname.startsWith("/ai-advisor");
-  const isRoot = pathname === "/";
-
-  if (isRoot) {
+  if (pathname === "/") {
     const url = request.nextUrl.clone();
-    url.pathname = isDemoMode ? "/dashboard" : "/login";
+    url.pathname = getRootRedirectTarget(isDemoMode);
     return NextResponse.redirect(url);
   }
 
-  if (isDemoMode && isProtectedRoute) {
+  if (isDemoMode && protectedRoute) {
     return NextResponse.next();
   }
 
-  if (isDemoMode && isAuthRoute) {
+  if (isDemoMode && authRoute) {
     const url = request.nextUrl.clone();
     url.pathname = "/dashboard";
     return NextResponse.redirect(url);
@@ -58,13 +56,13 @@ export async function middleware(request: NextRequest) {
     data: { user },
   } = await supabase.auth.getUser();
 
-  if (!user && isProtectedRoute) {
+  if (!user && protectedRoute) {
     const url = request.nextUrl.clone();
     url.pathname = "/login";
     return NextResponse.redirect(url);
   }
 
-  if (user && isAuthRoute) {
+  if (user && authRoute) {
     const url = request.nextUrl.clone();
     url.pathname = "/dashboard";
     return NextResponse.redirect(url);

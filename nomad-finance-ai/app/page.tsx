@@ -1,19 +1,10 @@
-"use client";
+import { cookies } from "next/headers";
+import { redirect } from "next/navigation";
+import { DEMO_COOKIE } from "@/lib/demo";
+import { getRootRedirectTarget } from "@/lib/auth-routes";
 
-import { useEffect } from "react";
-import { useRouter } from "next/navigation";
-import { Loader2 } from "lucide-react";
-
-export default function Home() {
-  const router = useRouter();
-
-  useEffect(() => {
-    router.replace("/dashboard");
-  }, [router]);
-
-  return (
-    <div className="flex min-h-svh items-center justify-center">
-      <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
-    </div>
-  );
+export default async function Home() {
+  const cookieStore = await cookies();
+  const target = getRootRedirectTarget(cookieStore.has(DEMO_COOKIE));
+  redirect(target);
 }
