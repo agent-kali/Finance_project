@@ -1,6 +1,7 @@
 import { QueryClient, dehydrate } from "@tanstack/react-query";
 import type { SupabaseClient } from "@supabase/supabase-js";
 import type { Database, Wallet, Transaction } from "@/types/database.types";
+import { getExchangeRates } from "@/lib/currency-conversion";
 
 export async function prefetchDashboardData(
   supabase: SupabaseClient<Database>
@@ -29,6 +30,10 @@ export async function prefetchDashboardData(
         if (error) throw error;
         return (data as Transaction[]) ?? [];
       },
+    }),
+    queryClient.prefetchQuery({
+      queryKey: ["exchange-rates", "EUR"] as const,
+      queryFn: () => getExchangeRates("EUR"),
     }),
   ]);
 

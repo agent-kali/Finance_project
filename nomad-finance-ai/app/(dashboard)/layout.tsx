@@ -47,15 +47,15 @@ export default async function DashboardLayout({
   return (
     <DemoProvider>
       <CurrencyProvider>
-        <CurrencyConversionProvider>
-          <HydrationBoundary state={dehydratedState}>
+        <HydrationBoundary state={dehydratedState}>
+          <CurrencyConversionProvider>
             <DefaultWalletProvider>
               <TimeRangeProvider>
                 <DashboardShell user={user}>{children}</DashboardShell>
               </TimeRangeProvider>
             </DefaultWalletProvider>
-          </HydrationBoundary>
-        </CurrencyConversionProvider>
+          </CurrencyConversionProvider>
+        </HydrationBoundary>
       </CurrencyProvider>
     </DemoProvider>
   );

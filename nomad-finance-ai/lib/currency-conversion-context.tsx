@@ -2,7 +2,11 @@
 
 import * as React from "react";
 import { useQuery } from "@tanstack/react-query";
-import { getExchangeRates, convert as convertAmount } from "./currency-conversion";
+import {
+  getExchangeRates,
+  convert as convertAmount,
+  initRatesFromData,
+} from "./currency-conversion";
 
 type CurrencyConversionContextValue = {
   convert: (amount: number, from: string, to: string) => number;
@@ -25,6 +29,12 @@ export function CurrencyConversionProvider({
     staleTime: 24 * 60 * 60 * 1000, // 24h
     gcTime: 24 * 60 * 60 * 1000,
   });
+
+  // Sync memoryCache from hydrated/prefetched data so convert() uses the same
+  // rates on client as server, preventing hydration mismatch.
+  if (data?.rates) {
+    initRatesFromData(data.rates, "EUR", data.date ?? "");
+  }
 
   const convert = React.useCallback(
     (amount: number, from: string, to: string) => convertAmount(amount, from, to),

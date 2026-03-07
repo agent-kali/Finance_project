@@ -114,6 +114,24 @@ export async function getExchangeRates(base: string = "EUR"): Promise<{
 }
 
 /**
+ * Initializes the in-memory rates cache from prefetched/hydrated data.
+ * Call this when React Query hydrates exchange rates so convert() uses the same
+ * rates on client as server, avoiding hydration mismatch.
+ */
+export function initRatesFromData(
+  rates: Record<string, number>,
+  base: string,
+  date: string
+): void {
+  memoryCache = {
+    rates,
+    base,
+    date,
+    fetchedAt: Date.now(),
+  };
+}
+
+/**
  * Converts amount from one currency to another. Sync; uses in-memory or localStorage cache.
  * Same currency returns amount unchanged. Fallback to EXCHANGE_RATES if cache empty.
  */
