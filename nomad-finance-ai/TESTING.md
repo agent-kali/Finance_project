@@ -47,8 +47,8 @@ The project uses **Vitest** with **@testing-library/react** and **jsdom**. Tests
 
 | Area | Reason |
 |------|--------|
-| **Middleware** | Edge runtime; logic covered by `lib/auth-routes.test.ts` |
-| **Dashboard layout auth** | Server component with Supabase; covered indirectly by middleware + layout flow |
+| **Proxy** | Edge runtime; logic covered by `lib/auth-routes.test.ts` |
+| **Dashboard layout auth** | Server component with Supabase; covered indirectly by proxy + layout flow |
 | **RegisterForm** | Schema covered by auth-schemas; full component test skipped for now |
 | **useOptimisticMutation** | Thin react-query wrapper; actions that use it are tested |
 | **Charts, dashboard widgets** | Recharts; would need heavier mocking; low ROI for unit tests |

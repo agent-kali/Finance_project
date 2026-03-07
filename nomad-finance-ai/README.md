@@ -28,13 +28,13 @@ I chose TanStack Query v5 over SWR for its superior optimistic mutation API. Tra
 
 This creates a sub-100ms perceived response time while maintaining data consistency.
 
-### Supabase RLS over middleware-only auth
+### Supabase RLS over proxy-based auth
 
-Row Level Security means the database itself enforces data isolation. Even if a Server Action has a bug, one user can never see another's data. This is security-by-default rather than security-by-convention.
+Row Level Security means the database itself enforces data isolation. Auth redirects and session checks run in `proxy.ts` (Next.js 16 proxy convention; formerly middleware). Even if a Server Action has a bug, one user can never see another's data. This is security-by-default rather than security-by-convention.
 
-### Edge Runtime for AI
+### AI route
 
-The `/api/ai` route runs on the Edge runtime with Groq (Llama 3.3 70B). Groq's inference speed + edge proximity = streaming responses that start in under 200ms. The system prompt is dynamically injected with the user's actual financial data — not generic advice.
+The `/api/ai` route uses Groq (Llama 3.3 70B) for streaming. Groq's inference speed plus a Node runtime gives streaming responses that start quickly. The system prompt is dynamically injected with the user's actual financial data — not generic advice.
 
 ### Server Actions over API routes for CRUD
 
@@ -50,7 +50,7 @@ Next.js App Router
 │   ├── transactions/ Filterable CRUD table + optimistic updates
 │   ├── wallets/      Multi-currency wallet overview
 │   └── ai-advisor/   Streaming AI chat (Groq + Vercel AI SDK)
-├── api/ai/           Edge route — Groq streaming endpoint
+├── api/ai/           Streaming AI chat endpoint (Groq + Vercel AI SDK)
 └── actions/          Server Actions for transactions + wallets
 ```
 
@@ -67,6 +67,10 @@ Next.js App Router
 | Charts | Recharts (Area, Pie, Bar) |
 | Forms | react-hook-form + Zod v4 |
 | Animations | prefers-reduced-motion respected globally |
+
+## Deployment
+
+**Production is built from the `main` branch.** Feature branches (e.g. `feat/...`) may be deployed for previews, but final changes should be merged into `main` for release. CI runs on push/PR to `main` (lint, tests, build).
 
 ## Setup
 

@@ -1,6 +1,6 @@
 /**
  * Canonical route definitions for auth and protected routes.
- * Used by middleware and root page to keep redirect logic in sync.
+ * Used by proxy (inlined in proxy.ts) and root page to keep redirect logic in sync.
  */
 
 export const AUTH_ROUTES = ["/login", "/register"] as const;

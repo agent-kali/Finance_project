@@ -20,7 +20,7 @@ export async function createClient() {
             );
           } catch {
             // setAll is called from Server Component where cookies can't be set.
-            // This can be safely ignored when called from middleware refresh.
+            // This can be safely ignored when called from proxy refresh.
           }
         },
       },
