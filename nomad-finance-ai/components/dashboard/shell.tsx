@@ -16,8 +16,10 @@ import {
 import { Sheet, SheetContent, SheetTrigger, SheetTitle } from "@/components/ui/sheet";
 import { Separator } from "@/components/ui/separator";
 import { ThemeToggle } from "@/components/theme-toggle";
+import { CommandPalette, CommandPaletteTrigger } from "@/components/command-palette";
 import { CurrencySelector } from "@/components/ui/currency-selector";
 import { DefaultWalletSelector } from "@/components/ui/default-wallet-selector";
+import { CommandPaletteProvider } from "@/lib/command-palette-context";
 import {
   Brain,
   LayoutDashboard,
@@ -107,9 +109,10 @@ export function DashboardShell({
   }
 
   return (
-    <div className="relative flex min-h-svh bg-gradient-nomad">
-      <div className="bg-ambient-glow" aria-hidden="true" />
-      <div className="bg-particles" aria-hidden="true" />
+    <CommandPaletteProvider>
+      <div className="relative flex min-h-svh bg-gradient-nomad">
+        <div className="bg-ambient-glow" aria-hidden="true" />
+        <div className="bg-particles" aria-hidden="true" />
 
       {/* Desktop sidebar */}
       <aside className="glass-sidebar hidden w-64 shrink-0 md:block">
@@ -152,6 +155,8 @@ export function DashboardShell({
               <span className="sr-only">Toggle menu</span>
             </Button>
           )}
+
+          <CommandPaletteTrigger />
 
           <div className="flex-1" />
 
@@ -209,6 +214,9 @@ export function DashboardShell({
         {/* Page content */}
         <main className="relative z-10 flex-1 overflow-auto p-4 md:p-6">{children}</main>
       </div>
-    </div>
+      </div>
+
+      <CommandPalette />
+    </CommandPaletteProvider>
   );
 }

@@ -1,6 +1,7 @@
 "use client";
 
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
+import { useSearchParams, useRouter } from "next/navigation";
 import { motion } from "framer-motion";
 import { useOptimisticMutation } from "@/lib/hooks/use-optimistic-mutation";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -48,6 +49,8 @@ const CURRENCY_ACCENTS: Record<string, { border: string; text: string }> = {
 const DEFAULT_ACCENT = { border: "border-l-cyan-400", text: "text-cyan-400" };
 
 export function WalletsContent() {
+  const router = useRouter();
+  const searchParams = useSearchParams();
   const { data: wallets, isLoading } = useWallets();
   const { isDemo } = useDemoMode();
   const displayCurrency = useDisplayCurrency();
@@ -55,6 +58,13 @@ export function WalletsContent() {
   const effectiveDefaultId = useEffectiveDefaultWalletId();
   const [createOpen, setCreateOpen] = useState(false);
   const [selectedCurrency, setSelectedCurrency] = useState<SupportedCurrency | "">("");
+
+  useEffect(() => {
+    if (searchParams.get("action") === "create") {
+      router.replace("/wallets");
+      queueMicrotask(() => setCreateOpen(true));
+    }
+  }, [searchParams, router]);
 
   const existingCurrencies = useMemo(
     () => new Set(wallets?.map((w) => w.currency) ?? []),

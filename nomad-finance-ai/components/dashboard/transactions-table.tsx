@@ -1,6 +1,7 @@
 "use client";
 
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
+import { useSearchParams, useRouter } from "next/navigation";
 import { useOptimisticMutation } from "@/lib/hooks/use-optimistic-mutation";
 import { useDemoMode } from "@/lib/demo-context";
 import {
@@ -54,12 +55,24 @@ const ALL_CATEGORIES = [...EXPENSE_CATEGORIES, ...INCOME_CATEGORIES];
 const UNIQUE_CATEGORIES = Array.from(new Set(ALL_CATEGORIES));
 
 export function TransactionsTable() {
+  const router = useRouter();
+  const searchParams = useSearchParams();
   const { data: transactions, isLoading } = useTransactions();
   const { data: wallets } = useWallets();
   const { isDemo } = useDemoMode();
 
   const [modalOpen, setModalOpen] = useState(false);
   const [editingTx, setEditingTx] = useState<Transaction | null>(null);
+
+  useEffect(() => {
+    if (searchParams.get("action") === "create") {
+      router.replace("/transactions");
+      queueMicrotask(() => {
+        setEditingTx(null);
+        setModalOpen(true);
+      });
+    }
+  }, [searchParams, router]);
 
   const [filterType, setFilterType] = useState<string>("all");
   const [filterCategory, setFilterCategory] = useState<string>("all");
