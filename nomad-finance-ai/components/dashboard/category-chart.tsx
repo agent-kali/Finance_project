@@ -5,7 +5,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useTransactions } from "@/lib/hooks/use-transactions";
 import { useDisplayCurrency } from "@/lib/hooks/use-profile";
-import { useTimeRange, type TimeRange } from "@/lib/time-range-context";
+import { useTimeRange } from "@/lib/time-range-context";
 import {
   getDateRange,
   getPeriodLabel,

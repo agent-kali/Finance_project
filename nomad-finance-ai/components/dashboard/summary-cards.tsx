@@ -7,14 +7,14 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { useWallets } from "@/lib/hooks/use-wallets";
 import { useTransactions } from "@/lib/hooks/use-transactions";
 import { useDisplayCurrency } from "@/lib/hooks/use-profile";
-import { useTimeRange, type TimeRange } from "@/lib/time-range-context";
+import { useTimeRange } from "@/lib/time-range-context";
 import {
   getDateRange,
   getPeriodLabel,
   getSavingsSubtitle,
 } from "@/lib/date-utils";
 import { useCurrencyConversion } from "@/lib/currency-conversion-context";
-import { convertCurrency, formatCurrency, formatForCard } from "@/lib/currency";
+import { convertCurrency, formatForCard } from "@/lib/currency";
 import type { SupportedCurrency } from "@/lib/constants";
 import {
   Banknote,

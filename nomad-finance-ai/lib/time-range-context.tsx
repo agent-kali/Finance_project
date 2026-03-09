@@ -45,15 +45,15 @@ export function useTimeRange() {
   return ctx;
 }
 
+function getInitialTimeRange(): TimeRange {
+  const stored = readStored();
+  return stored ?? DEFAULT_TIME_RANGE;
+}
+
 export function TimeRangeProvider({ children }: { children: ReactNode }) {
-  const [timeRange, setTimeRangeState] = useState<TimeRange>(DEFAULT_TIME_RANGE);
+  const [timeRange, setTimeRangeState] = useState<TimeRange>(getInitialTimeRange);
   const [isTransitioning, setIsTransitioning] = useState(false);
   const timeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-
-  useEffect(() => {
-    const stored = readStored();
-    if (stored) setTimeRangeState(stored);
-  }, []);
 
   useEffect(() => () => {
     if (timeoutRef.current) clearTimeout(timeoutRef.current);

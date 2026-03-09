@@ -74,11 +74,12 @@ const FormItemContext = React.createContext<FormItemContextValue>(
 )
 
 function FormItem({ className, ...props }: React.ComponentProps<"div">) {
+  const fallbackId = React.useId()
   const fieldContext = React.useContext(FormFieldContext)
   // Use field name for stable IDs to avoid hydration mismatch (useId can differ between server/client)
   const id = fieldContext?.name
     ? `form-item-${String(fieldContext.name)}`
-    : React.useId()
+    : fallbackId
 
   return (
     <FormItemContext.Provider value={{ id }}>

@@ -23,7 +23,7 @@ export function useChartDimensions() {
   useEffect(() => {
     const el = element;
     if (!el) {
-      setSize({ width: 0, height: 0 });
+      queueMicrotask(() => setSize({ width: 0, height: 0 }));
       return;
     }
 

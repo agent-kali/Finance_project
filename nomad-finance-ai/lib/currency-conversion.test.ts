@@ -1,7 +1,6 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
-import { convert, getExchangeRates } from "./currency-conversion";
+import { convert } from "./currency-conversion";
 import { EXCHANGE_RATES, SUPPORTED_CURRENCIES } from "@/lib/constants";
-import type { SupportedCurrency } from "@/lib/constants";
 
 // In Node, loadFromStorage returns null, so convert uses EXCHANGE_RATES when cache is empty.
 // Run convert tests first so memoryCache stays null; getExchangeRates tests use vi.resetModules.
