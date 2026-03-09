@@ -4,6 +4,7 @@ import {
   convertCurrency,
   formatCurrency,
   formatCompact,
+  formatForCard,
 } from "./currency";
 import { EXCHANGE_RATES, CURRENCY_SYMBOLS } from "@/lib/constants";
 import type { SupportedCurrency } from "@/lib/constants";
@@ -146,6 +147,30 @@ describe("formatCurrency", () => {
     it("formats zero with decimals", () => {
       expect(formatCurrency(0, "USD")).toBe("$0.00");
     });
+  });
+});
+
+// ─── formatForCard ─────────────────────────────────────────────────────────
+describe("formatForCard", () => {
+  it("returns full format when string length <= 11", () => {
+    expect(formatForCard(1_234.56, "USD")).toBe("$1,234.56");
+    expect(formatForCard(999_999.99, "USD")).toBe("$999,999.99");
+    expect(formatForCard(1_234_567, "VND")).toBe("₫1,234,567");
+  });
+
+  it("returns compact format when full string exceeds 11 chars", () => {
+    expect(formatForCard(191_450_500, "VND")).toBe("₫191.5M");
+    expect(formatForCard(12_345_678.9, "USD")).toBe("$12.3M");
+  });
+
+  it("boundary: 11 chars uses full, 12 chars uses compact", () => {
+    const fullShort = formatCurrency(123_456, "VND"); // "₫123,456" = 8 chars
+    expect(fullShort.length).toBeLessThanOrEqual(11);
+    expect(formatForCard(123_456, "VND")).toBe("₫123,456");
+
+    const fullLong = formatCurrency(191_450_500, "VND"); // "₫191,450,500" = 12 chars
+    expect(fullLong.length).toBeGreaterThan(11);
+    expect(formatForCard(191_450_500, "VND")).toBe("₫191.5M");
   });
 });
 

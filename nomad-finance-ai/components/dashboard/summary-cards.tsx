@@ -14,7 +14,7 @@ import {
   getSavingsSubtitle,
 } from "@/lib/date-utils";
 import { useCurrencyConversion } from "@/lib/currency-conversion-context";
-import { convertCurrency, formatCurrency } from "@/lib/currency";
+import { convertCurrency, formatCurrency, formatForCard } from "@/lib/currency";
 import type { SupportedCurrency } from "@/lib/constants";
 import {
   Banknote,
@@ -109,7 +109,7 @@ export function SummaryCards() {
       ? ((incomeInRange - expensesInRange) / incomeInRange) * 100
       : 0;
 
-  const totalBalanceFormatted = formatCurrency(totalBalance, displayCurrency);
+  const totalBalanceFormatted = formatForCard(totalBalance, displayCurrency);
 
   const totalBalanceCard = {
     title: "Total Balance",
@@ -123,7 +123,7 @@ export function SummaryCards() {
   const otherCards = [
     {
       title: `Income ${periodLabel}`,
-      value: formatCurrency(incomeInRange, displayCurrency),
+      value: formatForCard(incomeInRange, displayCurrency),
       subtitle: `${rangeTransactions.filter((t) => t.type === "income").length} transactions`,
       icon: TrendingUp,
       accent: "emerald" as const,
@@ -131,7 +131,7 @@ export function SummaryCards() {
     },
     {
       title: `Expenses ${periodLabel}`,
-      value: formatCurrency(expensesInRange, displayCurrency),
+      value: formatForCard(expensesInRange, displayCurrency),
       subtitle: `${rangeTransactions.filter((t) => t.type === "expense").length} transactions`,
       icon: TrendingDown,
       accent: "amber" as const,
@@ -174,11 +174,11 @@ export function SummaryCards() {
               <div className="min-w-0">
                 <div
                   key={displayCurrency}
-                  className="min-w-0 truncate font-semibold tracking-tight text-foreground animate-in fade-in duration-200"
+                  className="min-w-0 font-semibold tracking-tight tabular-nums text-foreground animate-in fade-in duration-200"
                   style={{
                     fontSize: card.title === "Total Balance"
-                      ? "clamp(1.5rem, 5vw, 2.5rem)"
-                      : "clamp(1.25rem, 4vw, 2.25rem)",
+                      ? "clamp(1.25rem, 4vw, 2rem)"
+                      : "clamp(1rem, 3.5vw, 1.75rem)",
                     letterSpacing: "-1.5px",
                   }}
                   title={ratesDate ? `Converted at Frankfurter rate. ${formatRatesDate(ratesDate)}` : "Converted amount"}

@@ -38,6 +38,16 @@ export function formatCurrency(
   })}`;
 }
 
+/** Format for dashboard cards: full for normal amounts, compact when too long. */
+export function formatForCard(
+  amount: number,
+  currency: SupportedCurrency
+): string {
+  const full = formatCurrency(amount, currency);
+  if (full.length <= 11) return full;
+  return formatCompact(amount, currency);
+}
+
 export function formatCompact(
   amount: number,
   currency: SupportedCurrency
