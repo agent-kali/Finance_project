@@ -150,7 +150,11 @@ export function SummaryCards() {
   const cards = [totalBalanceCard, ...otherCards];
 
   return (
-    <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+    <div
+      className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4"
+      aria-live="polite"
+      aria-atomic="true"
+    >
       {cards.map((card, i) => (
         <div
           key={card.title}

@@ -51,6 +51,14 @@ export function CategoryChart() {
 
   const maxValue = listData.length > 0 ? listData[0].value : 0;
 
+  const chartSummary =
+    listData.length > 0
+      ? `Spending by category: ${listData
+          .slice(0, 5)
+          .map((e) => `${e.name} ${formatCurrency(e.value, displayCurrency)}`)
+          .join("; ")}${listData.length > 5 ? `. ${listData.length - 5} more categories.` : ""}`
+      : null;
+
   if (isLoading) {
     return (
       <Card className="glass-card">
@@ -81,6 +89,11 @@ export function CategoryChart() {
             {getEmptyMessage(timeRange)}
           </p>
         ) : (
+          <div
+            role="img"
+            aria-label={`Spending by category for ${getPeriodLabel(timeRange)}`}
+          >
+            {chartSummary && <p className="sr-only">{chartSummary}</p>}
           <ul className="space-y-3">
             {listData.map((entry, i) => {
               const color = COLORS[i % COLORS.length];
@@ -125,6 +138,7 @@ export function CategoryChart() {
               );
             })}
           </ul>
+          </div>
         )}
       </CardContent>
     </Card>

@@ -23,6 +23,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { useWallets } from "@/lib/hooks/use-wallets";
+import { useReducedMotion } from "@/lib/hooks/use-reduced-motion";
 import { useDemoMode } from "@/lib/demo-context";
 import { useDefaultWallet, useEffectiveDefaultWalletId } from "@/lib/default-wallet-context";
 import { useDisplayCurrency } from "@/lib/hooks/use-profile";
@@ -56,6 +57,7 @@ export function WalletsContent() {
   const displayCurrency = useDisplayCurrency();
   const { setDefaultWallet } = useDefaultWallet() ?? {};
   const effectiveDefaultId = useEffectiveDefaultWalletId();
+  const prefersReducedMotion = useReducedMotion();
   const [createOpen, setCreateOpen] = useState(false);
   const [selectedCurrency, setSelectedCurrency] = useState<SupportedCurrency | "">("");
 
@@ -114,6 +116,7 @@ export function WalletsContent() {
 
   return (
     <div className="space-y-8">
+      <section aria-label="Wallets overview" className="space-y-8">
       <div className="flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
         <div className="flex flex-wrap items-center gap-3">
           <h1 className="text-3xl font-bold tracking-tight">Wallets</h1>
@@ -129,8 +132,9 @@ export function WalletsContent() {
         </div>
         {!isLoading && wallets && wallets.length > 0 && (
           <motion.div
-            initial={{ opacity: 0, scale: 0.95 }}
+            initial={prefersReducedMotion ? false : { opacity: 0, scale: 0.95 }}
             animate={{ opacity: 1, scale: 1 }}
+            transition={prefersReducedMotion ? { duration: 0 } : undefined}
             className="glass-card glass-card-hover rounded-xl px-5 py-3"
             title="Converted at Frankfurter rate"
           >
@@ -173,10 +177,10 @@ export function WalletsContent() {
             return (
               <motion.div
                 key={w.id}
-                initial={{ opacity: 0, y: 20 }}
+                initial={prefersReducedMotion ? false : { opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.4, delay: i * 0.1, ease: "easeOut" }}
-                whileHover={isOptimistic ? undefined : { scale: 1.02 }}
+                transition={prefersReducedMotion ? { duration: 0 } : { duration: 0.4, delay: i * 0.1, ease: "easeOut" }}
+                whileHover={prefersReducedMotion || isOptimistic ? undefined : { scale: 1.02 }}
                 className={cn(
                   "transition-opacity",
                   isOptimistic && "opacity-50 animate-pulse pointer-events-none"
@@ -251,6 +255,8 @@ export function WalletsContent() {
           </CardContent>
         </Card>
       )}
+
+      </section>
 
       <Dialog open={createOpen} onOpenChange={setCreateOpen}>
         <DialogContent className="sm:max-w-sm">

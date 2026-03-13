@@ -3,7 +3,7 @@ import { Card, CardContent, CardHeader } from "@/components/ui/card";
 
 export default function WalletsLoading() {
   return (
-    <div className="space-y-8">
+    <div className="space-y-8" role="status" aria-label="Loading wallets">
       <div className="flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
         <div className="flex flex-wrap items-center gap-3">
           <Skeleton className="h-9 w-28" />

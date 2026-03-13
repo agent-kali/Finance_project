@@ -19,6 +19,7 @@ import { useTransactions } from "@/lib/hooks/use-transactions";
 import { useChartDimensions } from "@/lib/hooks/use-chart-dimensions";
 import { useDisplayCurrency } from "@/lib/hooks/use-profile";
 import { useTimeRange, type TimeRange } from "@/lib/time-range-context";
+import { useReducedMotion } from "@/lib/hooks/use-reduced-motion";
 import { getEmptyMessage } from "@/lib/date-utils";
 import { convertCurrency, formatCurrency } from "@/lib/currency";
 import type { SupportedCurrency } from "@/lib/constants";
@@ -165,6 +166,7 @@ export function SpendingChart() {
   const { timeRange } = useTimeRange();
   const displayCurrency = useDisplayCurrency();
   const { ref, width, height } = useChartDimensions();
+  const prefersReducedMotion = useReducedMotion();
 
   const convert = useMemo(
     () => (amount: number, currency: string) =>
@@ -218,10 +220,37 @@ export function SpendingChart() {
 
   const title = getChartTitle(timeRange);
 
+  const chartAriaLabel = useMemo(() => {
+    if (chartType === "today") return "Today vs daily average spending";
+    if (chartType === "week") return "This week vs last week spending by day";
+    return "Income vs expenses over the last 6 months";
+  }, [chartType]);
+
+  const chartSummary = useMemo(() => {
+    if (!hasAnyData || chartData.length === 0) return null;
+    if (chartType === "today") {
+      const d = chartData as { name: string; value: number }[];
+      const today = d.find((x) => x.name === "Today")?.value ?? 0;
+      const avg = d.find((x) => x.name === "Daily Avg")?.value ?? 0;
+      return `Today: ${formatCurrency(today, displayCurrency)}. Daily average: ${formatCurrency(avg, displayCurrency)}.`;
+    }
+    if (chartType === "week") {
+      const d = chartData as { thisWeek: number; lastWeek: number }[];
+      const thisTotal = d.reduce((s, x) => s + x.thisWeek, 0);
+      const lastTotal = d.reduce((s, x) => s + x.lastWeek, 0);
+      return `This week total: ${formatCurrency(thisTotal, displayCurrency)}. Last week: ${formatCurrency(lastTotal, displayCurrency)}.`;
+    }
+    const d = chartData as { income: number; expenses: number }[];
+    const totalIncome = d.reduce((s, x) => s + x.income, 0);
+    const totalExpenses = d.reduce((s, x) => s + x.expenses, 0);
+    return `Total income: ${formatCurrency(totalIncome, displayCurrency)}. Total expenses: ${formatCurrency(totalExpenses, displayCurrency)}.`;
+  }, [chartType, chartData, hasAnyData, displayCurrency]);
+
   const sharedChartProps = {
     width,
     height,
     margin: { top: 8, right: 8, left: 28, bottom: 0 },
+    isAnimationActive: !prefersReducedMotion,
   };
 
   return (
@@ -232,7 +261,15 @@ export function SpendingChart() {
         </CardTitle>
       </CardHeader>
       <CardContent>
-        <div ref={ref} className="h-[300px]">
+        <div
+          ref={ref}
+          className="h-[300px]"
+          role="img"
+          aria-label={chartAriaLabel}
+        >
+          {chartSummary && (
+            <p className="sr-only">{chartSummary}</p>
+          )}
           {!hasAnyData ? (
             <p className="flex h-full items-center justify-center text-sm text-muted-foreground">
               {getEmptyMessage(timeRange)}

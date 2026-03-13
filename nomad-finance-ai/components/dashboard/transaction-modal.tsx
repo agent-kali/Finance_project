@@ -220,7 +220,7 @@ export function TransactionModal({
                         value={field.value}
                       >
                         <FormControl>
-                          <SelectTrigger className="w-full">
+                          <SelectTrigger className="w-full" aria-required>
                             <SelectValue placeholder="Select type" />
                           </SelectTrigger>
                         </FormControl>
@@ -245,6 +245,7 @@ export function TransactionModal({
                           type="text"
                           inputMode="decimal"
                           placeholder="0,00"
+                          aria-required
                           value={
                             Number.isNaN(field.value) || field.value === 0
                               ? ""
@@ -279,7 +280,7 @@ export function TransactionModal({
                         value={field.value}
                       >
                         <FormControl>
-                          <SelectTrigger className="w-full">
+                          <SelectTrigger className="w-full" aria-required>
                             <SelectValue placeholder="Select wallet" />
                           </SelectTrigger>
                         </FormControl>
@@ -308,7 +309,7 @@ export function TransactionModal({
                         value={field.value}
                       >
                         <FormControl>
-                          <SelectTrigger className="w-full">
+                          <SelectTrigger className="w-full" aria-required>
                             <SelectValue placeholder="Select category" />
                           </SelectTrigger>
                         </FormControl>
@@ -333,7 +334,7 @@ export function TransactionModal({
                   <FormItem>
                     <FormLabel>Date</FormLabel>
                     <FormControl>
-                      <Input type="date" {...field} />
+                      <Input type="date" aria-required {...field} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>

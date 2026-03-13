@@ -18,6 +18,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { useWallets } from "@/lib/hooks/use-wallets";
 import { useChartDimensions } from "@/lib/hooks/use-chart-dimensions";
 import { useDisplayCurrency } from "@/lib/hooks/use-profile";
+import { useReducedMotion } from "@/lib/hooks/use-reduced-motion";
 import { convertCurrency, formatCurrency } from "@/lib/currency";
 import { CURRENCY_SYMBOLS, type SupportedCurrency } from "@/lib/constants";
 
@@ -39,6 +40,7 @@ export function WalletChart() {
   const { data: wallets, isLoading } = useWallets();
   const displayCurrency = useDisplayCurrency();
   const { ref, width, height } = useChartDimensions();
+  const prefersReducedMotion = useReducedMotion();
 
   const chartData = useMemo(() => {
     if (!wallets?.length) return [];
@@ -81,7 +83,20 @@ export function WalletChart() {
             </Button>
           </div>
         ) : (
-          <div ref={ref} className="h-[300px]">
+          <div
+            ref={ref}
+            className="h-[300px]"
+            role="img"
+            aria-label={`Wallet balances in ${displayCurrency} equivalent`}
+          >
+            <p className="sr-only">
+              {chartData
+                .map(
+                  (w) =>
+                    `${w.name}: ${formatCurrency(w.balance, displayCurrency)}`
+                )
+                .join(". ")}
+            </p>
             {width > 0 && height > 0 && (
               <BarChart
                 width={width}
@@ -140,7 +155,7 @@ export function WalletChart() {
                     );
                   }}
                 />
-                <Bar dataKey="balance" radius={[6, 6, 0, 0]} filter="url(#barGlow)">
+                <Bar dataKey="balance" radius={[6, 6, 0, 0]} filter="url(#barGlow)" isAnimationActive={!prefersReducedMotion}>
                   {chartData.map((_, i) => (
                     <Cell key={i} fill={COLORS[i % COLORS.length]} />
                   ))}

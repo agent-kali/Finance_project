@@ -8,7 +8,7 @@ export default function AuthLayout({
 }) {
   return (
     <div className="flex min-h-svh items-center justify-center bg-background px-4 py-12">
-      <div className="w-full max-w-md space-y-8">
+      <main id="main-content" className="w-full max-w-md space-y-8">
         <div className="flex flex-col items-center gap-2 text-center">
           <div className="flex items-center gap-2">
             <Brain className="h-8 w-8 text-primary" />
@@ -19,7 +19,7 @@ export default function AuthLayout({
           </p>
         </div>
         {children}
-      </div>
+      </main>
     </div>
   );
 }

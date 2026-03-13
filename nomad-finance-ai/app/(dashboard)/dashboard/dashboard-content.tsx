@@ -75,23 +75,29 @@ function TimeRangeContent() {
     <div
       className={`space-y-8 transition-opacity duration-150 ease-out ${isTransitioning ? "opacity-60" : "opacity-100"}`}
     >
-      <ErrorBoundary fallbackTitle="Failed to load summary">
-        <SummaryCards />
-      </ErrorBoundary>
-      <ErrorBoundary fallbackTitle="Failed to load recent activity">
-        <RecentActivity />
-      </ErrorBoundary>
-      <div className="grid gap-6 lg:grid-cols-2">
+      <section aria-label="Summary">
+        <ErrorBoundary fallbackTitle="Failed to load summary">
+          <SummaryCards />
+        </ErrorBoundary>
+      </section>
+      <section aria-label="Recent activity">
+        <ErrorBoundary fallbackTitle="Failed to load recent activity">
+          <RecentActivity />
+        </ErrorBoundary>
+      </section>
+      <section aria-label="Spending and category charts" className="grid gap-6 lg:grid-cols-2">
         <ErrorBoundary fallbackTitle="Failed to load spending chart">
           <SpendingChart />
         </ErrorBoundary>
         <ErrorBoundary fallbackTitle="Failed to load category chart">
           <CategoryChart />
         </ErrorBoundary>
-      </div>
-      <ErrorBoundary fallbackTitle="Failed to load wallet chart">
-        <WalletChart />
-      </ErrorBoundary>
+      </section>
+      <section aria-label="Wallet chart">
+        <ErrorBoundary fallbackTitle="Failed to load wallet chart">
+          <WalletChart />
+        </ErrorBoundary>
+      </section>
     </div>
   );
 }

@@ -42,11 +42,17 @@ const ICONS = {
   Settings,
 } as const;
 
-function NavLinks({ onClick }: { onClick?: () => void }) {
+function NavLinks({
+  onClick,
+  ariaLabel = "Main navigation",
+}: {
+  onClick?: () => void;
+  ariaLabel?: string;
+}) {
   const pathname = usePathname();
 
   return (
-    <nav className="flex flex-col gap-1">
+    <nav className="flex flex-col gap-1" aria-label={ariaLabel}>
       {NAV_ITEMS.map((item) => {
         const Icon = ICONS[item.icon];
         const isActive = pathname === item.href;
@@ -145,7 +151,7 @@ export function DashboardShell({
                   <span className="font-semibold tracking-tight">{APP_NAME}</span>
                 </div>
                 <div className="px-3 py-4">
-                  <NavLinks onClick={() => setMobileOpen(false)} />
+                  <NavLinks onClick={() => setMobileOpen(false)} ariaLabel="Mobile navigation" />
                 </div>
               </SheetContent>
             </Sheet>
@@ -174,7 +180,7 @@ export function DashboardShell({
           {mounted ? (
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <Button variant="ghost" className="relative h-8 w-8 rounded-full">
+                <Button variant="ghost" className="relative h-8 w-8 rounded-full" aria-label="User menu">
                   <Avatar className="h-8 w-8">
                     <AvatarFallback className="bg-primary/10 text-primary text-xs">
                       {initials}
@@ -212,7 +218,7 @@ export function DashboardShell({
         </header>
 
         {/* Page content */}
-        <main className="relative z-10 flex-1 overflow-auto p-4 md:p-6">{children}</main>
+        <main id="main-content" className="relative z-10 flex-1 overflow-auto p-4 md:p-6">{children}</main>
       </div>
       </div>
 
