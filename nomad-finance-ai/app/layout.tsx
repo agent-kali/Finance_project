@@ -36,7 +36,7 @@ export default function RootLayout({
         <a
           href="#main-content"
           style={{ position: "absolute", left: "-9999px", top: "auto" }}
-          className="z-50 rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground focus:fixed focus:left-4 focus:top-4 focus:z-[9999]"
+          className="z-50 rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground focus:fixed focus:left-4 focus:top-4 focus:z-9999"
         >
           Skip to main content
         </a>

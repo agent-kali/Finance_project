@@ -135,7 +135,7 @@ export function DashboardShell({
 
       <div className="relative z-10 flex flex-1 flex-col">
         {/* Top bar */}
-        <header className="glass-header flex h-14 items-center gap-4 px-4 md:px-6">
+        <header className="glass-header flex min-h-14 min-w-0 flex-wrap items-center gap-4 px-4 md:px-6">
           {mounted ? (
             <Sheet open={mobileOpen} onOpenChange={setMobileOpen}>
               <SheetTrigger asChild>
