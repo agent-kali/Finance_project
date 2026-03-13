@@ -27,6 +27,7 @@ const CURRENCY_COLORS: Record<string, string> = {
   EUR: "#34d399",
   PLN: "#a78bfa",
   VND: "#f59e0b",
+  GBP: "#fb923c",
 };
 
 const CHART_LIGHT = {
