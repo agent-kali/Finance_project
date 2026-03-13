@@ -61,7 +61,7 @@ export function CategoryChart() {
 
   if (isLoading) {
     return (
-      <Card className="glass-card">
+      <Card className="glass-card glass-card-chart rounded-2xl">
         <CardHeader>
           <Skeleton className="h-5 w-48" />
         </CardHeader>
@@ -77,7 +77,7 @@ export function CategoryChart() {
   }
 
   return (
-    <Card className="glass-card glass-card-hover">
+    <Card className="glass-card glass-card-hover glass-card-chart rounded-2xl">
       <CardHeader>
         <CardTitle className="text-sm font-medium text-muted-foreground">
           Spending by Category ({getPeriodLabel(timeRange)})

@@ -24,8 +24,11 @@ import { getEmptyMessage } from "@/lib/date-utils";
 import { convertCurrency, formatCurrency } from "@/lib/currency";
 import type { SupportedCurrency } from "@/lib/constants";
 
+const TODAY_BAR_COLOR = "#22d3ee";
+const DAILY_AVG_BAR_COLOR = "#f59e0b";
 const INCOME_COLOR = "#34d399";
 const EXPENSE_COLOR = "#f59e0b";
+const MIN_BAR_HEIGHT_PX = 4;
 
 const CHART_LIGHT = {
   gridStroke: "oklch(0.88 0.01 270 / 0.6)",
@@ -193,9 +196,18 @@ export function SpendingChart() {
     }
   }, [transactions, timeRange, convert]);
 
+  const todayData = useMemo(
+    () => (chartType === "today" ? (chartData as { name: string; value: number }[]) : null),
+    [chartType, chartData]
+  );
+  const todayValueZero = useMemo(
+    () => todayData?.find((d) => d.name === "Today")?.value === 0 ?? false,
+    [todayData]
+  );
+
   const hasAnyData = useMemo(() => {
     if (chartType === "today")
-      return (chartData as { value: number }[]).some((d) => d.value > 0);
+      return (chartData as { value: number }[]).some((d) => d.value > 0) || todayValueZero;
     if (chartType === "week")
       return (chartData as { thisWeek: number; lastWeek: number }[]).some(
         (d) => d.thisWeek > 0 || d.lastWeek > 0
@@ -207,7 +219,7 @@ export function SpendingChart() {
 
   if (isLoading) {
     return (
-      <Card className="glass-card">
+      <Card className="glass-card glass-card-chart rounded-2xl">
         <CardHeader>
           <Skeleton className="h-5 w-48" />
         </CardHeader>
@@ -254,7 +266,7 @@ export function SpendingChart() {
   };
 
   return (
-    <Card className="glass-card glass-card-hover">
+    <Card className="glass-card glass-card-hover glass-card-chart rounded-2xl">
       <CardHeader>
         <CardTitle className="text-sm font-medium text-muted-foreground">
           {title}
@@ -278,16 +290,6 @@ export function SpendingChart() {
             <>
               {chartType === "today" && (
                 <BarChart {...sharedChartProps} data={chartData}>
-                  <defs>
-                    <linearGradient id="todayBarGrad" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="5%" stopColor={INCOME_COLOR} stopOpacity={0.8} />
-                      <stop offset="95%" stopColor={INCOME_COLOR} stopOpacity={0.3} />
-                    </linearGradient>
-                    <linearGradient id="dailyAvgBarGrad" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="5%" stopColor={EXPENSE_COLOR} stopOpacity={0.8} />
-                      <stop offset="95%" stopColor={EXPENSE_COLOR} stopOpacity={0.3} />
-                    </linearGradient>
-                  </defs>
                   <CartesianGrid
                     strokeDasharray="3 3"
                     stroke={chartColors.gridStroke}
@@ -298,6 +300,9 @@ export function SpendingChart() {
                     axisLine={false}
                     tickLine={false}
                     tick={{ fill: chartColors.tickFill, fontSize: 11 }}
+                    tickFormatter={(name) =>
+                      name === "Today" && todayValueZero ? "No data yet" : name
+                    }
                   />
                   <YAxis
                     axisLine={false}
@@ -311,9 +316,11 @@ export function SpendingChart() {
                     contentStyle={{ background: "transparent", border: "none", padding: 0 }}
                     content={({ active, payload, label }) => {
                       if (!active || !payload?.length) return null;
+                      const rawLabel = (payload[0].payload as { name: string }).name;
+                      const displayLabel = rawLabel === "Today" && todayValueZero ? "No data yet" : rawLabel;
                       return (
-                        <div className="glass-tooltip rounded-xl px-4 py-3" title="Converted at Frankfurter rate">
-                          <p className="mb-1 text-sm font-semibold text-foreground">{label}</p>
+                        <div className="glass-tooltip rounded-xl px-4 py-3">
+                          <p className="mb-1 text-sm font-semibold text-foreground">{displayLabel}</p>
                           {payload.map((entry) => (
                             <p key={entry.name} className="text-sm text-muted-foreground">
                               <span className="capitalize text-foreground">
@@ -332,13 +339,51 @@ export function SpendingChart() {
                   <Bar
                     dataKey="value"
                     radius={[6, 6, 0, 0]}
-                    strokeWidth={1}
+                    strokeWidth={0}
+                    shape={(
+                      props: {
+                        x: number;
+                        y: number;
+                        width: number;
+                        height: number;
+                        fill?: string;
+                        payload?: { name: string };
+                      }
+                    ) => {
+                      const { x, y, width, height, fill = TODAY_BAR_COLOR, payload } = props;
+                      const h = Math.max(height, MIN_BAR_HEIGHT_PX);
+                      const ny = height > 0 ? y : y + height - h;
+                      const isDailyAvg = payload?.name === "Daily Avg";
+                      const fillOpacity = isDailyAvg ? 0.85 : 1;
+                      return (
+                        <g>
+                          <rect
+                            x={x}
+                            y={ny}
+                            width={width}
+                            height={h}
+                            fill={fill}
+                            fillOpacity={fillOpacity}
+                            rx={6}
+                            ry={0}
+                          />
+                          {/* 2px top stroke for "lit from above" */}
+                          <line
+                            x1={x}
+                            y1={ny}
+                            x2={x + width}
+                            y2={ny}
+                            stroke={fill}
+                            strokeWidth={2}
+                          />
+                        </g>
+                      );
+                    }}
                   >
-                    {chartData.map((entry, i) => (
+                    {(chartData as { name: string }[]).map((entry, i) => (
                       <Cell
                         key={i}
-                        fill={entry.name === "Today" ? "url(#todayBarGrad)" : "url(#dailyAvgBarGrad)"}
-                        stroke={entry.name === "Today" ? INCOME_COLOR : EXPENSE_COLOR}
+                        fill={entry.name === "Today" ? TODAY_BAR_COLOR : DAILY_AVG_BAR_COLOR}
                       />
                     ))}
                   </Bar>

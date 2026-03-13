@@ -162,6 +162,31 @@
     border: 1px solid oklch(0.9 0.01 260 / 0.8);
     box-shadow: 0 4px 24px -4px oklch(0.2 0.02 260 / 0.08);
   }
+  .glass-card.glass-card-cyan-border {
+    box-shadow:
+      0 4px 24px -4px oklch(0.2 0.02 260 / 0.08),
+      0 0 0 1px rgba(34, 211, 238, 0.15),
+      0 0 20px rgba(34, 211, 238, 0.08);
+  }
+  .glass-card.glass-card-hover.glass-card-cyan-border:hover {
+    box-shadow:
+      0 12px 32px -8px oklch(0.2 0.02 260 / 0.12),
+      0 0 0 1px rgba(34, 211, 238, 0.15),
+      0 0 20px rgba(34, 211, 238, 0.08);
+  }
+  .glass-card.glass-card-chart {
+    border-radius: 16px;
+    box-shadow:
+      0 4px 24px -4px oklch(0.2 0.02 260 / 0.08),
+      0 0 0 1px rgba(34, 211, 238, 0.15),
+      0 0 20px rgba(34, 211, 238, 0.08);
+  }
+  .glass-card.glass-card-hover.glass-card-chart:hover {
+    box-shadow:
+      0 12px 32px -8px oklch(0.2 0.02 260 / 0.12),
+      0 0 0 1px rgba(34, 211, 238, 0.15),
+      0 0 20px rgba(34, 211, 238, 0.08);
+  }
   .glass-card-hover {
     transition: box-shadow 0.3s cubic-bezier(0.4, 0, 0.2, 1),
       border-color 0.3s cubic-bezier(0.4, 0, 0.2, 1);
@@ -229,6 +254,37 @@
     box-shadow:
       0 25px 50px -12px oklch(0.55 0.15 195 / 0.1),
       inset 0 1px 0 0 oklch(1 0 0 / 0.05);
+  }
+  .dark .glass-card.glass-card-cyan-border {
+    box-shadow:
+      0 25px 50px -12px oklch(0.55 0.15 195 / 0.1),
+      inset 0 1px 0 0 oklch(1 0 0 / 0.05),
+      0 0 0 1px rgba(34, 211, 238, 0.15),
+      0 0 20px rgba(34, 211, 238, 0.08);
+  }
+  .dark .glass-card.glass-card-hover.glass-card-cyan-border:hover {
+    box-shadow:
+      0 25px 50px -12px oklch(0.55 0.15 195 / 0.2),
+      0 0 30px -5px oklch(0.82 0.15 195 / 0.15),
+      inset 0 1px 0 0 oklch(1 0 0 / 0.08),
+      0 0 0 1px rgba(34, 211, 238, 0.15),
+      0 0 20px rgba(34, 211, 238, 0.08);
+  }
+  .dark .glass-card.glass-card-chart {
+    border-radius: 16px;
+    box-shadow:
+      0 25px 50px -12px oklch(0.55 0.15 195 / 0.1),
+      inset 0 1px 0 0 oklch(1 0 0 / 0.05),
+      0 0 0 1px rgba(34, 211, 238, 0.15),
+      0 0 20px rgba(34, 211, 238, 0.08);
+  }
+  .dark .glass-card.glass-card-hover.glass-card-chart:hover {
+    box-shadow:
+      0 25px 50px -12px oklch(0.55 0.15 195 / 0.2),
+      0 0 30px -5px oklch(0.82 0.15 195 / 0.15),
+      inset 0 1px 0 0 oklch(1 0 0 / 0.08),
+      0 0 0 1px rgba(34, 211, 238, 0.15),
+      0 0 20px rgba(34, 211, 238, 0.08);
   }
   .dark .glass-card-hover {
     transition: box-shadow 0.3s cubic-bezier(0.4, 0, 0.2, 1),
