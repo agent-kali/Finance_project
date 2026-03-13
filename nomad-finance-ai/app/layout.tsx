@@ -35,8 +35,7 @@ export default function RootLayout({
       <body className="font-sans antialiased">
         <a
           href="#main-content"
-          style={{ position: "absolute", left: "-9999px", top: "auto" }}
-          className="z-50 rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground focus:fixed focus:left-4 focus:top-4 focus:z-9999"
+          className="skip-link rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground"
         >
           Skip to main content
         </a>

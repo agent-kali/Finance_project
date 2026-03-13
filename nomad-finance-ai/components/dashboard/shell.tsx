@@ -120,8 +120,8 @@ export function DashboardShell({
         <div className="bg-ambient-glow" aria-hidden="true" />
         <div className="bg-particles" aria-hidden="true" />
 
-      {/* Desktop sidebar */}
-      <aside className="glass-sidebar hidden w-64 shrink-0 md:block">
+      {/* Desktop sidebar - persistent only at lg+; below that use mobile drawer */}
+      <aside className="glass-sidebar hidden w-64 shrink-0 lg:block">
         <div className="flex h-full flex-col">
           <div className="flex h-14 items-center gap-2 border-b border-border/50 px-4">
             <Brain className="h-5 w-5 text-primary" />
@@ -133,13 +133,13 @@ export function DashboardShell({
         </div>
       </aside>
 
-      <div className="relative z-10 flex flex-1 flex-col">
+      <div className="relative z-10 flex min-w-0 flex-1 flex-col">
         {/* Top bar */}
         <header className="glass-header flex min-h-14 min-w-0 flex-wrap items-center gap-4 px-4 md:px-6">
           {mounted ? (
             <Sheet open={mobileOpen} onOpenChange={setMobileOpen}>
               <SheetTrigger asChild>
-                <Button variant="ghost" size="icon" className="md:hidden">
+                <Button variant="ghost" size="icon" className="lg:hidden">
                   <Menu className="h-5 w-5" />
                   <span className="sr-only">Toggle menu</span>
                 </Button>
@@ -156,7 +156,7 @@ export function DashboardShell({
               </SheetContent>
             </Sheet>
           ) : (
-            <Button variant="ghost" size="icon" className="md:hidden">
+            <Button variant="ghost" size="icon" className="lg:hidden">
               <Menu className="h-5 w-5" />
               <span className="sr-only">Toggle menu</span>
             </Button>
@@ -175,7 +175,7 @@ export function DashboardShell({
 
           <ThemeToggle />
 
-          <Separator orientation="vertical" className="h-6 opacity-30" />
+          <Separator orientation="vertical" className="hidden h-6 opacity-30 sm:block" />
 
           {mounted ? (
             <DropdownMenu>

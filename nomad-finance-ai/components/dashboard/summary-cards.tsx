@@ -23,6 +23,7 @@ import {
   PiggyBank,
 } from "lucide-react";
 import { DefaultWalletSelector } from "@/components/ui/default-wallet-selector";
+import { cn } from "@/lib/utils";
 
 const CARD_ACCENTS = {
   cyan: "border-l-2 border-l-cyan-400",
@@ -57,7 +58,7 @@ export function SummaryCards() {
 
   if (isLoading) {
     return (
-      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
         {Array.from({ length: 4 }).map((_, i) => (
           <Card key={i} className="glass-card glass-card-hover">
             <CardHeader className="flex flex-row items-center justify-between pb-2">
@@ -151,7 +152,7 @@ export function SummaryCards() {
 
   return (
     <div
-      className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4"
+      className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4"
       aria-live="polite"
       aria-atomic="true"
     >
@@ -165,26 +166,26 @@ export function SummaryCards() {
             animationFillMode: "backwards",
           }}
         >
-          <Card className={`glass-card glass-card-hover overflow-hidden ${CARD_ACCENTS[card.accent]}`}>
+          <Card className={`glass-card glass-card-hover min-h-0 ${CARD_ACCENTS[card.accent]}`}>
             <CardHeader className="flex flex-row items-center justify-between pb-2">
               <CardTitle className="text-xs font-medium uppercase tracking-wider text-muted-foreground">
                 {card.title}
               </CardTitle>
-              <div className={`rounded-full bg-background/50 p-1.5 ${ICON_COLORS[card.accent]}`}>
+              <div className={`rounded-full bg-background/50 p-1.5 shrink-0 ${ICON_COLORS[card.accent]}`}>
                 <card.icon className="h-4 w-4" />
               </div>
             </CardHeader>
-            <CardContent>
-              <div className="min-w-0">
+            <CardContent className="min-h-0">
+              <div className="min-w-0 overflow-visible">
                 <div
                   key={displayCurrency}
-                  className="min-w-0 font-semibold tracking-tight tabular-nums text-foreground animate-in fade-in duration-200"
-                  style={{
-                    fontSize: card.title === "Total Balance"
-                      ? "clamp(1.25rem, 4vw, 2rem)"
-                      : "clamp(1rem, 3.5vw, 1.75rem)",
-                    letterSpacing: "-1.5px",
-                  }}
+                  className={cn(
+                    "min-w-0 font-semibold tabular-nums text-foreground animate-in fade-in duration-200 tracking-tight [overflow-wrap:break-word]",
+                    card.title === "Total Balance"
+                      ? "text-xl sm:text-2xl md:text-2xl lg:text-3xl xl:text-4xl"
+                      : "text-lg sm:text-xl md:text-xl lg:text-2xl xl:text-2xl"
+                  )}
+                  style={{ letterSpacing: "-1.5px" }}
                   title={ratesDate ? `Converted at Frankfurter rate. ${formatRatesDate(ratesDate)}` : "Converted amount"}
                 >
                   {card.value}
