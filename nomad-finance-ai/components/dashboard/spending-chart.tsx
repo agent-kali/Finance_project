@@ -201,7 +201,7 @@ export function SpendingChart() {
     [chartType, chartData]
   );
   const todayValueZero = useMemo(
-    () => todayData?.find((d) => d.name === "Today")?.value === 0 ?? false,
+    () => todayData?.find((d) => d.name === "Today")?.value === 0,
     [todayData]
   );
 
