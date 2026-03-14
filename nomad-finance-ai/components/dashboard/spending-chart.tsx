@@ -215,22 +215,7 @@ export function SpendingChart() {
     return (chartData as { income: number; expenses: number }[]).some(
       (d) => d.income > 0 || d.expenses > 0
     );
-  }, [chartData, chartType]);
-
-  if (isLoading) {
-    return (
-      <Card className="glass-card glass-card-chart rounded-2xl">
-        <CardHeader>
-          <Skeleton className="h-5 w-48" />
-        </CardHeader>
-        <CardContent>
-          <Skeleton className="h-[300px] w-full rounded-lg" />
-        </CardContent>
-      </Card>
-    );
-  }
-
-  const title = getChartTitle(timeRange);
+  }, [chartData, chartType, todayValueZero]);
 
   const chartAriaLabel = useMemo(() => {
     if (chartType === "today") return "Today vs daily average spending";
@@ -257,6 +242,21 @@ export function SpendingChart() {
     const totalExpenses = d.reduce((s, x) => s + x.expenses, 0);
     return `Total income: ${formatCurrency(totalIncome, displayCurrency)}. Total expenses: ${formatCurrency(totalExpenses, displayCurrency)}.`;
   }, [chartType, chartData, hasAnyData, displayCurrency]);
+
+  if (isLoading) {
+    return (
+      <Card className="glass-card glass-card-chart rounded-2xl">
+        <CardHeader>
+          <Skeleton className="h-5 w-48" />
+        </CardHeader>
+        <CardContent>
+          <Skeleton className="h-[300px] w-full rounded-lg" />
+        </CardContent>
+      </Card>
+    );
+  }
+
+  const title = getChartTitle(timeRange);
 
   const sharedChartProps = {
     width,
@@ -314,7 +314,7 @@ export function SpendingChart() {
                     cursor={{ fill: "rgba(0,0,0,0.05)" }}
                     wrapperStyle={{ background: "transparent" }}
                     contentStyle={{ background: "transparent", border: "none", padding: 0 }}
-                    content={({ active, payload, label }) => {
+                    content={({ active, payload }) => {
                       if (!active || !payload?.length) return null;
                       const rawLabel = (payload[0].payload as { name: string }).name;
                       const displayLabel = rawLabel === "Today" && todayValueZero ? "No data yet" : rawLabel;
