@@ -157,7 +157,7 @@ export function SummaryCards() {
   const thisWeekExpensesFormatted = formatForCard(expensesThisWeek, displayCurrency);
 
   const totalBalanceCard = {
-    title: "Total Balance",
+    title: "Total balance",
     value: totalBalanceFormatted,
     subtitle: `Across ${wallets?.length ?? 0} wallets`,
     icon: Banknote,
@@ -167,7 +167,7 @@ export function SummaryCards() {
 
   const otherCards = [
     {
-      title: `Income ${periodLabel}`,
+      title: `Income ${periodLabel.toLowerCase()}`,
       value: formatForCard(incomeInRange, displayCurrency),
       subtitle: `${rangeTransactions.filter((t) => t.type === "income").length} transactions`,
       icon: TrendingUp,
@@ -175,7 +175,7 @@ export function SummaryCards() {
       showDefaultWalletSelector: false,
     },
     {
-      title: `Expenses ${periodLabel}`,
+      title: `Expenses ${periodLabel.toLowerCase()}`,
       value: formatForCard(expensesInRange, displayCurrency),
       subtitle: `${rangeTransactions.filter((t) => t.type === "expense").length} transactions`,
       icon: TrendingDown,
@@ -183,7 +183,7 @@ export function SummaryCards() {
       showDefaultWalletSelector: false,
     },
     {
-      title: "Savings Rate",
+      title: "Savings rate",
       value: `${savingsRate.toFixed(1)}%`,
       subtitle: getSavingsSubtitle(timeRange, incomeInRange > 0),
       icon: PiggyBank,
@@ -201,10 +201,10 @@ export function SummaryCards() {
       aria-atomic="true"
     >
       {cards.map((card, i) => {
-        const isTotalBalance = card.title === "Total Balance";
+        const isTotalBalance = card.title === "Total balance";
         const isIncome = card.title.startsWith("Income");
         const isExpenses = card.title.startsWith("Expenses");
-        const isSavings = card.title === "Savings Rate";
+        const isSavings = card.title === "Savings rate";
         const hovered = hoveredIndex === i && !prefersReducedMotion;
         const glow = NEON_GLOW[card.accent];
         return (
@@ -232,7 +232,7 @@ export function SummaryCards() {
                 aria-hidden
               />
               <CardHeader className="flex flex-row items-center justify-between pb-2">
-                <CardTitle className="text-xs font-medium uppercase tracking-wider text-muted-foreground">
+                <CardTitle className="text-xs font-medium tracking-wide text-muted-foreground">
                   {card.title}
                 </CardTitle>
                 <div className={cn("rounded-full bg-background/50 p-1.5 shrink-0", ICON_COLORS[card.accent])}>
