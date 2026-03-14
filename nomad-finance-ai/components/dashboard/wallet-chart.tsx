@@ -154,25 +154,18 @@ export function WalletChart() {
                   dataKey="balance"
                   radius={[6, 6, 0, 0]}
                   isAnimationActive={!prefersReducedMotion}
-                  shape={(props: { x: number; y: number; width: number; height: number; fill?: string }) => {
-                    const { x, y, width, height, fill = "#22d3ee" } = props;
+                  shape={(props: { x: number; y: number; width: number; height: number; currency?: string }) => {
+                    const { x, y, width, height, currency } = props;
+                    const fill = CURRENCY_COLORS[(currency as string)] ?? "#22d3ee";
                     return (
-                      <rect
-                        x={x}
-                        y={y}
-                        width={width}
-                        height={height}
-                        fill={fill}
-                        rx={6}
-                        ry={0}
-                      />
+                      <rect x={x} y={y} width={width} height={height} fill={fill} rx={6} ry={0} />
                     );
                   }}
                 >
-                  {chartData.map((w) => (
+                  {chartData.map((entry) => (
                     <Cell
-                      key={w.currency}
-                      fill={CURRENCY_COLORS[w.currency] ?? "#22d3ee"}
+                      key={entry.currency}
+                      fill={CURRENCY_COLORS[entry.currency] ?? "#22d3ee"}
                     />
                   ))}
                 </Bar>
