@@ -221,8 +221,11 @@ export function TransactionsTable() {
                     <tr className="border-b text-left text-muted-foreground">
                       <th className="px-4 py-3 font-medium">
                         <button
+                          type="button"
                           className="flex items-center gap-1"
                           onClick={() => toggleSort("date")}
+                          aria-label={`Sort by date${sortField === "date" ? `, ${sortDir === "asc" ? "ascending" : "descending"}` : ""}`}
+                          aria-sort={sortField === "date" ? (sortDir === "asc" ? "ascending" : "descending") : undefined}
                         >
                           Date
                           <ArrowUpDown className="h-3 w-3" />
@@ -233,8 +236,11 @@ export function TransactionsTable() {
                       <th className="px-4 py-3 font-medium">Wallet</th>
                       <th className="px-4 py-3 font-medium text-right">
                         <button
+                          type="button"
                           className="ml-auto flex items-center gap-1"
                           onClick={() => toggleSort("amount")}
+                          aria-label={`Sort by amount${sortField === "amount" ? `, ${sortDir === "asc" ? "ascending" : "descending"}` : ""}`}
+                          aria-sort={sortField === "amount" ? (sortDir === "asc" ? "ascending" : "descending") : undefined}
                         >
                           Amount
                           <ArrowUpDown className="h-3 w-3" />
@@ -289,6 +295,10 @@ export function TransactionsTable() {
                                   : "text-red-400"
                               }
                             >
+                              <span className="sr-only">
+                                {tx.type === "income" ? "Income" : "Expense"}
+                                {" "}
+                              </span>
                               {tx.type === "income" ? "+" : "−"}
                               {formatCurrency(tx.amount, currency)}
                             </span>

@@ -205,7 +205,7 @@ export function TransactionModal({
         ) : (
           <Form {...form}>
             <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                 <FormField
                   control={form.control}
                   name="type"
@@ -220,7 +220,7 @@ export function TransactionModal({
                         value={field.value}
                       >
                         <FormControl>
-                          <SelectTrigger className="w-full">
+                          <SelectTrigger className="w-full" aria-required>
                             <SelectValue placeholder="Select type" />
                           </SelectTrigger>
                         </FormControl>
@@ -245,6 +245,7 @@ export function TransactionModal({
                           type="text"
                           inputMode="decimal"
                           placeholder="0,00"
+                          aria-required
                           value={
                             Number.isNaN(field.value) || field.value === 0
                               ? ""
@@ -267,7 +268,7 @@ export function TransactionModal({
                 />
               </div>
 
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                 <FormField
                   control={form.control}
                   name="wallet_id"
@@ -279,7 +280,7 @@ export function TransactionModal({
                         value={field.value}
                       >
                         <FormControl>
-                          <SelectTrigger className="w-full">
+                          <SelectTrigger className="w-full" aria-required>
                             <SelectValue placeholder="Select wallet" />
                           </SelectTrigger>
                         </FormControl>
@@ -308,7 +309,7 @@ export function TransactionModal({
                         value={field.value}
                       >
                         <FormControl>
-                          <SelectTrigger className="w-full">
+                          <SelectTrigger className="w-full" aria-required>
                             <SelectValue placeholder="Select category" />
                           </SelectTrigger>
                         </FormControl>
@@ -333,7 +334,7 @@ export function TransactionModal({
                   <FormItem>
                     <FormLabel>Date</FormLabel>
                     <FormControl>
-                      <Input type="date" {...field} />
+                      <Input type="date" aria-required {...field} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>

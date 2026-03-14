@@ -51,9 +51,17 @@ export function CategoryChart() {
 
   const maxValue = listData.length > 0 ? listData[0].value : 0;
 
+  const chartSummary =
+    listData.length > 0
+      ? `Spending by category: ${listData
+          .slice(0, 5)
+          .map((e) => `${e.name} ${formatCurrency(e.value, displayCurrency)}`)
+          .join("; ")}${listData.length > 5 ? `. ${listData.length - 5} more categories.` : ""}`
+      : null;
+
   if (isLoading) {
     return (
-      <Card className="glass-card">
+      <Card className="glass-card glass-card-chart rounded-2xl">
         <CardHeader>
           <Skeleton className="h-5 w-48" />
         </CardHeader>
@@ -69,7 +77,7 @@ export function CategoryChart() {
   }
 
   return (
-    <Card className="glass-card glass-card-hover">
+    <Card className="glass-card glass-card-hover glass-card-chart rounded-2xl">
       <CardHeader>
         <CardTitle className="text-sm font-medium text-muted-foreground">
           Spending by Category ({getPeriodLabel(timeRange)})
@@ -81,6 +89,11 @@ export function CategoryChart() {
             {getEmptyMessage(timeRange)}
           </p>
         ) : (
+          <div
+            role="img"
+            aria-label={`Spending by category for ${getPeriodLabel(timeRange)}`}
+          >
+            {chartSummary && <p className="sr-only">{chartSummary}</p>}
           <ul className="space-y-3">
             {listData.map((entry, i) => {
               const color = COLORS[i % COLORS.length];
@@ -125,6 +138,7 @@ export function CategoryChart() {
               );
             })}
           </ul>
+          </div>
         )}
       </CardContent>
     </Card>

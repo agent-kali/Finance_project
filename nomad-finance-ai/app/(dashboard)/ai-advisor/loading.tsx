@@ -3,7 +3,7 @@ import { Card, CardContent, CardHeader } from "@/components/ui/card";
 
 export default function AiAdvisorLoading() {
   return (
-    <div className="space-y-8">
+    <div className="space-y-8" role="status" aria-label="Loading AI advisor">
       <Skeleton className="h-9 w-52" />
 
       <Card className="glass-card flex h-[calc(100svh-10rem)] flex-col overflow-hidden rounded-xl border">

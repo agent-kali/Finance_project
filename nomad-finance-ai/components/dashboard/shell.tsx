@@ -42,11 +42,17 @@ const ICONS = {
   Settings,
 } as const;
 
-function NavLinks({ onClick }: { onClick?: () => void }) {
+function NavLinks({
+  onClick,
+  ariaLabel = "Main navigation",
+}: {
+  onClick?: () => void;
+  ariaLabel?: string;
+}) {
   const pathname = usePathname();
 
   return (
-    <nav className="flex flex-col gap-1">
+    <nav className="flex flex-col gap-1" aria-label={ariaLabel}>
       {NAV_ITEMS.map((item) => {
         const Icon = ICONS[item.icon];
         const isActive = pathname === item.href;
@@ -114,8 +120,8 @@ export function DashboardShell({
         <div className="bg-ambient-glow" aria-hidden="true" />
         <div className="bg-particles" aria-hidden="true" />
 
-      {/* Desktop sidebar */}
-      <aside className="glass-sidebar hidden w-64 shrink-0 md:block">
+      {/* Desktop sidebar - persistent only at lg+; below that use mobile drawer */}
+      <aside className="glass-sidebar hidden w-64 shrink-0 lg:block">
         <div className="flex h-full flex-col">
           <div className="flex h-14 items-center gap-2 border-b border-border/50 px-4">
             <Brain className="h-5 w-5 text-primary" />
@@ -127,13 +133,13 @@ export function DashboardShell({
         </div>
       </aside>
 
-      <div className="relative z-10 flex flex-1 flex-col">
+      <div className="relative z-10 flex min-w-0 flex-1 flex-col">
         {/* Top bar */}
-        <header className="glass-header flex h-14 items-center gap-4 px-4 md:px-6">
+        <header className="glass-header flex min-h-14 min-w-0 flex-wrap items-center gap-4 px-4 md:px-6">
           {mounted ? (
             <Sheet open={mobileOpen} onOpenChange={setMobileOpen}>
               <SheetTrigger asChild>
-                <Button variant="ghost" size="icon" className="md:hidden">
+                <Button variant="ghost" size="icon" className="lg:hidden">
                   <Menu className="h-5 w-5" />
                   <span className="sr-only">Toggle menu</span>
                 </Button>
@@ -145,12 +151,12 @@ export function DashboardShell({
                   <span className="font-semibold tracking-tight">{APP_NAME}</span>
                 </div>
                 <div className="px-3 py-4">
-                  <NavLinks onClick={() => setMobileOpen(false)} />
+                  <NavLinks onClick={() => setMobileOpen(false)} ariaLabel="Mobile navigation" />
                 </div>
               </SheetContent>
             </Sheet>
           ) : (
-            <Button variant="ghost" size="icon" className="md:hidden">
+            <Button variant="ghost" size="icon" className="lg:hidden">
               <Menu className="h-5 w-5" />
               <span className="sr-only">Toggle menu</span>
             </Button>
@@ -169,12 +175,12 @@ export function DashboardShell({
 
           <ThemeToggle />
 
-          <Separator orientation="vertical" className="h-6 opacity-30" />
+          <Separator orientation="vertical" className="hidden h-6 opacity-30 sm:block" />
 
           {mounted ? (
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <Button variant="ghost" className="relative h-8 w-8 rounded-full">
+                <Button variant="ghost" className="relative h-8 w-8 rounded-full" aria-label="User menu">
                   <Avatar className="h-8 w-8">
                     <AvatarFallback className="bg-primary/10 text-primary text-xs">
                       {initials}
@@ -212,7 +218,7 @@ export function DashboardShell({
         </header>
 
         {/* Page content */}
-        <main className="relative z-10 flex-1 overflow-auto p-4 md:p-6">{children}</main>
+        <main id="main-content" className="relative z-10 flex-1 overflow-auto p-4 md:p-6">{children}</main>
       </div>
       </div>
 

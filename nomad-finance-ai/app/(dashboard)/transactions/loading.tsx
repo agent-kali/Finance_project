@@ -3,7 +3,7 @@ import { Card, CardContent } from "@/components/ui/card";
 
 export default function TransactionsLoading() {
   return (
-    <div className="space-y-8">
+    <div className="space-y-8" role="status" aria-label="Loading transactions">
       <div className="flex flex-wrap items-center justify-between gap-4">
         <Skeleton className="h-9 w-48" />
         <Skeleton className="h-9 w-36" />

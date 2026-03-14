@@ -3,7 +3,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 
 export default function SettingsLoading() {
   return (
-    <div className="space-y-8">
+    <div className="space-y-8" role="status" aria-label="Loading settings">
       <div>
         <Skeleton className="h-8 w-32 sm:h-9 sm:w-40" />
         <Skeleton className="mt-1 h-4 w-64" />

@@ -118,6 +118,7 @@ export function RegisterForm() {
                     <Input
                       placeholder="Daniel Alexandrov"
                       autoComplete="name"
+                      aria-required
                       {...field}
                     />
                   </FormControl>
@@ -136,6 +137,7 @@ export function RegisterForm() {
                       type="email"
                       placeholder="you@example.com"
                       autoComplete="email"
+                      aria-required
                       {...field}
                     />
                   </FormControl>
@@ -154,6 +156,7 @@ export function RegisterForm() {
                       type="password"
                       placeholder="••••••••"
                       autoComplete="new-password"
+                      aria-required
                       {...field}
                     />
                   </FormControl>
@@ -172,6 +175,7 @@ export function RegisterForm() {
                       type="password"
                       placeholder="••••••••"
                       autoComplete="new-password"
+                      aria-required
                       {...field}
                     />
                   </FormControl>

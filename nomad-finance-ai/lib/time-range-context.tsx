@@ -27,6 +27,9 @@ function readStored(): TimeRange | null {
   return null;
 }
 
+/** Initial value must be the same on server and first client render to avoid hydration mismatch. */
+const SSR_SAFE_DEFAULT: TimeRange = "Today";
+
 type TimeRangeContextValue = {
   timeRange: TimeRange;
   setTimeRange: (range: TimeRange) => void;
@@ -34,8 +37,6 @@ type TimeRangeContextValue = {
 };
 
 const TimeRangeContext = createContext<TimeRangeContextValue | null>(null);
-
-const DEFAULT_TIME_RANGE: TimeRange = "Today";
 
 export function useTimeRange() {
   const ctx = useContext(TimeRangeContext);
@@ -45,13 +46,10 @@ export function useTimeRange() {
   return ctx;
 }
 
-function getInitialTimeRange(): TimeRange {
-  const stored = readStored();
-  return stored ?? DEFAULT_TIME_RANGE;
-}
-
 export function TimeRangeProvider({ children }: { children: ReactNode }) {
-  const [timeRange, setTimeRangeState] = useState<TimeRange>(getInitialTimeRange);
+  const [timeRange, setTimeRangeState] = useState<TimeRange>(
+    () => readStored() ?? SSR_SAFE_DEFAULT
+  );
   const [isTransitioning, setIsTransitioning] = useState(false);
   const timeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 

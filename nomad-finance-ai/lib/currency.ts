@@ -29,10 +29,13 @@ export function formatCurrency(
   currency: SupportedCurrency
 ): string {
   const symbol = CURRENCY_SYMBOLS[currency];
-  if (currency === "VND") {
-    return `${symbol}${Math.round(amount).toLocaleString("en-US")}`;
+  if (amount === 0) {
+    return `${symbol} 0`;
   }
-  return `${symbol}${amount.toLocaleString("en-US", {
+  if (currency === "VND") {
+    return `${symbol} ${Math.round(amount).toLocaleString("en-US")}`;
+  }
+  return `${symbol} ${amount.toLocaleString("en-US", {
     minimumFractionDigits: 2,
     maximumFractionDigits: 2,
   })}`;
@@ -56,14 +59,14 @@ export function formatCompact(
   const abs = Math.abs(amount);
 
   if (currency === "VND") {
-    if (abs >= 1_000_000) return `${symbol}${(amount / 1_000_000).toFixed(1)}M`;
-    if (abs >= 1_000) return `${symbol}${(amount / 1_000).toFixed(0)}K`;
-    return `${symbol}${Math.round(amount)}`;
+    if (abs >= 1_000_000) return `${symbol} ${(amount / 1_000_000).toFixed(1)}M`;
+    if (abs >= 1_000) return `${symbol} ${(amount / 1_000).toFixed(0)}K`;
+    return `${symbol} ${Math.round(amount)}`;
   }
 
-  if (abs >= 1_000_000) return `${symbol}${(amount / 1_000_000).toFixed(1)}M`;
-  if (abs >= 1_000) return `${symbol}${(amount / 1_000).toFixed(1)}K`;
-  return `${symbol}${amount.toFixed(2)}`;
+  if (abs >= 1_000_000) return `${symbol} ${(amount / 1_000_000).toFixed(1)}M`;
+  if (abs >= 1_000) return `${symbol} ${(amount / 1_000).toFixed(1)}K`;
+  return `${symbol} ${amount.toFixed(2)}`;
 }
 export type Currency = {
   code: string;

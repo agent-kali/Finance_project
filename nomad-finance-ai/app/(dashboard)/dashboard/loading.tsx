@@ -3,7 +3,7 @@ import { Card, CardContent, CardHeader } from "@/components/ui/card";
 
 export default function DashboardLoading() {
   return (
-    <div className="space-y-8">
+    <div className="space-y-8" role="status" aria-label="Loading dashboard">
       <div className="flex flex-col gap-3">
         <Skeleton className="h-7 w-48 sm:h-8 sm:w-56" />
         <div className="flex flex-wrap items-center gap-3">
@@ -12,7 +12,7 @@ export default function DashboardLoading() {
         </div>
       </div>
 
-      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
         {Array.from({ length: 4 }).map((_, i) => (
           <Card key={i} className="glass-card">
             <CardHeader className="pb-2">

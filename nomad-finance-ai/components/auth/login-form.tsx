@@ -83,6 +83,7 @@ export function LoginForm() {
                       type="email"
                       placeholder="you@example.com"
                       autoComplete="email"
+                      aria-required
                       {...field}
                     />
                   </FormControl>
@@ -101,6 +102,7 @@ export function LoginForm() {
                       type="password"
                       placeholder="••••••••"
                       autoComplete="current-password"
+                      aria-required
                       {...field}
                     />
                   </FormControl>

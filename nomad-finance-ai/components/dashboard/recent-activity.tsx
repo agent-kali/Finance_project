@@ -133,6 +133,10 @@ export function RecentActivity() {
                 }`}
                 title="Converted at Frankfurter rate"
               >
+                <span className="sr-only">
+                  {tx.type === "income" ? "Income" : "Expense"}
+                  {" "}
+                </span>
                 {tx.type === "income" ? "+" : "-"}
                 {formatCurrency(
                   convertCurrency(tx.amount, tx.currency as SupportedCurrency, displayCurrency),

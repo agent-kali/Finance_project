@@ -9,7 +9,9 @@ export default function AIAdvisorPage() {
   return (
     <div className="space-y-8">
       <h1 className="text-3xl font-bold tracking-tight">AI Financial Advisor</h1>
-      <AiAdvisor />
+      <section aria-label="AI advisor chat">
+        <AiAdvisor />
+      </section>
     </div>
   );
 }

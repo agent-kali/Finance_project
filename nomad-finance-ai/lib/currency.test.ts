@@ -110,33 +110,33 @@ describe("formatCurrency", () => {
 
   describe("VND formatting (zero-decimal currency)", () => {
     it("rounds to the nearest whole number", () => {
-      expect(formatCurrency(50_000.4, "VND")).toBe("₫50,000");
-      expect(formatCurrency(50_000.5, "VND")).toBe("₫50,001");
+      expect(formatCurrency(50_000.4, "VND")).toBe("₫ 50,000");
+      expect(formatCurrency(50_000.5, "VND")).toBe("₫ 50,001");
     });
 
     it("includes thousands separators", () => {
-      expect(formatCurrency(1_234_567, "VND")).toBe("₫1,234,567");
+      expect(formatCurrency(1_234_567, "VND")).toBe("₫ 1,234,567");
     });
 
     it("formats zero", () => {
-      expect(formatCurrency(0, "VND")).toBe("₫0");
+      expect(formatCurrency(0, "VND")).toBe("₫ 0");
     });
   });
 
   describe("standard currency formatting (two-decimal currencies)", () => {
     it("pads to two decimal places", () => {
-      expect(formatCurrency(5, "USD")).toBe("$5.00");
+      expect(formatCurrency(5, "USD")).toBe("$ 5.00");
     });
 
     it("truncates/rounds beyond two decimal places", () => {
       // toLocaleString rounds using banker's rounding in some engines,
       // so we verify the output has exactly two decimals.
       const result = formatCurrency(9.999, "USD");
-      expect(result).toMatch(/^\$[\d,]+\.\d{2}$/);
+      expect(result).toMatch(/^\$ [\d,]+\.\d{2}$/);
     });
 
     it("includes thousands separators for large amounts", () => {
-      expect(formatCurrency(1_234_567.89, "USD")).toBe("$1,234,567.89");
+      expect(formatCurrency(1_234_567.89, "USD")).toBe("$ 1,234,567.89");
     });
 
     it("handles negative amounts", () => {
@@ -145,7 +145,7 @@ describe("formatCurrency", () => {
     });
 
     it("formats zero with decimals", () => {
-      expect(formatCurrency(0, "USD")).toBe("$0.00");
+      expect(formatCurrency(0, "USD")).toBe("$ 0");
     });
   });
 });
@@ -153,24 +153,24 @@ describe("formatCurrency", () => {
 // ─── formatForCard ─────────────────────────────────────────────────────────
 describe("formatForCard", () => {
   it("returns full format when string length <= 11", () => {
-    expect(formatForCard(1_234.56, "USD")).toBe("$1,234.56");
-    expect(formatForCard(999_999.99, "USD")).toBe("$999,999.99");
-    expect(formatForCard(1_234_567, "VND")).toBe("₫1,234,567");
+    expect(formatForCard(1_234.56, "USD")).toBe("$ 1,234.56");
+    expect(formatForCard(9_999.99, "USD")).toBe("$ 9,999.99");
+    expect(formatForCard(1_234_567, "VND")).toBe("₫ 1,234,567");
   });
 
   it("returns compact format when full string exceeds 11 chars", () => {
-    expect(formatForCard(191_450_500, "VND")).toBe("₫191.5M");
-    expect(formatForCard(12_345_678.9, "USD")).toBe("$12.3M");
+    expect(formatForCard(191_450_500, "VND")).toBe("₫ 191.5M");
+    expect(formatForCard(12_345_678.9, "USD")).toBe("$ 12.3M");
   });
 
   it("boundary: 11 chars uses full, 12 chars uses compact", () => {
-    const fullShort = formatCurrency(123_456, "VND"); // "₫123,456" = 8 chars
+    const fullShort = formatCurrency(123_456, "VND"); // "₫ 123,456" = 9 chars
     expect(fullShort.length).toBeLessThanOrEqual(11);
-    expect(formatForCard(123_456, "VND")).toBe("₫123,456");
+    expect(formatForCard(123_456, "VND")).toBe("₫ 123,456");
 
-    const fullLong = formatCurrency(191_450_500, "VND"); // "₫191,450,500" = 12 chars
+    const fullLong = formatCurrency(191_450_500, "VND"); // "₫ 191,450,500" = 13 chars
     expect(fullLong.length).toBeGreaterThan(11);
-    expect(formatForCard(191_450_500, "VND")).toBe("₫191.5M");
+    expect(formatForCard(191_450_500, "VND")).toBe("₫ 191.5M");
   });
 });
 
@@ -178,14 +178,14 @@ describe("formatForCard", () => {
 describe("formatCompact", () => {
   describe("USD (representative two-decimal currency)", () => {
     it.each([
-      [2_500_000, "$2.5M"],
-      [1_000_000, "$1.0M"],
-      [999_999, "$1000.0K"],
-      [10_000, "$10.0K"],
-      [1_000, "$1.0K"],
-      [999.99, "$999.99"],
-      [42.5, "$42.50"],
-      [0, "$0.00"],
+      [2_500_000, "$ 2.5M"],
+      [1_000_000, "$ 1.0M"],
+      [999_999, "$ 1000.0K"],
+      [10_000, "$ 10.0K"],
+      [1_000, "$ 1.0K"],
+      [999.99, "$ 999.99"],
+      [42.5, "$ 42.50"],
+      [0, "$ 0.00"],
     ])("formats %d as %s", (input, expected) => {
       expect(formatCompact(input, "USD")).toBe(expected);
     });
@@ -193,12 +193,12 @@ describe("formatCompact", () => {
 
   describe("VND (zero-decimal currency)", () => {
     it.each([
-      [5_000_000, "₫5.0M"],
-      [1_000_000, "₫1.0M"],
-      [50_000, "₫50K"],
-      [1_000, "₫1K"],
-      [999, "₫999"],
-      [0, "₫0"],
+      [5_000_000, "₫ 5.0M"],
+      [1_000_000, "₫ 1.0M"],
+      [50_000, "₫ 50K"],
+      [1_000, "₫ 1K"],
+      [999, "₫ 999"],
+      [0, "₫ 0"],
     ])("formats %d as %s", (input, expected) => {
       expect(formatCompact(input, "VND")).toBe(expected);
     });
@@ -206,22 +206,22 @@ describe("formatCompact", () => {
     it("rounds VND thousands to whole numbers (no .0K)", () => {
       const result = formatCompact(1_500, "VND");
       // VND thousands use toFixed(0), so no decimal
-      expect(result).toBe("₫2K");
+      expect(result).toBe("₫ 2K");
     });
   });
 
   describe("negative values", () => {
     it("uses Math.abs for threshold but preserves sign in output", () => {
       // This documents the current behavior — negative millions keep the minus
-      expect(formatCompact(-3_000_000, "USD")).toBe("$-3.0M");
+      expect(formatCompact(-3_000_000, "USD")).toBe("$ -3.0M");
     });
 
     it("handles negative thousands", () => {
-      expect(formatCompact(-5_000, "USD")).toBe("$-5.0K");
+      expect(formatCompact(-5_000, "USD")).toBe("$ -5.0K");
     });
 
     it("handles negative small amounts", () => {
-      expect(formatCompact(-7.5, "USD")).toBe("$-7.50");
+      expect(formatCompact(-7.5, "USD")).toBe("$ -7.50");
     });
   });
 

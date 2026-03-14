@@ -1,6 +1,7 @@
 "use client";
 
 import { useRouter } from "next/navigation";
+import { useSyncExternalStore } from "react";
 import { Command as CommandIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useTheme } from "next-themes";
@@ -19,6 +20,7 @@ export function CommandPalette() {
   const router = useRouter();
   const { setTheme } = useTheme();
   const { open, closePalette } = useCommandPalette();
+  const mounted = useSyncExternalStore(() => () => {}, () => true, () => false);
 
   function runAction(
     action:
@@ -50,6 +52,8 @@ export function CommandPalette() {
         break;
     }
   }
+
+  if (!mounted) return null;
 
   return (
     <CommandDialog

@@ -33,6 +33,12 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning>
       <body className="font-sans antialiased">
+        <a
+          href="#main-content"
+          className="skip-link rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground"
+        >
+          Skip to main content
+        </a>
         <Providers>{children}</Providers>
       </body>
     </html>
