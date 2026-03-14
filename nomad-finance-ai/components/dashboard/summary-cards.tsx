@@ -257,14 +257,9 @@ export function SummaryCards() {
                 <p className="mt-1 text-xs text-muted-foreground">
                   {card.subtitle}
                   {"showDefaultWalletSelector" in card && card.showDefaultWalletSelector && ratesDate && (
-                    <> • {formatRatesDate(ratesDate)}</>
+                    <> • {isTotalBalance ? "Live rates" : formatRatesDate(ratesDate)}</>
                   )}
                 </p>
-                {isTotalBalance && ratesDate && (
-                  <p className="mt-0.5 text-xs text-muted-foreground">
-                    Converted at Frankfurter rate.
-                  </p>
-                )}
                 {isIncome && (
                   <p className="mt-0.5 text-xs text-muted-foreground">
                     This week: {thisWeekIncomeFormatted}
