@@ -17,16 +17,20 @@ async function ensureProfile(supabase: Awaited<ReturnType<typeof createClient>>,
   }
 }
 
-export async function createWallet(currency: SupportedCurrency) {
+export async function createWallet(
+  currency: SupportedCurrency,
+  options?: { balance?: number }
+) {
   const supabase = await createClient();
   const { data: { user }, error: authError } = await supabase.auth.getUser();
   if (authError || !user) throw new Error("Unauthorized");
 
   await ensureProfile(supabase, user.id, user.user_metadata?.full_name as string | undefined);
 
+  const balance = options?.balance ?? 0;
   const { data, error } = await supabase
     .from("wallets")
-    .insert({ user_id: user.id, currency, balance: 0 })
+    .insert({ user_id: user.id, currency, balance })
     .select()
     .single();
 

@@ -74,3 +74,29 @@ export type Currency = {
   name: string;
   flag: string;
 };
+
+/** Format number for amount input display (European: period thousands, comma decimal). */
+export function formatAmountDisplay(value: number): string {
+  if (!Number.isFinite(value) || value < 0) return "";
+  if (value === 0) return "";
+  const [intPart, decPart] = value.toFixed(2).split(".");
+  const formattedInt = intPart.replace(/\B(?=(\d{3})+(?!\d))/g, ".");
+  return decPart && parseFloat(decPart) > 0
+    ? `${formattedInt},${decPart.replace(/0+$/, "") || "0"}`
+    : formattedInt;
+}
+
+/** Parse amount input string to number (handles European and US formats). */
+export function parseAmountInput(input: string): number {
+  const trimmed = input.replace(/\s/g, "");
+  if (!trimmed) return 0;
+  // European: 1.234,56 → 1234.56 (comma = decimal)
+  if (trimmed.indexOf(",") >= 0) {
+    const withDecimal = trimmed.replace(/\./g, "").replace(",", ".");
+    const num = parseFloat(withDecimal);
+    return Number.isNaN(num) ? 0 : num;
+  }
+  // US/international: 1234.56 or 1234 (period = decimal)
+  const num = parseFloat(trimmed);
+  return Number.isNaN(num) ? 0 : num;
+}

@@ -109,6 +109,17 @@ export const DEMO_CREDENTIALS = {
   password: "demo123456",
 };
 
+export const ONBOARDING_CURRENCIES = ["EUR", "USD", "VND", "PLN", "GBP"] as const;
+export type OnboardingCurrency = (typeof ONBOARDING_CURRENCIES)[number];
+
+export const CURRENCY_DISPLAY: Record<OnboardingCurrency, { flag: string; name: string }> = {
+  EUR: { flag: "🇪🇺", name: "Euro" },
+  USD: { flag: "🇺🇸", name: "US Dollar" },
+  VND: { flag: "🇻🇳", name: "Vietnamese Dong" },
+  PLN: { flag: "🇵🇱", name: "Polish Zloty" },
+  GBP: { flag: "🇬🇧", name: "British Pound" },
+};
+
 export const NAV_ITEMS = [
   { label: "Dashboard", href: "/dashboard", icon: "LayoutDashboard" as const },
   { label: "Transactions", href: "/transactions", icon: "ArrowLeftRight" as const },

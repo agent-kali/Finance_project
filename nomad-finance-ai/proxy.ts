@@ -6,6 +6,7 @@ const DEMO_COOKIE = "demo_mode";
 const AUTH_ROUTES = ["/login", "/register"] as const;
 const PROTECTED_ROUTES = [
   "/dashboard",
+  "/onboarding",
   "/transactions",
   "/wallets",
   "/ai-advisor",

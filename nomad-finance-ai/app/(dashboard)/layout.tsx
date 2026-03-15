@@ -42,6 +42,14 @@ export default async function DashboardLayout({
     redirect("/login");
   }
 
+  const { count } = await supabase
+    .from("wallets")
+    .select("id", { count: "exact", head: true });
+
+  if (count !== null && count === 0) {
+    redirect("/onboarding");
+  }
+
   const dehydratedState = await prefetchDashboardData(supabase);
 
   return (

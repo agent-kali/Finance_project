@@ -34,6 +34,10 @@ import { Button } from "@/components/ui/button";
 import { useWallets } from "@/lib/hooks/use-wallets";
 import { useEffectiveDefaultWalletId } from "@/lib/default-wallet-context";
 import {
+  formatAmountDisplay,
+  parseAmountInput,
+} from "@/lib/currency";
+import {
   EXPENSE_CATEGORIES,
   INCOME_CATEGORIES,
   CURRENCY_SYMBOLS,
@@ -46,29 +50,6 @@ import {
 import type { Transaction } from "@/types/database.types";
 import { Loader2, Wallet } from "lucide-react";
 import Link from "next/link";
-
-/** Format number with period as thousands separator (e.g. 1000000 → "1.000.000") */
-function formatAmountDisplay(value: number): string {
-  if (!Number.isFinite(value) || value < 0) return "";
-  if (value === 0) return "";
-  const [intPart, decPart] = value.toFixed(2).split(".");
-  const formattedInt = intPart.replace(/\B(?=(\d{3})+(?!\d))/g, ".");
-  return decPart && parseFloat(decPart) > 0
-    ? `${formattedInt},${decPart.replace(/0+$/, "") || "0"}`
-    : formattedInt;
-}
-
-/** Parse formatted amount string back to number */
-function parseAmountInput(input: string): number {
-  const trimmed = input.replace(/\s/g, "");
-  if (!trimmed) return 0;
-  const withDecimal =
-    trimmed.indexOf(",") >= 0
-      ? trimmed.replace(/\./g, "").replace(",", ".")
-      : trimmed.replace(/\./g, "");
-  const num = parseFloat(withDecimal);
-  return Number.isNaN(num) ? 0 : num;
-}
 
 const transactionSchema = z.object({
   type: z.enum(["income", "expense"]),

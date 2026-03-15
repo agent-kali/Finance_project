@@ -1,0 +1,6 @@
+{"sessionId":"749418","location":"onboarding/page.tsx:handleWalletSubmit","message":"handleWalletSubmit entered","data":{"selectedCurrency":"EUR","balance":100},"timestamp":1773579137652,"hypothesisId":"A"}
+{"sessionId":"749418","location":"onboarding/page.tsx:handleWalletSubmit","message":"createWallet succeeded, before router","data":{},"timestamp":1773579138895,"hypothesisId":"C"}
+{"sessionId":"749418","location":"onboarding/page.tsx:handleWalletSubmit","message":"handleWalletSubmit finally","data":{},"timestamp":1773579138897,"hypothesisId":"D"}
+{"sessionId":"749418","location":"onboarding/page.tsx:handleWalletSubmit","message":"handleWalletSubmit entered","data":{"selectedCurrency":"EUR","balance":100},"timestamp":1773579144513,"hypothesisId":"A"}
+{"sessionId":"749418","location":"onboarding/page.tsx:handleWalletSubmit","message":"createWallet catch","data":{"errMsg":"Error: duplicate key value violates unique constraint \"wallets_user_id_currency_key\"","errName":"Error"},"timestamp":1773579146253,"hypothesisId":"B"}
+{"sessionId":"749418","location":"onboarding/page.tsx:handleWalletSubmit","message":"handleWalletSubmit finally","data":{},"timestamp":1773579146254,"hypothesisId":"D"}
