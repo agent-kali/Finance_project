@@ -174,7 +174,7 @@ export default function OnboardingPage() {
                 <p className="mt-2 text-muted-foreground">
                   Pick your primary currency. You can always change this later.
                 </p>
-                <div className="mt-6 grid gap-3 sm:grid-cols-2">
+                <div className="mt-6 grid grid-cols-1 gap-3">
                   {ONBOARDING_CURRENCIES.map((code) => {
                     const { flag, name } = CURRENCY_DISPLAY[code];
                     const isSelected = selectedCurrency === code;
@@ -192,12 +192,12 @@ export default function OnboardingPage() {
                         aria-pressed={isSelected}
                         aria-label={`Select ${name}`}
                       >
-                        <span className="text-2xl" aria-hidden>
+                        <span className="shrink-0 text-2xl" aria-hidden>
                           {flag}
                         </span>
-                        <div>
+                        <div className="min-w-0 shrink">
                           <span className="font-medium">{code}</span>
-                          <span className="ml-2 text-muted-foreground">
+                          <span className="ml-2 text-muted-foreground whitespace-nowrap">
                             {name}
                           </span>
                         </div>
@@ -263,7 +263,7 @@ export default function OnboardingPage() {
                       id="balance-input"
                       type="text"
                       inputMode="decimal"
-                      placeholder="0.00"
+                      placeholder={selectedCurrency === "VND" ? "0" : "0.00"}
                       aria-required
                       className="mt-2 min-h-[44px]"
                       value={balanceInput}
