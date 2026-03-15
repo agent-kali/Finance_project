@@ -1,22 +1,11 @@
 "use client";
 
-import { useState } from "react";
-import { useRouter } from "next/navigation";
-import { useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { z } from "zod";
+import { useState, useRef } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import { Brain, ArrowRight, Loader2 } from "lucide-react";
+import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import {
-  Form,
-  FormControl,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-} from "@/components/ui/form";
 import { createWallet } from "@/app/actions/wallets";
 import { updateProfilePrimaryCurrency } from "@/app/actions/profiles";
 import {
@@ -25,14 +14,24 @@ import {
   type OnboardingCurrency,
 } from "@/lib/constants";
 import { useReducedMotion } from "@/lib/hooks/use-reduced-motion";
-import { formatAmountDisplay, parseAmountInput } from "@/lib/currency";
 import { cn } from "@/lib/utils";
 
-const walletSchema = z.object({
-  balance: z.number().min(0, "Balance cannot be negative"),
-});
+/** Allow only digits and one decimal separator (dot or comma) while typing */
+function sanitizeBalanceInput(value: string): string {
+  const parts = value.replace(",", ".").split(".");
+  if (parts.length > 2) return value.slice(0, -1);
+  const intPart = (parts[0] ?? "").replace(/\D/g, "");
+  const decPart = (parts[1] ?? "").replace(/\D/g, "");
+  if (decPart.length > 2) return intPart + "." + decPart.slice(0, 2);
+  return parts.length === 1 ? intPart : intPart + "." + decPart;
+}
 
-type WalletValues = z.infer<typeof walletSchema>;
+function parseBalance(value: string): number {
+  const trimmed = value.trim().replace(",", ".");
+  if (!trimmed) return 0;
+  const num = parseFloat(trimmed);
+  return Number.isNaN(num) || num < 0 ? 0 : num;
+}
 
 const slideVariants = {
   enter: (direction: number) => ({
@@ -56,12 +55,9 @@ export default function OnboardingPage() {
     useState<OnboardingCurrency | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const prefersReducedMotion = useReducedMotion();
-  const router = useRouter();
 
-  const form = useForm<WalletValues>({
-    resolver: zodResolver(walletSchema),
-    defaultValues: { balance: 0 as number },
-  });
+  const [balanceInput, setBalanceInput] = useState("");
+  const submittingRef = useRef(false);
 
   const goNext = (dir: number) => {
     setDirection(dir);
@@ -79,83 +75,38 @@ export default function OnboardingPage() {
     try {
       await updateProfilePrimaryCurrency(selectedCurrency);
       goNext(1);
-    } catch {
-      // TODO: toast error
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "Something went wrong");
     } finally {
       setIsSubmitting(false);
     }
   }
 
-  async function handleWalletSubmit(values: WalletValues) {
+  async function handleCreateWallet() {
     if (!selectedCurrency) return;
+    if (submittingRef.current) return;
+    submittingRef.current = true;
     setIsSubmitting(true);
-    // #region agent log
-    fetch("http://127.0.0.1:7859/ingest/b30ba92e-e835-4f4c-893f-e95fcfbd0e5b", {
-      method: "POST",
-      headers: { "Content-Type": "application/json", "X-Debug-Session-Id": "749418" },
-      body: JSON.stringify({
-        sessionId: "749418",
-        location: "onboarding/page.tsx:handleWalletSubmit",
-        message: "handleWalletSubmit entered",
-        data: { selectedCurrency, balance: values.balance },
-        timestamp: Date.now(),
-        hypothesisId: "A",
-      }),
-    }).catch(() => {});
-    // #endregion
+
+    const balance = parseBalance(balanceInput);
     try {
-      await createWallet(selectedCurrency, { balance: values.balance });
-      // #region agent log
-      fetch("http://127.0.0.1:7859/ingest/b30ba92e-e835-4f4c-893f-e95fcfbd0e5b", {
-        method: "POST",
-        headers: { "Content-Type": "application/json", "X-Debug-Session-Id": "749418" },
-        body: JSON.stringify({
-          sessionId: "749418",
-          location: "onboarding/page.tsx:handleWalletSubmit",
-          message: "createWallet succeeded, before router",
-          data: {},
-          timestamp: Date.now(),
-          hypothesisId: "C",
-        }),
-      }).catch(() => {});
-      // #endregion
-      router.push("/dashboard");
-      router.refresh();
+      await createWallet(selectedCurrency, { balance });
+      window.location.href = "/dashboard";
     } catch (err) {
-      // #region agent log
-      fetch("http://127.0.0.1:7859/ingest/b30ba92e-e835-4f4c-893f-e95fcfbd0e5b", {
-        method: "POST",
-        headers: { "Content-Type": "application/json", "X-Debug-Session-Id": "749418" },
-        body: JSON.stringify({
-          sessionId: "749418",
-          location: "onboarding/page.tsx:handleWalletSubmit",
-          message: "createWallet catch",
-          data: { errMsg: String(err), errName: err instanceof Error ? err.name : "unknown" },
-          timestamp: Date.now(),
-          hypothesisId: "B",
-        }),
-      }).catch(() => {});
-      // #endregion
-      form.setError("balance", {
-        message: "Something went wrong. Please try again.",
-      });
+      console.error("[onboarding] createWallet failed:", err);
+      const msg =
+        err instanceof Error
+          ? err.message.includes("duplicate key")
+            ? "You already have a wallet for this currency. Go to dashboard."
+            : err.message
+          : "Something went wrong. Please try again.";
+      toast.error(msg);
       setIsSubmitting(false);
-    } finally {
-      // #region agent log
-      fetch("http://127.0.0.1:7859/ingest/b30ba92e-e835-4f4c-893f-e95fcfbd0e5b", {
-        method: "POST",
-        headers: { "Content-Type": "application/json", "X-Debug-Session-Id": "749418" },
-        body: JSON.stringify({
-          sessionId: "749418",
-          location: "onboarding/page.tsx:handleWalletSubmit",
-          message: "handleWalletSubmit finally",
-          data: {},
-          timestamp: Date.now(),
-          hypothesisId: "D",
-        }),
-      }).catch(() => {});
-      // #endregion
-      setIsSubmitting(false);
+      submittingRef.current = false;
+      // Duplicate key = wallet exists, redirect to dashboard (onboarding effectively done)
+      if (err instanceof Error && err.message.includes("duplicate key")) {
+        window.location.href = "/dashboard";
+      }
     }
   }
 
@@ -300,77 +251,58 @@ export default function OnboardingPage() {
                 <p className="mt-2 text-muted-foreground">
                   This is where your money lives. Add more wallets anytime.
                 </p>
-                <Form {...form}>
-                  <form
-                    onSubmit={form.handleSubmit(handleWalletSubmit)}
-                    className="mt-6 space-y-4"
-                  >
-                    <FormField
-                      control={form.control}
-                      name="balance"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>
-                            {CURRENCY_DISPLAY[selectedCurrency].name} balance
-                          </FormLabel>
-                          <FormControl>
-                            <Input
-                              type="text"
-                              inputMode="decimal"
-                              placeholder="0.00"
-                              aria-required
-                              className="min-h-[44px]"
-                              value={
-                                Number.isNaN(field.value) || field.value === 0
-                                  ? ""
-                                  : formatAmountDisplay(field.value)
-                              }
-                              onChange={(e) => {
-                                const num = parseAmountInput(e.target.value);
-                                field.onChange(num);
-                              }}
-                              onBlur={(e) => {
-                                field.onBlur();
-                                const num = parseAmountInput(e.target.value);
-                                field.onChange(num);
-                              }}
-                            />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
+                <div className="mt-6 space-y-4">
+                  <div>
+                    <label
+                      htmlFor="balance-input"
+                      className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+                    >
+                      {CURRENCY_DISPLAY[selectedCurrency].name} balance
+                    </label>
+                    <Input
+                      id="balance-input"
+                      type="text"
+                      inputMode="decimal"
+                      placeholder="0.00"
+                      aria-required
+                      className="mt-2 min-h-[44px]"
+                      value={balanceInput}
+                      onChange={(e) =>
+                        setBalanceInput(sanitizeBalanceInput(e.target.value))
+                      }
                     />
-                    <p className="text-sm text-muted-foreground">
-                      Currency: {selectedCurrency} —{" "}
-                      {CURRENCY_DISPLAY[selectedCurrency].name}
-                    </p>
-                    <div className="mt-8 flex gap-3">
-                      <Button
-                        type="button"
-                        variant="outline"
-                        onClick={goPrev}
-                        disabled={isSubmitting}
-                        className="min-h-[44px]"
-                      >
-                        Back
-                      </Button>
-                      <Button
-                        type="submit"
-                        className="min-h-[44px] flex-1 gap-2"
-                        disabled={isSubmitting}
-                      >
-                        {isSubmitting ? (
-                          <Loader2 className="h-4 w-4 animate-spin" />
-                        ) : (
-                          <>
-                            Create wallet & go to dashboard
-                            <ArrowRight className="h-4 w-4" />
-                          </>
-                        )}
-                      </Button>
-                    </div>
-                  </form>
-                </Form>
+                  </div>
+                  <p className="text-sm text-muted-foreground">
+                    Currency: {selectedCurrency} —{" "}
+                    {CURRENCY_DISPLAY[selectedCurrency].name}
+                  </p>
+                  <div className="mt-8 flex gap-3">
+                    <Button
+                      type="button"
+                      variant="outline"
+                      onClick={goPrev}
+                      disabled={isSubmitting}
+                      className="min-h-[44px]"
+                    >
+                      Back
+                    </Button>
+                    <Button
+                      type="button"
+                      className="min-h-[44px] flex-1 gap-2"
+                      disabled={isSubmitting}
+                      onClick={handleCreateWallet}
+                    >
+                      {isSubmitting ? (
+                        <Loader2 className="h-4 w-4 animate-spin" />
+                      ) : (
+                        <>
+                          Create wallet & go to dashboard
+                          <ArrowRight className="h-4 w-4" />
+                        </>
+                      )}
+                    </Button>
+                  </div>
+                </div>
               </div>
             </motion.div>
           )}
