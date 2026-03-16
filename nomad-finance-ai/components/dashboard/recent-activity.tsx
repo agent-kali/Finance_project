@@ -1,9 +1,8 @@
 "use client";
 
 import { useMemo } from "react";
-import Link from "next/link";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
+import { EmptyState } from "@/components/ui/empty-state";
 import { cn } from "@/lib/utils";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useTransactions } from "@/lib/hooks/use-transactions";
@@ -12,6 +11,7 @@ import { useTimeRange } from "@/lib/time-range-context";
 import { convertCurrency, formatCurrency } from "@/lib/currency";
 import type { SupportedCurrency } from "@/lib/constants";
 import type { Transaction } from "@/types/database.types";
+import { Activity } from "lucide-react";
 
 function formatTime(tx: Transaction): string {
   const d = new Date(tx.date);
@@ -85,15 +85,14 @@ export function RecentActivity() {
             Recent Activity
           </CardTitle>
         </CardHeader>
-        <CardContent>
-          <div className="flex flex-col items-center justify-center py-6">
-            <p className="text-center text-sm text-muted-foreground">
-              No recent transactions
-            </p>
-            <Button variant="link" asChild className="mt-2">
-              <Link href="/transactions">Add transaction</Link>
-            </Button>
-          </div>
+        <CardContent className="p-0">
+          <EmptyState
+            icon={Activity}
+            heading="No recent activity"
+            subtext="Your latest transactions will appear here"
+            ctaLabel="Add transaction"
+            ctaHref="/transactions?action=create"
+          />
         </CardContent>
       </Card>
     );

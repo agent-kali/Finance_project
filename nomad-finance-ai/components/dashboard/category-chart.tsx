@@ -6,13 +6,11 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { useTransactions } from "@/lib/hooks/use-transactions";
 import { useDisplayCurrency } from "@/lib/hooks/use-profile";
 import { useTimeRange } from "@/lib/time-range-context";
-import {
-  getDateRange,
-  getPeriodLabel,
-  getEmptyMessage,
-} from "@/lib/date-utils";
+import { getDateRange, getPeriodLabel } from "@/lib/date-utils";
 import { convertCurrency, formatCurrency } from "@/lib/currency";
 import type { SupportedCurrency } from "@/lib/constants";
+import { EmptyState } from "@/components/ui/empty-state";
+import { PieChart } from "lucide-react";
 
 const COLORS = [
   "#22d3ee",
@@ -85,9 +83,11 @@ export function CategoryChart() {
       </CardHeader>
       <CardContent>
         {listData.length === 0 ? (
-          <p className="flex min-h-[200px] items-center justify-center text-sm text-muted-foreground">
-            {getEmptyMessage(timeRange)}
-          </p>
+          <EmptyState
+            icon={PieChart}
+            heading="No spending data"
+            className="min-h-[200px]"
+          />
         ) : (
           <div
             role="img"

@@ -35,6 +35,7 @@ import {
 } from "@/lib/constants";
 import { cn } from "@/lib/utils";
 import { createWallet, deleteWallet } from "@/app/actions/wallets";
+import { EmptyState } from "@/components/ui/empty-state";
 import { DefaultWalletSelector } from "@/components/ui/default-wallet-selector";
 import { Wallet, Plus, Trash2, Loader2, Star } from "lucide-react";
 import type { Wallet as WalletType } from "@/types/database.types";
@@ -244,14 +245,14 @@ export function WalletsContent() {
         </div>
       ) : (
         <Card className="glass-card">
-          <CardContent className="flex flex-col items-center justify-center py-12">
-            <Wallet className="mb-4 h-12 w-12 text-muted-foreground/50" />
-            <p className="text-muted-foreground">No wallets yet</p>
-            {!isDemo && (
-              <Button variant="link" onClick={() => setCreateOpen(true)} className="mt-2">
-                Create your first wallet
-              </Button>
-            )}
+          <CardContent className="p-0">
+            <EmptyState
+              icon={Wallet}
+              heading="No wallets yet"
+              subtext="Create a wallet for each currency you use"
+              ctaLabel={!isDemo ? "Create wallet" : undefined}
+              onCtaClick={!isDemo ? () => setCreateOpen(true) : undefined}
+            />
           </CardContent>
         </Card>
       )}

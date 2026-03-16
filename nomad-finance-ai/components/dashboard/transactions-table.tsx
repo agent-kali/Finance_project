@@ -37,6 +37,7 @@ import {
 } from "@/lib/constants";
 import { cn } from "@/lib/utils";
 import { deleteTransaction } from "@/app/actions/transactions";
+import { EmptyState } from "@/components/ui/empty-state";
 import { TransactionModal } from "./transaction-modal";
 import type { Transaction } from "@/types/database.types";
 import {
@@ -207,13 +208,13 @@ export function TransactionsTable() {
         <Card className="glass-card glass-card-hover">
           <CardContent className="p-0">
             {filtered.length === 0 ? (
-              <div className="flex flex-col items-center justify-center py-12">
-                <ArrowLeftRight className="mb-4 h-12 w-12 text-muted-foreground/50" />
-                <p className="text-muted-foreground">No transactions found</p>
-                <Button variant="link" onClick={handleAdd} className="mt-2">
-                  Add your first transaction
-                </Button>
-              </div>
+              <EmptyState
+                icon={ArrowLeftRight}
+                heading="No transactions yet"
+                subtext="Add your first transaction to start tracking your finances"
+                ctaLabel="Add transaction"
+                onCtaClick={handleAdd}
+              />
             ) : (
               <div className="overflow-x-auto">
                 <table className="w-full text-sm">

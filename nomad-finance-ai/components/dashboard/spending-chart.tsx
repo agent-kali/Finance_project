@@ -23,6 +23,8 @@ import { useReducedMotion } from "@/lib/hooks/use-reduced-motion";
 import { getEmptyMessage } from "@/lib/date-utils";
 import { convertCurrency, formatCurrency } from "@/lib/currency";
 import type { SupportedCurrency } from "@/lib/constants";
+import { EmptyState } from "@/components/ui/empty-state";
+import { BarChart3 } from "lucide-react";
 
 const TODAY_BAR_COLOR = "#22d3ee";
 const DAILY_AVG_BAR_COLOR = "#f59e0b";
@@ -283,9 +285,12 @@ export function SpendingChart() {
             <p className="sr-only">{chartSummary}</p>
           )}
           {!hasAnyData ? (
-            <p className="flex h-full items-center justify-center text-sm text-muted-foreground">
-              {getEmptyMessage(timeRange)}
-            </p>
+            <EmptyState
+              icon={BarChart3}
+              heading="No spending data"
+              subtext={getEmptyMessage(timeRange)}
+              className="min-h-[300px]"
+            />
           ) : width > 0 && height > 0 && chartData.length > 0 ? (
             <>
               {chartType === "today" && (

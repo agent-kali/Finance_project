@@ -1,7 +1,6 @@
 "use client";
 
 import { useMemo } from "react";
-import Link from "next/link";
 import {
   BarChart,
   Bar,
@@ -13,7 +12,6 @@ import {
 } from "recharts";
 import { useTheme } from "next-themes";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useWallets } from "@/lib/hooks/use-wallets";
 import { useChartDimensions } from "@/lib/hooks/use-chart-dimensions";
@@ -21,6 +19,8 @@ import { useDisplayCurrency } from "@/lib/hooks/use-profile";
 import { useReducedMotion } from "@/lib/hooks/use-reduced-motion";
 import { convertCurrency, formatCurrency } from "@/lib/currency";
 import { CURRENCY_SYMBOLS, type SupportedCurrency } from "@/lib/constants";
+import { EmptyState } from "@/components/ui/empty-state";
+import { Wallet } from "lucide-react";
 
 const CURRENCY_COLORS: Record<string, string> = {
   USD: "#22d3ee",
@@ -80,14 +80,12 @@ export function WalletChart() {
       </CardHeader>
       <CardContent>
         {chartData.length === 0 ? (
-          <div className="flex h-[300px] flex-col items-center justify-center gap-2">
-            <p className="text-center text-sm text-muted-foreground">
-              No wallets yet
-            </p>
-            <Button variant="link" asChild>
-              <Link href="/wallets">Create a wallet</Link>
-            </Button>
-          </div>
+          <EmptyState
+            icon={Wallet}
+            heading="No wallets yet"
+            subtext="Create a wallet to see your balance breakdown"
+            className="min-h-[300px]"
+          />
         ) : (
           <div
             ref={ref}

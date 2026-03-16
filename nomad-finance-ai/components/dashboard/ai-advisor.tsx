@@ -5,7 +5,8 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Brain, Send, Sparkles, AlertCircle, Lock, BarChart3, PieChart, TrendingUp, Globe } from "lucide-react";
+import { Brain, Send, AlertCircle, Lock } from "lucide-react";
+import { EmptyState } from "@/components/ui/empty-state";
 import { cn } from "@/lib/utils";
 import { useDemoMode } from "@/lib/demo-context";
 
@@ -113,12 +114,6 @@ export function AiAdvisor() {
     [messages, isStreaming]
   );
 
-  function handleAnalyze() {
-    sendMessage(
-      "Analyze my recent financial data and give me actionable advice on my spending patterns, savings opportunities, and any tax considerations as a digital nomad."
-    );
-  }
-
   function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     sendMessage(input);
@@ -160,65 +155,22 @@ export function AiAdvisor() {
                 </div>
               </div>
             ) : (
-              <div className="flex w-full max-w-lg flex-col items-center gap-8">
-                {/* Illustration area */}
-                <div className="flex w-full items-center justify-center rounded-3xl border border-zinc-200 bg-white p-5 shadow-sm dark:rounded-2xl dark:border-zinc-700 dark:bg-zinc-900/70 dark:backdrop-blur-sm">
-                  <div className="flex items-center justify-center gap-4">
-                    <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl border border-zinc-100 bg-white p-3 text-teal-600 shadow-sm transition-all hover:bg-teal-50 hover:shadow dark:border-zinc-600 dark:bg-background/80 dark:text-primary dark:shadow-lg dark:shadow-cyan-500/30 dark:hover:bg-background/80 dark:hover:shadow-lg dark:hover:shadow-cyan-500/30">
-                      <BarChart3 className="h-6 w-6" />
-                    </div>
-                    <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl border border-zinc-100 bg-white p-3 text-teal-600 shadow-sm transition-all hover:bg-teal-50 hover:shadow dark:border-zinc-600 dark:bg-background/80 dark:text-primary dark:shadow-lg dark:shadow-cyan-500/30 dark:hover:bg-background/80 dark:hover:shadow-lg dark:hover:shadow-cyan-500/30">
-                      <PieChart className="h-6 w-6" />
-                    </div>
-                    <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl border border-zinc-100 bg-white p-3 text-teal-600 shadow-sm transition-all hover:bg-teal-50 hover:shadow dark:border-zinc-600 dark:bg-background/80 dark:text-primary dark:shadow-lg dark:shadow-cyan-500/30 dark:hover:bg-background/80 dark:hover:shadow-lg dark:hover:shadow-cyan-500/30">
-                      <TrendingUp className="h-6 w-6" />
-                    </div>
-                    <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl border border-zinc-100 bg-white p-3 text-teal-600 shadow-sm transition-all hover:bg-teal-50 hover:shadow dark:border-zinc-600 dark:bg-background/80 dark:text-primary dark:shadow-lg dark:shadow-cyan-500/30 dark:hover:bg-background/80 dark:hover:shadow-lg dark:hover:shadow-cyan-500/30">
-                      <Globe className="h-6 w-6" />
-                    </div>
-                  </div>
-                </div>
-
-                {/* Copy and CTA */}
-                <div className="flex flex-col items-center gap-6 text-center">
-                  <div className="rounded-2xl border border-primary/20 bg-primary/5 p-5 shadow-sm dark:border-primary/30 dark:bg-primary/10">
-                    <Sparkles className="h-9 w-9 text-primary" />
-                  </div>
-                  <div className="space-y-2">
-                    <h3 className="text-lg font-semibold">Financial Insights</h3>
-                    <p className="max-w-sm text-sm text-muted-foreground">
-                      Get personalized financial advice based on your actual
-                      transaction data. Ask about spending patterns, savings, or EU
-                      tax considerations.
-                    </p>
-                  </div>
-                  <Button onClick={handleAnalyze} disabled={isStreaming}>
-                    <Sparkles className="mr-2 h-4 w-4" />
-                    Analyze My Finances
-                  </Button>
-
-                  {/* Example prompt suggestions */}
-                  <div className="flex flex-wrap justify-center gap-2 pt-2">
-                    {[
-                      "Analyze my spending patterns",
-                      "Find savings opportunities",
-                      "EU tax considerations for nomads",
-                      "Budget recommendations",
-                    ].map((prompt) => (
-                      <button
-                        key={prompt}
-                        type="button"
-                        onClick={() => sendMessage(prompt)}
-                        disabled={isStreaming}
-                        className={cn(
-                          "rounded-xl border border-border/60 bg-muted/50 px-4 py-2.5 text-sm text-muted-foreground shadow-sm transition-colors hover:border-primary/30 hover:bg-primary/5 hover:text-foreground disabled:pointer-events-none disabled:opacity-50 dark:border-border/40 dark:bg-muted/30 dark:hover:border-primary/40 dark:hover:bg-primary/10"
-                        )}
-                      >
-                        {prompt}
-                      </button>
-                    ))}
-                  </div>
-                </div>
+              <div className="flex h-full w-full flex-col items-center justify-center">
+                <EmptyState
+                  icon={Brain}
+                  heading="Your AI financial advisor"
+                  subtext="Ask me anything about your spending, savings, or financial goals"
+                  iconSize="large"
+                  iconClassName="text-primary"
+                  suggestionChips={[
+                    "Analyze my spending this month",
+                    "How is my savings rate?",
+                    "Where can I cut expenses?",
+                  ]}
+                  onChipClick={sendMessage}
+                  chipDisabled={isStreaming}
+                  className="flex-1 min-h-0 w-full py-8"
+                />
               </div>
             )}
           </div>
