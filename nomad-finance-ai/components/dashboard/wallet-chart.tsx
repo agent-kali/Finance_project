@@ -65,7 +65,7 @@ export function WalletChart() {
           <Skeleton className="h-5 w-48" />
         </CardHeader>
         <CardContent>
-          <Skeleton className="h-[300px] w-full rounded-lg" />
+          <Skeleton className="min-h-[300px] w-full rounded-lg" />
         </CardContent>
       </Card>
     );

@@ -22,7 +22,7 @@ const SpendingChart = dynamic(
           <Skeleton className="h-5 w-40" />
         </CardHeader>
         <CardContent>
-          <Skeleton className="h-[280px] w-full rounded-lg" />
+          <Skeleton className="min-h-[300px] w-full rounded-lg" />
         </CardContent>
       </Card>
     ),
@@ -42,7 +42,7 @@ const CategoryChart = dynamic(
           <Skeleton className="h-5 w-40" />
         </CardHeader>
         <CardContent>
-          <Skeleton className="h-[280px] w-full rounded-lg" />
+          <Skeleton className="min-h-[300px] w-full rounded-lg" />
         </CardContent>
       </Card>
     ),
@@ -62,7 +62,7 @@ const WalletChart = dynamic(
           <Skeleton className="h-5 w-40" />
         </CardHeader>
         <CardContent>
-          <Skeleton className="h-[200px] w-full rounded-lg" />
+          <Skeleton className="min-h-[300px] w-full rounded-lg" />
         </CardContent>
       </Card>
     ),

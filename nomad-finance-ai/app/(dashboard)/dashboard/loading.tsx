@@ -14,7 +14,7 @@ export default function DashboardLoading() {
 
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
         {Array.from({ length: 4 }).map((_, i) => (
-          <Card key={i} className="glass-card">
+          <Card key={i} className="glass-card min-h-[120px]">
             <CardHeader className="pb-2">
               <Skeleton className="h-3 w-24" />
             </CardHeader>
@@ -29,7 +29,7 @@ export default function DashboardLoading() {
         ))}
       </div>
 
-      <Card className="glass-card">
+      <Card className="glass-card min-h-[280px]">
         <CardHeader>
           <Skeleton className="h-5 w-36" />
         </CardHeader>
@@ -38,11 +38,12 @@ export default function DashboardLoading() {
             {Array.from({ length: 5 }).map((_, i) => (
               <li
                 key={i}
-                className="flex items-center gap-4 py-3 first:pt-0 last:pb-0"
+                className="flex flex-wrap items-center gap-x-4 gap-y-1 py-3 first:pt-0 last:pb-0"
               >
-                <Skeleton className="h-10 w-10 shrink-0 rounded-full" />
-                <Skeleton className="h-4 flex-1 max-w-[200px]" />
-                <Skeleton className="h-5 w-16 shrink-0" />
+                <Skeleton className="h-4 flex-1 min-w-0 max-w-[200px]" />
+                <Skeleton className="h-5 w-16 shrink-0 rounded-md" />
+                <Skeleton className="h-4 w-12 shrink-0" />
+                <Skeleton className="h-4 w-14 shrink-0" />
               </li>
             ))}
           </ul>
@@ -55,7 +56,7 @@ export default function DashboardLoading() {
             <Skeleton className="h-5 w-40" />
           </CardHeader>
           <CardContent>
-            <Skeleton className="h-[280px] w-full rounded-lg" />
+            <Skeleton className="min-h-[300px] w-full rounded-lg" />
           </CardContent>
         </Card>
         <Card className="glass-card">
@@ -63,16 +64,7 @@ export default function DashboardLoading() {
             <Skeleton className="h-5 w-40" />
           </CardHeader>
           <CardContent>
-            <div className="space-y-3">
-              {Array.from({ length: 5 }).map((_, i) => (
-                <div key={i} className="flex min-w-0 items-center gap-2 sm:gap-3">
-                  <Skeleton className="h-2.5 w-2.5 shrink-0 rounded-full" />
-                  <Skeleton className="h-4 flex-1 max-w-[120px] sm:max-w-[200px]" />
-                  <Skeleton className="h-1.5 w-12 shrink-0 rounded-full sm:w-20" />
-                  <Skeleton className="h-4 w-14 shrink-0 sm:w-20" />
-                </div>
-              ))}
-            </div>
+            <Skeleton className="min-h-[300px] w-full rounded-lg" />
           </CardContent>
         </Card>
       </div>
@@ -82,7 +74,7 @@ export default function DashboardLoading() {
           <Skeleton className="h-5 w-40" />
         </CardHeader>
         <CardContent>
-          <Skeleton className="h-[200px] w-full rounded-lg" />
+          <Skeleton className="min-h-[300px] w-full rounded-lg" />
         </CardContent>
       </Card>
     </div>

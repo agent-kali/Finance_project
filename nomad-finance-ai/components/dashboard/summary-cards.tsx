@@ -25,7 +25,6 @@ import {
   TrendingDown,
   PiggyBank,
 } from "lucide-react";
-import { DefaultWalletSelector } from "@/components/ui/default-wallet-selector";
 import { cn } from "@/lib/utils";
 
 type AccentKey = "cyan" | "emerald" | "amber" | "violet";
@@ -59,14 +58,6 @@ const ICON_COLORS: Record<AccentKey, string> = {
 
 const SAVINGS_GOAL_PCT = 30;
 
-function formatRatesDate(dateStr: string | null): string {
-  if (!dateStr) return "";
-  const d = new Date(dateStr);
-  const today = new Date();
-  if (d.toDateString() === today.toDateString()) return "Rates updated today";
-  return `Rates from ${d.toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })}`;
-}
-
 export function SummaryCards() {
   const { data: wallets, isLoading: walletsLoading } = useWallets();
   const { data: transactions, isLoading: txLoading } = useTransactions();
@@ -82,7 +73,7 @@ export function SummaryCards() {
     return (
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4 items-stretch min-w-0">
         {Array.from({ length: 4 }).map((_, i) => (
-          <Card key={i} className="glass-card glass-card-hover flex flex-col h-full min-h-0">
+          <Card key={i} className="glass-card glass-card-hover flex flex-col h-full min-h-[120px]">
             <CardHeader className="flex flex-row items-center justify-between pb-2">
               <Skeleton className="h-3 w-24" />
               <Skeleton className="h-5 w-5 rounded-full" />
@@ -162,7 +153,6 @@ export function SummaryCards() {
     subtitle: `Across ${wallets?.length ?? 0} wallets`,
     icon: Banknote,
     accent: "cyan" as const,
-    showDefaultWalletSelector: true,
   };
 
   const otherCards = [
@@ -172,7 +162,6 @@ export function SummaryCards() {
       subtitle: `${rangeTransactions.filter((t) => t.type === "income").length} transactions`,
       icon: TrendingUp,
       accent: "emerald" as const,
-      showDefaultWalletSelector: false,
     },
     {
       title: `Expenses ${periodLabel.toLowerCase()}`,
@@ -180,7 +169,6 @@ export function SummaryCards() {
       subtitle: `${rangeTransactions.filter((t) => t.type === "expense").length} transactions`,
       icon: TrendingDown,
       accent: "amber" as const,
-      showDefaultWalletSelector: false,
     },
     {
       title: "Savings rate",
@@ -188,7 +176,6 @@ export function SummaryCards() {
       subtitle: getSavingsSubtitle(timeRange, incomeInRange > 0),
       icon: PiggyBank,
       accent: "violet" as const,
-      showDefaultWalletSelector: false,
     },
   ];
 
@@ -256,8 +243,8 @@ export function SummaryCards() {
                 </div>
                 <p className="mt-1 text-xs text-muted-foreground">
                   {card.subtitle}
-                  {"showDefaultWalletSelector" in card && card.showDefaultWalletSelector && ratesDate && (
-                    <> • {isTotalBalance ? "Live rates" : formatRatesDate(ratesDate)}</>
+                  {isTotalBalance && ratesDate && (
+                    <> • Live rates</>
                   )}
                 </p>
                 {isIncome && (
@@ -281,12 +268,14 @@ export function SummaryCards() {
                     <p className="mt-1 text-xs text-muted-foreground">Toward {SAVINGS_GOAL_PCT}% goal</p>
                   </div>
                 )}
-                {"showDefaultWalletSelector" in card && card.showDefaultWalletSelector && (wallets?.length ?? 0) > 0 && (
-                  <div className="mt-3">
-                    <DefaultWalletSelector variant="compact" showTooltip={true} />
-                  </div>
+                {isTotalBalance && (wallets?.length ?? 0) > 0 && (
+                  <Button variant="link" asChild className="mt-3 h-auto p-0 text-xs font-medium text-muted-foreground hover:text-foreground">
+                    <Link href="/wallets">
+                      {wallets!.length === 1 ? "1 wallet" : `${wallets!.length} wallets`}
+                    </Link>
+                  </Button>
                 )}
-                {"showDefaultWalletSelector" in card && card.showDefaultWalletSelector && (wallets?.length ?? 0) === 0 && (
+                {isTotalBalance && (wallets?.length ?? 0) === 0 && (
                   <Button variant="link" asChild className="mt-2 h-auto p-0 text-xs font-medium text-muted-foreground hover:text-foreground">
                     <Link href="/wallets">Create a wallet to get started</Link>
                   </Button>

@@ -18,7 +18,6 @@ import { Separator } from "@/components/ui/separator";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { CommandPalette, CommandPaletteTrigger } from "@/components/command-palette";
 import { CurrencySelector } from "@/components/ui/currency-selector";
-import { DefaultWalletSelector } from "@/components/ui/default-wallet-selector";
 import { CommandPaletteProvider } from "@/lib/command-palette-context";
 import {
   Brain,
@@ -167,10 +166,10 @@ export function DashboardShell({
           <div className="flex-1" />
 
           {mounted && (
-            <>
-              <DefaultWalletSelector variant="compact" />
+            <div className="flex items-center gap-2">
+              <span className="text-xs text-muted-foreground shrink-0">View in</span>
               <CurrencySelector />
-            </>
+            </div>
           )}
 
           <ThemeToggle />

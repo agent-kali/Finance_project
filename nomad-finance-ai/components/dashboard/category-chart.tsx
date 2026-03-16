@@ -64,11 +64,7 @@ export function CategoryChart() {
           <Skeleton className="h-5 w-48" />
         </CardHeader>
         <CardContent>
-          <div className="space-y-3">
-            {Array.from({ length: 5 }).map((_, i) => (
-              <Skeleton key={i} className="h-8 w-full rounded-md" />
-            ))}
-          </div>
+          <Skeleton className="min-h-[300px] w-full rounded-lg" />
         </CardContent>
       </Card>
     );

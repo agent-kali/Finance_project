@@ -21,7 +21,7 @@ export default function TransactionsLoading() {
 
         <Card className="glass-card glass-card-hover">
           <CardContent className="p-0">
-            <div className="overflow-x-auto">
+            <div className="overflow-x-auto min-h-[400px]">
               <table className="w-full text-sm">
                 <thead>
                   <tr className="border-b text-left">
@@ -44,7 +44,7 @@ export default function TransactionsLoading() {
                   </tr>
                 </thead>
                 <tbody>
-                  {Array.from({ length: 8 }).map((_, i) => (
+                  {Array.from({ length: 6 }).map((_, i) => (
                     <tr key={i} className="border-b last:border-0">
                       <td className="px-4 py-3">
                         <Skeleton className="h-4 w-20" />

@@ -62,16 +62,24 @@ export function RecentActivity() {
 
   if (isLoading) {
     return (
-      <Card className="glass-card">
+      <Card className="glass-card min-h-[280px]">
         <CardHeader>
           <Skeleton className="h-5 w-36" />
         </CardHeader>
         <CardContent>
-          <div className="space-y-2">
+          <ul className="divide-y divide-border/50 space-y-0">
             {Array.from({ length: 5 }).map((_, i) => (
-              <Skeleton key={i} className="h-12 w-full rounded-md" />
+              <li
+                key={i}
+                className="flex flex-wrap items-center gap-x-4 gap-y-1 py-3 first:pt-0 last:pb-0"
+              >
+                <Skeleton className="h-4 flex-1 min-w-0 max-w-[200px]" />
+                <Skeleton className="h-5 w-16 shrink-0 rounded-md" />
+                <Skeleton className="h-4 w-12 shrink-0" />
+                <Skeleton className="h-4 w-14 shrink-0" />
+              </li>
             ))}
-          </div>
+          </ul>
         </CardContent>
       </Card>
     );

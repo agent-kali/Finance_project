@@ -11,7 +11,7 @@ export default function AiAdvisorLoading() {
           <Skeleton className="h-5 w-40" />
         </CardHeader>
 
-        <CardContent className="flex flex-1 flex-col gap-8 overflow-y-auto p-4">
+        <CardContent className="flex flex-1 flex-col gap-8 overflow-y-auto p-4 min-h-[300px]">
           <div className="flex w-full max-w-lg flex-col items-center gap-8">
             <div className="flex w-full items-center justify-center gap-4">
               <Skeleton className="h-10 w-10 shrink-0 rounded-full" />

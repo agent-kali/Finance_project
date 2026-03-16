@@ -9,7 +9,7 @@ export default function SettingsLoading() {
         <Skeleton className="mt-1 h-4 w-64" />
       </div>
 
-      <Card className="glass-card glass-card-hover">
+      <Card className="glass-card glass-card-hover min-h-[120px]">
         <CardHeader>
           <CardTitle>
             <Skeleton className="h-5 w-24" />
@@ -26,7 +26,7 @@ export default function SettingsLoading() {
         </CardContent>
       </Card>
 
-      <Card className="glass-card glass-card-hover">
+      <Card className="glass-card glass-card-hover min-h-[120px]">
         <CardHeader>
           <CardTitle>
             <Skeleton className="h-5 w-28" />

@@ -155,7 +155,7 @@ export function WalletsContent() {
       {isLoading ? (
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
           {Array.from({ length: 3 }).map((_, i) => (
-            <Card key={i} className="glass-card glass-card-hover">
+            <Card key={i} className="glass-card glass-card-hover min-h-[140px]">
               <CardHeader>
                 <Skeleton className="h-5 w-32" />
               </CardHeader>
