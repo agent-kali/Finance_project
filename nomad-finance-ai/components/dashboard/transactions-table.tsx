@@ -28,6 +28,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { useTransactions } from "@/lib/hooks/use-transactions";
 import { useWallets } from "@/lib/hooks/use-wallets";
+import { useIsMobile } from "@/lib/hooks/use-is-mobile";
 import { formatCurrency } from "@/lib/currency";
 import {
   EXPENSE_CATEGORIES,
@@ -39,6 +40,7 @@ import { cn } from "@/lib/utils";
 import { deleteTransaction } from "@/app/actions/transactions";
 import { EmptyState } from "@/components/ui/empty-state";
 import { TransactionModal } from "./transaction-modal";
+import { AddTransactionSheet } from "./add-transaction-sheet";
 import type { Transaction } from "@/types/database.types";
 import {
   Plus,
@@ -61,8 +63,10 @@ export function TransactionsTable() {
   const { data: transactions, isLoading } = useTransactions();
   const { data: wallets } = useWallets();
   const { isDemo } = useDemoMode();
+  const isMobile = useIsMobile();
 
   const [modalOpen, setModalOpen] = useState(false);
+  const [sheetOpen, setSheetOpen] = useState(false);
   const [editingTx, setEditingTx] = useState<Transaction | null>(null);
 
   useEffect(() => {
@@ -70,10 +74,14 @@ export function TransactionsTable() {
       router.replace("/transactions");
       queueMicrotask(() => {
         setEditingTx(null);
-        setModalOpen(true);
+        if (isMobile) {
+          setSheetOpen(true);
+        } else {
+          setModalOpen(true);
+        }
       });
     }
-  }, [searchParams, router]);
+  }, [searchParams, router, isMobile]);
 
   const [filterType, setFilterType] = useState<string>("all");
   const [filterCategory, setFilterCategory] = useState<string>("all");
@@ -134,7 +142,11 @@ export function TransactionsTable() {
 
   function handleAdd() {
     setEditingTx(null);
-    setModalOpen(true);
+    if (isMobile) {
+      setSheetOpen(true);
+    } else {
+      setModalOpen(true);
+    }
   }
 
   if (isLoading) {
@@ -404,6 +416,10 @@ export function TransactionsTable() {
         open={modalOpen}
         onOpenChange={setModalOpen}
         transaction={editingTx}
+      />
+      <AddTransactionSheet
+        open={sheetOpen}
+        onOpenChange={setSheetOpen}
       />
     </>
   );
