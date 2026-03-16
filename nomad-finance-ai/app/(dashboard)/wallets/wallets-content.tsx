@@ -116,13 +116,13 @@ export function WalletsContent() {
   );
 
   return (
-    <div className="space-y-8">
+    <div className="min-w-0 space-y-8">
       <section aria-label="Wallets overview" className="space-y-8">
       <div className="flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
-        <div className="flex flex-wrap items-center gap-3">
-          <h1 className="text-3xl font-bold tracking-tight">Wallets</h1>
+        <div className="flex min-w-0 flex-wrap items-center gap-3">
+          <h1 className="text-2xl font-bold tracking-tight sm:text-3xl">Wallets</h1>
           {!isDemo && availableCurrencies.length > 0 && (
-            <Button size="sm" onClick={() => setCreateOpen(true)}>
+            <Button size="sm" onClick={() => setCreateOpen(true)} className="w-full sm:w-auto">
               <Plus className="mr-1 h-4 w-4" />
               Add Wallet
             </Button>
@@ -136,15 +136,16 @@ export function WalletsContent() {
             initial={prefersReducedMotion ? false : { opacity: 0, scale: 0.95 }}
             animate={{ opacity: 1, scale: 1 }}
             transition={prefersReducedMotion ? { duration: 0 } : undefined}
-            className="glass-card glass-card-hover rounded-xl px-5 py-3"
+            className="glass-card glass-card-hover min-w-0 overflow-hidden rounded-xl px-5 py-3"
             title="Converted at Frankfurter rate"
           >
             <p className="text-xs font-medium uppercase tracking-wider text-muted-foreground">
               Total Balance
             </p>
             <p
-              className="text-4xl font-semibold text-foreground sm:text-5xl md:text-6xl"
+              className="min-w-0 truncate text-3xl font-semibold text-foreground sm:text-5xl md:text-6xl"
               style={{ letterSpacing: "-1.5px" }}
+              title={formatCurrency(totalInDisplay, displayCurrency)}
             >
               {formatCurrency(totalInDisplay, displayCurrency)}
             </p>

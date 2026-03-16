@@ -76,7 +76,7 @@ export function CurrencySelector({
           aria-label="Select currency"
           aria-expanded={open}
           className={cn(
-            "inline-flex h-9 shrink-0 items-center gap-2 rounded-lg border border-border bg-muted/40 px-3 py-2 text-xs font-medium transition-all duration-150 hover:bg-muted/60 hover:text-foreground dark:border-border dark:bg-muted/20 dark:hover:bg-muted/40 sm:px-4 sm:text-sm",
+            "inline-flex h-9 min-w-0 shrink-0 items-center gap-1.5 rounded-lg border border-border bg-muted/40 px-2 py-2 text-xs font-medium transition-all duration-150 hover:bg-muted/60 hover:text-foreground dark:border-border dark:bg-muted/20 dark:hover:bg-muted/40 sm:gap-2 sm:px-4 sm:text-sm",
             "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background",
             "text-foreground",
             className
@@ -88,7 +88,7 @@ export function CurrencySelector({
                 {selected.flag}
               </span>
               <span className="hidden sm:inline">{selected.symbol}</span>
-              <span className="font-semibold">{selected.code}</span>
+              <span className="min-w-0 truncate font-semibold">{selected.code}</span>
               <span className="hidden truncate max-w-28 text-muted-foreground lg:inline">
                 {selected.shortName}
               </span>

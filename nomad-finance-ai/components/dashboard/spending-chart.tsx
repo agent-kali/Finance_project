@@ -21,7 +21,7 @@ import { useDisplayCurrency } from "@/lib/hooks/use-profile";
 import { useTimeRange, type TimeRange } from "@/lib/time-range-context";
 import { useReducedMotion } from "@/lib/hooks/use-reduced-motion";
 import { getEmptyMessage } from "@/lib/date-utils";
-import { convertCurrency, formatCurrency } from "@/lib/currency";
+import { convertCurrency, formatCurrency, formatCompact } from "@/lib/currency";
 import type { SupportedCurrency } from "@/lib/constants";
 import { EmptyState } from "@/components/ui/empty-state";
 import { BarChart3 } from "lucide-react";
@@ -260,10 +260,16 @@ export function SpendingChart() {
 
   const title = getChartTitle(timeRange);
 
+  const isNarrow = width > 0 && width < 400;
+  const chartMargin = { top: 8, right: 8, left: isNarrow ? 40 : 28, bottom: 0 };
+  const tickFontSize = isNarrow ? 10 : 11;
+  const formatTick = (v: number) =>
+    isNarrow ? formatCompact(v, displayCurrency) : formatCurrency(v, displayCurrency);
+
   const sharedChartProps = {
     width,
     height,
-    margin: { top: 8, right: 8, left: 28, bottom: 0 },
+    margin: chartMargin,
     isAnimationActive: !prefersReducedMotion,
   };
 
@@ -274,10 +280,10 @@ export function SpendingChart() {
           {title}
         </CardTitle>
       </CardHeader>
-      <CardContent>
+      <CardContent className="min-w-0 overflow-hidden">
         <div
           ref={ref}
-          className="h-[300px]"
+          className="h-[300px] min-w-0 w-full"
           role="img"
           aria-label={chartAriaLabel}
         >
@@ -304,7 +310,7 @@ export function SpendingChart() {
                     dataKey="name"
                     axisLine={false}
                     tickLine={false}
-                    tick={{ fill: chartColors.tickFill, fontSize: 11 }}
+                    tick={{ fill: chartColors.tickFill, fontSize: tickFontSize }}
                     tickFormatter={(name) =>
                       name === "Today" && todayValueZero ? "No data yet" : name
                     }
@@ -312,8 +318,8 @@ export function SpendingChart() {
                   <YAxis
                     axisLine={false}
                     tickLine={false}
-                    tick={{ fill: chartColors.tickFill, fontSize: 11 }}
-                    tickFormatter={(v: number) => formatCurrency(v, displayCurrency)}
+                    tick={{ fill: chartColors.tickFill, fontSize: tickFontSize }}
+                    tickFormatter={(v: number) => formatTick(v)}
                   />
                   <Tooltip
                     cursor={{ fill: "rgba(0,0,0,0.05)" }}
@@ -416,13 +422,13 @@ export function SpendingChart() {
                     dataKey="name"
                     axisLine={false}
                     tickLine={false}
-                    tick={{ fill: chartColors.tickFill, fontSize: 11 }}
+                    tick={{ fill: chartColors.tickFill, fontSize: tickFontSize }}
                   />
                   <YAxis
                     axisLine={false}
                     tickLine={false}
-                    tick={{ fill: chartColors.tickFill, fontSize: 11 }}
-                    tickFormatter={(v: number) => formatCurrency(v, displayCurrency)}
+                    tick={{ fill: chartColors.tickFill, fontSize: tickFontSize }}
+                    tickFormatter={(v: number) => formatTick(v)}
                   />
                   <Tooltip
                     cursor={{ fill: "rgba(0,0,0,0.05)" }}
@@ -503,13 +509,13 @@ export function SpendingChart() {
                     dataKey="name"
                     axisLine={false}
                     tickLine={false}
-                    tick={{ fill: chartColors.tickFill, fontSize: 11 }}
+                    tick={{ fill: chartColors.tickFill, fontSize: tickFontSize }}
                   />
                   <YAxis
                     axisLine={false}
                     tickLine={false}
-                    tick={{ fill: chartColors.tickFill, fontSize: 11 }}
-                    tickFormatter={(v: number) => formatCurrency(v, displayCurrency)}
+                    tick={{ fill: chartColors.tickFill, fontSize: tickFontSize }}
+                    tickFormatter={(v: number) => formatTick(v)}
                   />
                   <Tooltip
                     cursor={false}

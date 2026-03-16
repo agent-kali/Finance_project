@@ -121,21 +121,23 @@ export function RecentActivity() {
             <li
               key={tx.id}
               className={cn(
-                "flex flex-wrap items-center gap-x-4 gap-y-1 py-3 first:pt-0 last:pb-0 transition-opacity",
+                "flex items-center gap-2 py-3 first:pt-0 last:pb-0 transition-opacity",
                 isOptimistic && "opacity-50 animate-pulse pointer-events-none"
               )}
             >
-              <span className="min-w-0 flex-1 truncate text-sm font-medium text-foreground">
-                {getMerchant(tx)}
-              </span>
-              <span className="inline-flex shrink-0 rounded-md border border-border/60 bg-muted/30 px-2 py-0.5 text-xs font-medium text-muted-foreground">
-                {tx.category}
-              </span>
-              <span className="shrink-0 text-xs text-muted-foreground tabular-nums">
-                {formatTime(tx)}
-              </span>
+              <div className="min-w-0 flex-1 overflow-hidden">
+                <span className="block truncate text-sm font-medium text-foreground">
+                  {getMerchant(tx)}
+                </span>
+                <div className="mt-0.5 flex flex-wrap items-center gap-x-2 gap-y-0 text-xs text-muted-foreground">
+                  <span className="inline-flex shrink-0 rounded-md border border-border/60 bg-muted/30 px-2 py-0.5 font-medium">
+                    {tx.category}
+                  </span>
+                  <span className="shrink-0 tabular-nums">{formatTime(tx)}</span>
+                </div>
+              </div>
               <span
-                className={`shrink-0 text-right text-sm font-medium tabular-nums ${
+                className={`shrink-0 whitespace-nowrap text-right text-sm font-medium tabular-nums ${
                   tx.type === "income" ? "text-emerald-400" : "text-amber-500"
                 }`}
                 title="Converted at Frankfurter rate"

@@ -125,6 +125,11 @@
   body {
     @apply bg-background text-foreground;
   }
+  @media (max-width: 640px) {
+    html {
+      font-size: 14px;
+    }
+  }
 }
 
 /* Skip link: visually hidden until keyboard focus */
@@ -154,6 +159,10 @@
 }
 
 @layer components {
+  .touch-target {
+    min-height: 44px;
+    min-width: 44px;
+  }
   /* ----- Light mode (default) ----- */
   .glass-card {
     background: oklch(1 0 0 / 0.85);

@@ -138,7 +138,7 @@ export function DashboardShell({
           {mounted ? (
             <Sheet open={mobileOpen} onOpenChange={setMobileOpen}>
               <SheetTrigger asChild>
-                <Button variant="ghost" size="icon" className="lg:hidden">
+                <Button variant="ghost" size="icon-touch" className="lg:hidden">
                   <Menu className="h-5 w-5" />
                   <span className="sr-only">Toggle menu</span>
                 </Button>
@@ -155,7 +155,7 @@ export function DashboardShell({
               </SheetContent>
             </Sheet>
           ) : (
-            <Button variant="ghost" size="icon" className="lg:hidden">
+            <Button variant="ghost" size="icon-touch" className="lg:hidden">
               <Menu className="h-5 w-5" />
               <span className="sr-only">Toggle menu</span>
             </Button>
@@ -166,9 +166,9 @@ export function DashboardShell({
           <div className="flex-1" />
 
           {mounted && (
-            <div className="flex items-center gap-2">
-              <span className="text-xs text-muted-foreground shrink-0">View in</span>
-              <CurrencySelector />
+            <div className="flex min-w-0 items-center gap-2">
+              <span className="hidden shrink-0 text-xs text-muted-foreground sm:inline">View in</span>
+              <CurrencySelector className="min-w-0 max-w-[120px] sm:max-w-none" />
             </div>
           )}
 
@@ -179,8 +179,8 @@ export function DashboardShell({
           {mounted ? (
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <Button variant="ghost" className="relative h-8 w-8 rounded-full" aria-label="User menu">
-                  <Avatar className="h-8 w-8">
+                <Button variant="ghost" size="icon-touch" className="relative rounded-full" aria-label="User menu">
+                  <Avatar className="h-8 w-8 sm:h-9 sm:w-9">
                     <AvatarFallback className="bg-primary/10 text-primary text-xs">
                       {initials}
                     </AvatarFallback>
@@ -206,8 +206,8 @@ export function DashboardShell({
               </DropdownMenuContent>
             </DropdownMenu>
           ) : (
-            <Button variant="ghost" className="relative h-8 w-8 rounded-full">
-              <Avatar className="h-8 w-8">
+            <Button variant="ghost" size="icon-touch" className="relative rounded-full">
+              <Avatar className="h-8 w-8 sm:h-9 sm:w-9">
                 <AvatarFallback className="bg-primary/10 text-primary text-xs">
                   {initials}
                 </AvatarFallback>

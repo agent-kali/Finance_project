@@ -81,7 +81,7 @@ export function EmptyState({
         )
       )}
       {suggestionChips && suggestionChips.length > 0 && onChipClick && (
-        <div className="flex flex-wrap justify-center gap-2">
+        <div className="flex max-w-full min-w-0 flex-wrap justify-center gap-2">
           {suggestionChips.map((chip) => (
             <button
               key={chip}
@@ -89,7 +89,7 @@ export function EmptyState({
               onClick={() => onChipClick(chip)}
               disabled={chipDisabled}
               className={cn(
-                "rounded-xl border border-border/60 bg-muted/50 px-4 py-2.5 text-sm text-muted-foreground shadow-sm transition-colors",
+                "min-w-0 rounded-xl border border-border/60 bg-muted/50 px-4 py-2.5 text-sm text-muted-foreground shadow-sm transition-colors",
                 "hover:border-primary/30 hover:bg-primary/5 hover:text-foreground",
                 "disabled:pointer-events-none disabled:opacity-50",
                 "dark:border-border/40 dark:bg-muted/30 dark:hover:border-primary/40 dark:hover:bg-primary/10"

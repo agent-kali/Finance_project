@@ -210,16 +210,16 @@ export function TransactionsTable() {
 
   return (
     <>
-      <div className="space-y-4">
-        <div className="flex flex-wrap items-center gap-3">
+      <div className="min-w-0 space-y-4">
+        <div className="flex min-w-0 flex-wrap items-center gap-3">
           <Input
             placeholder="Search description or category..."
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            className="w-full sm:w-64"
+            className="w-full min-w-0 sm:w-64"
           />
           <Select value={filterType} onValueChange={setFilterType}>
-            <SelectTrigger className="w-32">
+            <SelectTrigger className="w-full min-w-0 max-w-full sm:w-32">
               <SelectValue placeholder="Type" />
             </SelectTrigger>
             <SelectContent>
@@ -229,7 +229,7 @@ export function TransactionsTable() {
             </SelectContent>
           </Select>
           <Select value={filterCategory} onValueChange={setFilterCategory}>
-            <SelectTrigger className="w-40">
+            <SelectTrigger className="w-full min-w-0 max-w-full sm:w-40">
               <SelectValue placeholder="Category" />
             </SelectTrigger>
             <SelectContent>
@@ -242,7 +242,7 @@ export function TransactionsTable() {
             </SelectContent>
           </Select>
           <Select value={filterWallet} onValueChange={setFilterWallet}>
-            <SelectTrigger className="w-36">
+            <SelectTrigger className="w-full min-w-0 max-w-full sm:w-36">
               <SelectValue placeholder="Wallet" />
             </SelectTrigger>
             <SelectContent>
@@ -254,14 +254,14 @@ export function TransactionsTable() {
               ))}
             </SelectContent>
           </Select>
-          <div className="flex-1" />
-          <Button onClick={handleAdd} size="sm">
-            <Plus className="mr-1 h-4 w-4" />
-            Add Transaction
+          <div className="flex-1 sm:min-w-0" />
+          <Button onClick={handleAdd} size="sm" className="w-full sm:w-auto" aria-label="Add Transaction">
+            <Plus className="h-4 w-4 sm:mr-1" />
+            <span className="hidden sm:inline">Add Transaction</span>
           </Button>
         </div>
 
-        <Card className="glass-card glass-card-hover">
+        <Card className="glass-card glass-card-hover min-w-0 overflow-hidden">
           <CardContent className="p-0">
             {filtered.length === 0 ? (
               <EmptyState
@@ -289,8 +289,8 @@ export function TransactionsTable() {
                         </button>
                       </th>
                       <th className="px-4 py-3 font-medium">Description</th>
-                      <th className="px-4 py-3 font-medium">Category</th>
-                      <th className="px-4 py-3 font-medium">Wallet</th>
+                      <th className="hidden px-4 py-3 font-medium md:table-cell">Category</th>
+                      <th className="hidden px-4 py-3 font-medium md:table-cell">Wallet</th>
                       <th className="px-4 py-3 font-medium text-right">
                         <button
                           type="button"
@@ -329,17 +329,19 @@ export function TransactionsTable() {
                               year: "numeric",
                             })}
                           </td>
-                          <td className="px-4 py-3">
-                            {tx.description || (
-                              <span className="text-muted-foreground">—</span>
-                            )}
+                          <td className="min-w-0 px-4 py-3">
+                            <span className="block truncate max-w-[40ch] md:max-w-none" title={tx.description || undefined}>
+                              {tx.description || (
+                                <span className="text-muted-foreground">—</span>
+                              )}
+                            </span>
                           </td>
-                          <td className="px-4 py-3">
+                          <td className="hidden md:table-cell px-4 py-3">
                             <Badge variant="outline" className="text-xs">
                               {tx.category}
                             </Badge>
                           </td>
-                          <td className="px-4 py-3 whitespace-nowrap">
+                          <td className="hidden whitespace-nowrap px-4 py-3 md:table-cell">
                             {wallet
                               ? `${CURRENCY_SYMBOLS[wallet.currency as SupportedCurrency]} ${wallet.currency}`
                               : tx.currency}
@@ -365,8 +367,8 @@ export function TransactionsTable() {
                               <DropdownMenuTrigger asChild>
                                 <Button
                                   variant="ghost"
-                                  size="icon"
-                                  className="h-8 w-8"
+                                  size="icon-touch"
+                                  aria-label="Row actions"
                                 >
                                   <MoreHorizontal className="h-4 w-4" />
                                   <span className="sr-only">Actions</span>

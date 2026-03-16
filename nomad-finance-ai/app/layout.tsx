@@ -32,7 +32,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" suppressHydrationWarning>
-      <body className="font-sans antialiased">
+      <body className="font-sans antialiased overflow-x-hidden">
         <a
           href="#main-content"
           className="skip-link rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground"

@@ -17,7 +17,7 @@ import { useWallets } from "@/lib/hooks/use-wallets";
 import { useChartDimensions } from "@/lib/hooks/use-chart-dimensions";
 import { useDisplayCurrency } from "@/lib/hooks/use-profile";
 import { useReducedMotion } from "@/lib/hooks/use-reduced-motion";
-import { convertCurrency, formatCurrency } from "@/lib/currency";
+import { convertCurrency, formatCurrency, formatCompact } from "@/lib/currency";
 import { CURRENCY_SYMBOLS, type SupportedCurrency } from "@/lib/constants";
 import { EmptyState } from "@/components/ui/empty-state";
 import { Wallet } from "lucide-react";
@@ -78,7 +78,7 @@ export function WalletChart() {
           Wallet Balances ({displayCurrency} equivalent)
         </CardTitle>
       </CardHeader>
-      <CardContent>
+      <CardContent className="min-w-0 overflow-hidden">
         {chartData.length === 0 ? (
           <EmptyState
             icon={Wallet}
@@ -89,7 +89,7 @@ export function WalletChart() {
         ) : (
           <div
             ref={ref}
-            className="h-[300px]"
+            className="h-[300px] min-w-0 w-full"
             role="img"
             aria-label={`Wallet balances in ${displayCurrency} equivalent`}
           >
@@ -101,11 +101,17 @@ export function WalletChart() {
                 )
                 .join(". ")}
             </p>
-            {width > 0 && height > 0 && (
+            {width > 0 && height > 0 && (() => {
+              const isNarrow = width < 400;
+              const tickFontSize = isNarrow ? 10 : 11;
+              const formatTick = (v: number) =>
+                isNarrow ? formatCompact(v, displayCurrency) : formatCurrency(v, displayCurrency);
+              return (
               <BarChart
                 width={width}
                 height={height}
                 data={chartData}
+                margin={{ top: 8, right: 8, left: isNarrow ? 40 : 28, bottom: 0 }}
                 barSize={Math.min(
                   52,
                   Math.max(24, Math.floor((width - 60) / Math.max(chartData.length, 1)))
@@ -120,13 +126,13 @@ export function WalletChart() {
                   dataKey="name"
                   axisLine={false}
                   tickLine={false}
-                  tick={{ fill: chartColors.tickFill, fontSize: 11 }}
+                  tick={{ fill: chartColors.tickFill, fontSize: tickFontSize }}
                 />
                 <YAxis
                   axisLine={false}
                   tickLine={false}
-                  tick={{ fill: chartColors.tickFill, fontSize: 11 }}
-                  tickFormatter={(v: number) => formatCurrency(v, displayCurrency)}
+                  tick={{ fill: chartColors.tickFill, fontSize: tickFontSize }}
+                  tickFormatter={(v: number) => formatTick(v)}
                 />
                 <Tooltip
                   cursor={false}
@@ -168,7 +174,8 @@ export function WalletChart() {
                   ))}
                 </Bar>
               </BarChart>
-            )}
+              );
+            })()}
           </div>
         )}
       </CardContent>

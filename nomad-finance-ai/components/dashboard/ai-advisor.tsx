@@ -198,7 +198,7 @@ export function AiAdvisor() {
             )}
             <div
               className={cn(
-                "max-w-[85%] rounded-lg px-4 py-3 text-sm leading-relaxed",
+                "min-w-0 max-w-[85%] rounded-lg px-4 py-3 text-sm leading-relaxed",
                 msg.role === "user"
                   ? "bg-primary text-primary-foreground"
                   : "bg-muted"
@@ -216,18 +216,18 @@ export function AiAdvisor() {
       </CardContent>
 
       {messages.length > 0 && (
-        <div className="shrink-0 border-t p-4">
+        <div className="shrink-0 border-t p-4 pb-[max(1rem,env(safe-area-inset-bottom))]">
           <form onSubmit={handleSubmit} className="flex gap-2">
             <Input
               value={input}
               onChange={(e) => setInput(e.target.value)}
               placeholder="Ask a follow-up question..."
               disabled={isStreaming}
-              className="flex-1"
+              className="min-w-0 flex-1"
             />
             <Button
               type="submit"
-              size="icon"
+              size="icon-touch"
               disabled={isStreaming || !input.trim()}
             >
               <Send className="h-4 w-4" />

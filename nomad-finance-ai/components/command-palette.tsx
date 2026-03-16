@@ -109,7 +109,7 @@ export function CommandPaletteTrigger() {
       variant="ghost"
       size="sm"
       onClick={openPalette}
-      className="flex gap-1.5 text-muted-foreground"
+      className="touch-target flex gap-1.5 text-muted-foreground"
       aria-label="Open command palette"
     >
       <CommandIcon className="h-4 w-4" />

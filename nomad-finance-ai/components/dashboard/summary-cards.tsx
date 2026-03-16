@@ -227,14 +227,14 @@ export function SummaryCards() {
                 </div>
               </CardHeader>
               <CardContent className="min-h-0 flex-1 flex flex-col">
-                <div className="min-w-0 overflow-visible">
+                <div className="min-w-0 overflow-hidden">
                   <div
                     key={displayCurrency}
                     className={cn(
-                      "min-w-0 font-semibold tabular-nums text-foreground animate-in fade-in duration-200 tracking-tight wrap-break-word",
+                      "min-w-0 break-all font-semibold tabular-nums text-foreground animate-in fade-in duration-200 tracking-tight",
                       isTotalBalance
-                        ? "text-xl sm:text-2xl md:text-2xl lg:text-3xl xl:text-4xl"
-                        : "text-4xl"
+                        ? "text-lg sm:text-2xl md:text-2xl lg:text-3xl xl:text-4xl"
+                        : "text-2xl sm:text-4xl"
                     )}
                     style={{ letterSpacing: "-1.5px" }}
                   >

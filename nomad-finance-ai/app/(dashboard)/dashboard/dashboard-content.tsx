@@ -85,7 +85,7 @@ function TimeRangeContent() {
           <RecentActivity />
         </ErrorBoundary>
       </section>
-      <section aria-label="Spending and category charts" className="grid gap-6 lg:grid-cols-2">
+      <section aria-label="Spending and category charts" className="grid min-w-0 gap-6 lg:grid-cols-2">
         <ErrorBoundary fallbackTitle="Failed to load spending chart">
           <SpendingChart />
         </ErrorBoundary>

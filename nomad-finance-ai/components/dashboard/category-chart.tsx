@@ -77,7 +77,7 @@ export function CategoryChart() {
           Spending by Category ({getPeriodLabel(timeRange)})
         </CardTitle>
       </CardHeader>
-      <CardContent>
+      <CardContent className="min-w-0 overflow-hidden">
         {listData.length === 0 ? (
           <EmptyState
             icon={PieChart}
@@ -86,6 +86,7 @@ export function CategoryChart() {
           />
         ) : (
           <div
+            className="min-w-0 w-full"
             role="img"
             aria-label={`Spending by category for ${getPeriodLabel(timeRange)}`}
           >
