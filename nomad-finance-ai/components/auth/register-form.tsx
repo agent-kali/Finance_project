@@ -116,7 +116,7 @@ export function RegisterForm() {
                   <FormLabel>Full Name</FormLabel>
                   <FormControl>
                     <Input
-                      placeholder="Daniel Alexandrov"
+                      placeholder="Jane Smith"
                       autoComplete="name"
                       aria-required
                       {...field}
