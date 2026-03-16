@@ -8,6 +8,7 @@ import { TimeRangeToggle } from "@/components/dashboard/time-range-toggle";
 import { useTimeRange } from "@/lib/time-range-context";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
+import { MobileFab } from "@/components/dashboard/mobile-fab";
 
 const SpendingChart = dynamic(
   () =>
@@ -112,6 +113,7 @@ export function DashboardContent() {
         </div>
       </div>
       <TimeRangeContent />
+      <MobileFab />
     </div>
   );
 }

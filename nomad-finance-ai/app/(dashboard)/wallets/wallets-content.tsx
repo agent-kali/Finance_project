@@ -39,6 +39,7 @@ import { EmptyState } from "@/components/ui/empty-state";
 import { DefaultWalletSelector } from "@/components/ui/default-wallet-selector";
 import { Wallet, Plus, Trash2, Loader2, Star } from "lucide-react";
 import type { Wallet as WalletType } from "@/types/database.types";
+import { MobileFab } from "@/components/dashboard/mobile-fab";
 
 const CURRENCY_ACCENTS: Record<string, { border: string; text: string }> = {
   EUR: { border: "border-l-cyan-400", text: "text-cyan-400" },
@@ -304,6 +305,7 @@ export function WalletsContent() {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+      <MobileFab />
     </div>
   );
 }
