@@ -11,7 +11,47 @@ import { useTimeRange } from "@/lib/time-range-context";
 import { convertCurrency, formatCurrency } from "@/lib/currency";
 import type { SupportedCurrency } from "@/lib/constants";
 import type { Transaction } from "@/types/database.types";
-import { Activity } from "lucide-react";
+import {
+  Activity,
+  Home,
+  Utensils,
+  Car,
+  Monitor,
+  Heart,
+  Film,
+  ShoppingBag,
+  Wrench,
+  Plane,
+  GraduationCap,
+  Briefcase,
+  TrendingUp,
+  Landmark,
+  ArrowLeftRight,
+  Circle,
+  type LucideIcon,
+} from "lucide-react";
+
+const CATEGORY_ICONS: Record<string, LucideIcon> = {
+  Housing: Home,
+  "Food & Dining": Utensils,
+  Transportation: Car,
+  Coworking: Monitor,
+  "Health & Insurance": Heart,
+  Entertainment: Film,
+  Shopping: ShoppingBag,
+  "SaaS & Tools": Wrench,
+  Travel: Plane,
+  Education: GraduationCap,
+  Salary: Briefcase,
+  Freelance: Briefcase,
+  Investment: TrendingUp,
+  Transfer: ArrowLeftRight,
+  Other: Landmark,
+};
+
+function getCategoryIcon(category: string): LucideIcon {
+  return CATEGORY_ICONS[category] ?? Circle;
+}
 
 function formatTime(tx: Transaction): string {
   const d = new Date(tx.date);
@@ -64,19 +104,21 @@ export function RecentActivity() {
     return (
       <Card className="glass-card min-h-[280px]">
         <CardHeader>
-          <Skeleton className="h-5 w-36" />
+          <Skeleton className="h-3 w-36" />
         </CardHeader>
         <CardContent>
           <ul className="divide-y divide-border/50 space-y-0">
             {Array.from({ length: 5 }).map((_, i) => (
               <li
                 key={i}
-                className="flex flex-wrap items-center gap-x-4 gap-y-1 py-3 first:pt-0 last:pb-0"
+                className="flex items-center gap-3 py-3 first:pt-0 last:pb-0"
               >
-                <Skeleton className="h-4 flex-1 min-w-0 max-w-[200px]" />
-                <Skeleton className="h-5 w-16 shrink-0 rounded-md" />
-                <Skeleton className="h-4 w-12 shrink-0" />
-                <Skeleton className="h-4 w-14 shrink-0" />
+                <Skeleton className="h-8 w-8 shrink-0 rounded-full" />
+                <div className="min-w-0 flex-1">
+                  <Skeleton className="h-4 w-40" />
+                  <Skeleton className="mt-1 h-3 w-24" />
+                </div>
+                <Skeleton className="h-4 w-16 shrink-0" />
               </li>
             ))}
           </ul>
@@ -89,7 +131,7 @@ export function RecentActivity() {
     return (
       <Card className="glass-card">
         <CardHeader>
-          <CardTitle className="text-sm font-medium text-muted-foreground">
+          <CardTitle className="text-[11px] font-medium uppercase tracking-widest text-muted-foreground">
             Recent Activity
           </CardTitle>
         </CardHeader>
@@ -109,28 +151,32 @@ export function RecentActivity() {
   return (
     <Card className="glass-card">
       <CardHeader>
-        <CardTitle className="text-sm font-medium text-muted-foreground">
+        <CardTitle className="text-[11px] font-medium uppercase tracking-widest text-muted-foreground">
           Recent Activity
         </CardTitle>
       </CardHeader>
       <CardContent>
-        <ul className="divide-y divide-border/50">
+        <ul className="divide-y divide-border/30">
           {recent.map((tx) => {
             const isOptimistic = tx.id.startsWith("temp-");
+            const Icon = getCategoryIcon(tx.category);
             return (
             <li
               key={tx.id}
               className={cn(
-                "flex items-center gap-2 py-3 first:pt-0 last:pb-0 transition-opacity",
+                "flex items-center gap-3 py-3 first:pt-0 last:pb-0 transition-opacity",
                 isOptimistic && "opacity-50 animate-pulse pointer-events-none"
               )}
             >
+              <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-muted text-muted-foreground">
+                <Icon className="h-3.5 w-3.5" />
+              </div>
               <div className="min-w-0 flex-1 overflow-hidden">
                 <span className="block truncate text-sm font-medium text-foreground">
                   {getMerchant(tx)}
                 </span>
                 <div className="mt-0.5 flex flex-wrap items-center gap-x-2 gap-y-0 text-xs text-muted-foreground">
-                  <span className="inline-flex shrink-0 rounded-md border border-border/60 bg-muted/30 px-2 py-0.5 font-medium">
+                  <span className="inline-flex shrink-0 rounded-md bg-muted/40 px-2 py-0.5 font-medium text-muted-foreground">
                     {tx.category}
                   </span>
                   <span className="shrink-0 tabular-nums">{formatTime(tx)}</span>
@@ -146,7 +192,7 @@ export function RecentActivity() {
                   {tx.type === "income" ? "Income" : "Expense"}
                   {" "}
                 </span>
-                {tx.type === "income" ? "+" : "-"}
+                {tx.type === "income" ? "+" : "\u2212"}
                 {formatCurrency(
                   convertCurrency(tx.amount, tx.currency as SupportedCurrency, displayCurrency),
                   displayCurrency
