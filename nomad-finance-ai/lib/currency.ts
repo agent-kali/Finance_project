@@ -86,17 +86,19 @@ export function formatAmountDisplay(value: number): string {
     : formattedInt;
 }
 
-/** Parse amount input string to number (handles European and US formats). */
+/** Parse amount input string to number (handles European and US formats). Caps at 2 decimals for currency. */
 export function parseAmountInput(input: string): number {
   const trimmed = input.replace(/\s/g, "");
   if (!trimmed) return 0;
+  let num: number;
   // European: 1.234,56 → 1234.56 (comma = decimal)
   if (trimmed.indexOf(",") >= 0) {
     const withDecimal = trimmed.replace(/\./g, "").replace(",", ".");
-    const num = parseFloat(withDecimal);
-    return Number.isNaN(num) ? 0 : num;
+    num = parseFloat(withDecimal);
+  } else {
+    // US/international: 1234.56 or 1234 (period = decimal)
+    num = parseFloat(trimmed);
   }
-  // US/international: 1234.56 or 1234 (period = decimal)
-  const num = parseFloat(trimmed);
-  return Number.isNaN(num) ? 0 : num;
+  if (Number.isNaN(num)) return 0;
+  return Math.round(num * 100) / 100;
 }

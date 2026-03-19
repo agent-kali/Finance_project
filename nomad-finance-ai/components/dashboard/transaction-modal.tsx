@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useForm, useWatch } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -128,6 +128,8 @@ export function TransactionModal({
 
   const watchedType = useWatch({ control: form.control, name: "type" });
 
+  const [amountDisplay, setAmountDisplay] = useState<string>("");
+
   useEffect(() => {
     if (transaction) {
       form.reset({
@@ -138,6 +140,9 @@ export function TransactionModal({
         date: transaction.date,
         description: transaction.description ?? "",
       });
+      setAmountDisplay(
+        transaction.amount ? formatAmountDisplay(transaction.amount) : ""
+      );
     } else {
       form.reset({
         type: "expense",
@@ -147,6 +152,7 @@ export function TransactionModal({
         date: new Date().toISOString().split("T")[0],
         description: "",
       });
+      setAmountDisplay("");
     }
   }, [transaction, wallets, effectiveDefaultWalletId, form]);
 
@@ -227,19 +233,30 @@ export function TransactionModal({
                           inputMode="decimal"
                           placeholder="0,00"
                           aria-required
-                          value={
-                            Number.isNaN(field.value) || field.value === 0
-                              ? ""
-                              : formatAmountDisplay(field.value)
-                          }
+                          value={amountDisplay}
                           onChange={(e) => {
-                            const num = parseAmountInput(e.target.value);
+                            const raw = e.target.value.replace(/[^\d.,]/g, "");
+                            const parts = raw.split(/[.,]/);
+                            const sane =
+                              parts.length > 2
+                                ? parts[0] +
+                                  (raw.includes(",") ? "," : ".") +
+                                  parts.slice(1).join("")
+                                : raw;
+                            setAmountDisplay(sane);
+                            const num = parseAmountInput(sane);
                             field.onChange(num);
                           }}
                           onBlur={(e) => {
-                            field.onBlur();
-                            const num = parseAmountInput(e.target.value);
+                            const raw = e.target.value;
+                            const num = parseAmountInput(raw);
                             field.onChange(num);
+                            setAmountDisplay(
+                              num && Number.isFinite(num)
+                                ? formatAmountDisplay(num)
+                                : ""
+                            );
+                            field.onBlur();
                           }}
                         />
                       </FormControl>
