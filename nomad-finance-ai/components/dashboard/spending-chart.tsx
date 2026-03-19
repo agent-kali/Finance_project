@@ -26,19 +26,18 @@ import type { SupportedCurrency } from "@/lib/constants";
 import { EmptyState } from "@/components/ui/empty-state";
 import { BarChart3 } from "lucide-react";
 
-const TODAY_BAR_COLOR = "#22d3ee";
-const DAILY_AVG_BAR_COLOR = "#f59e0b";
-const INCOME_COLOR = "#34d399";
-const EXPENSE_COLOR = "#f59e0b";
+const ACCENT = "#2dd4bf";
+const ACCENT_60 = "rgba(45, 212, 191, 0.6)";
+const ACCENT_30 = "rgba(45, 212, 191, 0.3)";
 const MIN_BAR_HEIGHT_PX = 4;
 
 const CHART_LIGHT = {
-  gridStroke: "oklch(0.88 0.01 270 / 0.6)",
-  tickFill: "oklch(0.4 0.02 270)",
+  gridStroke: "oklch(0.88 0.01 270 / 0.4)",
+  tickFill: "oklch(0.5 0.02 270)",
 };
 const CHART_DARK = {
-  gridStroke: "oklch(0.3 0.01 270 / 0.3)",
-  tickFill: "oklch(0.6 0.02 270)",
+  gridStroke: "oklch(0.3 0.01 270 / 0.15)",
+  tickFill: "oklch(0.55 0.02 270)",
 };
 
 function getChartTitle(timeRange: TimeRange): string {
@@ -101,8 +100,6 @@ function buildWeekData(
   const thisWeekStart = getStartOfWeek(now);
   const lastWeekStart = new Date(thisWeekStart);
   lastWeekStart.setDate(lastWeekStart.getDate() - 7);
-  const lastWeekEnd = new Date(thisWeekStart);
-  lastWeekEnd.setMilliseconds(-1);
 
   const dayLabels = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
   const rows: { name: string; thisWeek: number; lastWeek: number }[] = [];
@@ -276,7 +273,7 @@ export function SpendingChart() {
   return (
     <Card className="glass-card">
       <CardHeader>
-        <CardTitle className="text-sm font-medium text-muted-foreground">
+        <CardTitle className="text-[11px] font-medium uppercase tracking-widest text-muted-foreground">
           {title}
         </CardTitle>
       </CardHeader>
@@ -361,40 +358,28 @@ export function SpendingChart() {
                         payload?: { name: string };
                       }
                     ) => {
-                      const { x, y, width, height, fill = TODAY_BAR_COLOR, payload } = props;
+                      const { x, y, width, height, payload } = props;
                       const h = Math.max(height, MIN_BAR_HEIGHT_PX);
                       const ny = height > 0 ? y : y + height - h;
                       const isDailyAvg = payload?.name === "Daily Avg";
-                      const fillOpacity = isDailyAvg ? 0.85 : 1;
+                      const barFill = isDailyAvg ? ACCENT_30 : ACCENT;
                       return (
-                        <g>
-                          <rect
-                            x={x}
-                            y={ny}
-                            width={width}
-                            height={h}
-                            fill={fill}
-                            fillOpacity={fillOpacity}
-                            rx={6}
-                            ry={0}
-                          />
-                          {/* 2px top stroke for "lit from above" */}
-                          <line
-                            x1={x}
-                            y1={ny}
-                            x2={x + width}
-                            y2={ny}
-                            stroke={fill}
-                            strokeWidth={2}
-                          />
-                        </g>
+                        <rect
+                          x={x}
+                          y={ny}
+                          width={width}
+                          height={h}
+                          fill={barFill}
+                          rx={6}
+                          ry={0}
+                        />
                       );
                     }}
                   >
                     {(chartData as { name: string }[]).map((entry, i) => (
                       <Cell
                         key={i}
-                        fill={entry.name === "Today" ? TODAY_BAR_COLOR : DAILY_AVG_BAR_COLOR}
+                        fill={entry.name === "Today" ? ACCENT : ACCENT_30}
                       />
                     ))}
                   </Bar>
@@ -403,16 +388,6 @@ export function SpendingChart() {
 
               {chartType === "week" && (
                 <BarChart {...sharedChartProps} data={chartData}>
-                  <defs>
-                    <linearGradient id="thisWeekBarGrad" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="5%" stopColor={INCOME_COLOR} stopOpacity={0.8} />
-                      <stop offset="95%" stopColor={INCOME_COLOR} stopOpacity={0.3} />
-                    </linearGradient>
-                    <linearGradient id="lastWeekBarGrad" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="5%" stopColor={EXPENSE_COLOR} stopOpacity={0.5} />
-                      <stop offset="95%" stopColor={EXPENSE_COLOR} stopOpacity={0.2} />
-                    </linearGradient>
-                  </defs>
                   <CartesianGrid
                     strokeDasharray="3 3"
                     stroke={chartColors.gridStroke}
@@ -454,18 +429,16 @@ export function SpendingChart() {
                   <Bar
                     dataKey="thisWeek"
                     name="This Week"
-                    fill="url(#thisWeekBarGrad)"
+                    fill={ACCENT}
                     radius={[6, 6, 0, 0]}
-                    stroke={INCOME_COLOR}
-                    strokeWidth={1}
+                    strokeWidth={0}
                   />
                   <Bar
                     dataKey="lastWeek"
                     name="Last Week"
-                    fill="url(#lastWeekBarGrad)"
+                    fill={ACCENT_30}
                     radius={[6, 6, 0, 0]}
-                    stroke={EXPENSE_COLOR}
-                    strokeWidth={1}
+                    strokeWidth={0}
                   />
                 </BarChart>
               )}
@@ -474,31 +447,13 @@ export function SpendingChart() {
                 <AreaChart {...sharedChartProps} data={chartData}>
                   <defs>
                     <linearGradient id="incomeGrad" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="5%" stopColor={INCOME_COLOR} stopOpacity={0.4} />
-                      <stop offset="95%" stopColor={INCOME_COLOR} stopOpacity={0.02} />
+                      <stop offset="5%" stopColor={ACCENT} stopOpacity={0.3} />
+                      <stop offset="95%" stopColor={ACCENT} stopOpacity={0.02} />
                     </linearGradient>
                     <linearGradient id="expenseGrad" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="5%" stopColor={EXPENSE_COLOR} stopOpacity={0.4} />
-                      <stop offset="95%" stopColor={EXPENSE_COLOR} stopOpacity={0.02} />
+                      <stop offset="5%" stopColor={ACCENT} stopOpacity={0.12} />
+                      <stop offset="95%" stopColor={ACCENT} stopOpacity={0.01} />
                     </linearGradient>
-                    <filter id="glowIncome" x="-20%" y="-20%" width="140%" height="140%">
-                      <feGaussianBlur stdDeviation="4" result="blur" />
-                      <feFlood floodColor={INCOME_COLOR} floodOpacity="0.3" />
-                      <feComposite in2="blur" operator="in" />
-                      <feMerge>
-                        <feMergeNode />
-                        <feMergeNode in="SourceGraphic" />
-                      </feMerge>
-                    </filter>
-                    <filter id="glowExpense" x="-20%" y="-20%" width="140%" height="140%">
-                      <feGaussianBlur stdDeviation="4" result="blur" />
-                      <feFlood floodColor={EXPENSE_COLOR} floodOpacity="0.3" />
-                      <feComposite in2="blur" operator="in" />
-                      <feMerge>
-                        <feMergeNode />
-                        <feMergeNode in="SourceGraphic" />
-                      </feMerge>
-                    </filter>
                   </defs>
                   <CartesianGrid
                     strokeDasharray="3 3"
@@ -541,18 +496,17 @@ export function SpendingChart() {
                   <Area
                     type="monotone"
                     dataKey="income"
-                    stroke={INCOME_COLOR}
+                    stroke={ACCENT}
                     fill="url(#incomeGrad)"
-                    strokeWidth={2.5}
-                    filter="url(#glowIncome)"
+                    strokeWidth={2}
                   />
                   <Area
                     type="monotone"
                     dataKey="expenses"
-                    stroke={EXPENSE_COLOR}
+                    stroke={ACCENT_60}
                     fill="url(#expenseGrad)"
-                    strokeWidth={2.5}
-                    filter="url(#glowExpense)"
+                    strokeWidth={1.5}
+                    strokeDasharray="4 2"
                   />
                 </AreaChart>
               )}

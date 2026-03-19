@@ -12,16 +12,11 @@ import type { SupportedCurrency } from "@/lib/constants";
 import { EmptyState } from "@/components/ui/empty-state";
 import { PieChart } from "lucide-react";
 
-const COLORS = [
-  "#22d3ee",
-  "#34d399",
-  "#f59e0b",
-  "#a78bfa",
-  "#fb923c",
-  "#fb7185",
-  "#38bdf8",
-  "#2dd4bf",
-];
+const ACCENT = "#2dd4bf";
+
+function accentAtOpacity(opacity: number): string {
+  return `rgba(45, 212, 191, ${opacity})`;
+}
 
 export function CategoryChart() {
   const { data: transactions, isLoading } = useTransactions();
@@ -73,7 +68,7 @@ export function CategoryChart() {
   return (
     <Card className="glass-card">
       <CardHeader>
-        <CardTitle className="text-sm font-medium text-muted-foreground">
+        <CardTitle className="text-[11px] font-medium uppercase tracking-widest text-muted-foreground">
           Spending by Category ({getPeriodLabel(timeRange)})
         </CardTitle>
       </CardHeader>
@@ -93,7 +88,8 @@ export function CategoryChart() {
             {chartSummary && <p className="sr-only">{chartSummary}</p>}
           <ul className="space-y-3">
             {listData.map((entry, i) => {
-              const color = COLORS[i % COLORS.length];
+              const opacity = Math.max(0.2, 1 - i * 0.15);
+              const color = i === 0 ? ACCENT : accentAtOpacity(opacity);
               const pct = maxValue > 0 ? (entry.value / maxValue) * 100 : 0;
               return (
                 <li
@@ -101,18 +97,15 @@ export function CategoryChart() {
                   className="flex min-w-0 items-center gap-2 sm:gap-3"
                 >
                   <div
-                    className="h-2.5 w-2.5 shrink-0 rounded-full"
-                    style={{
-                      backgroundColor: color,
-                      boxShadow: `0 0 6px ${color}40`,
-                    }}
+                    className="h-2 w-2 shrink-0 rounded-full"
+                    style={{ backgroundColor: color }}
                   />
                   <span className="min-w-0 flex-1 truncate text-xs font-medium text-foreground sm:text-sm">
                     {entry.name}
                   </span>
                   <div className="flex w-12 shrink-0 items-center sm:w-20">
                     <div
-                      className="h-1.5 w-full overflow-hidden rounded-full bg-muted/60"
+                      className="h-1 w-full overflow-hidden rounded-full bg-muted/60"
                       role="presentation"
                     >
                       <div
@@ -120,7 +113,6 @@ export function CategoryChart() {
                         style={{
                           width: `${pct}%`,
                           backgroundColor: color,
-                          opacity: 0.6,
                         }}
                       />
                     </div>
