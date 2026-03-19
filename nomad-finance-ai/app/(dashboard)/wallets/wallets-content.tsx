@@ -39,7 +39,6 @@ import { EmptyState } from "@/components/ui/empty-state";
 import { DefaultWalletSelector } from "@/components/ui/default-wallet-selector";
 import { Wallet, Plus, Trash2, Loader2, Star } from "lucide-react";
 import type { Wallet as WalletType } from "@/types/database.types";
-import { MobileFab } from "@/components/dashboard/mobile-fab";
 
 
 export function WalletsContent() {
@@ -295,7 +294,6 @@ export function WalletsContent() {
           </DialogFooter>
         </DialogContent>
       </Dialog>
-      <MobileFab />
     </div>
   );
 }
