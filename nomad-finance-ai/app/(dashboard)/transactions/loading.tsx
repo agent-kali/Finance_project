@@ -19,7 +19,7 @@ export default function TransactionsLoading() {
           <Skeleton className="h-9 w-40" />
         </div>
 
-        <Card className="glass-card glass-card-hover">
+        <Card className="glass-card">
           <CardContent className="p-0">
             <div className="overflow-x-auto min-h-[400px]">
               <table className="w-full text-sm">

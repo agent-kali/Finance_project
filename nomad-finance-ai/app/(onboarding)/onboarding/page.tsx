@@ -133,7 +133,7 @@ export default function OnboardingPage() {
               transition={transition}
               className="flex flex-col items-center"
             >
-              <div className="glass-card glass-card-cyan-border glass-card-hover rounded-2xl p-8 text-center">
+              <div className="glass-card rounded-2xl p-8 text-center">
                 <div className="mb-6 flex justify-center">
                   <Brain className="h-20 w-20 text-primary" aria-hidden />
                 </div>
@@ -167,7 +167,7 @@ export default function OnboardingPage() {
               transition={transition}
               className="flex flex-col"
             >
-              <div className="glass-card glass-card-cyan-border glass-card-hover rounded-2xl p-8">
+              <div className="glass-card rounded-2xl p-8">
                 <h2 className="text-xl font-bold tracking-tight">
                   Where do you spend most?
                 </h2>
@@ -184,9 +184,9 @@ export default function OnboardingPage() {
                         type="button"
                         onClick={() => setSelectedCurrency(code)}
                         className={cn(
-                          "glass-card glass-card-hover flex min-h-[60px] items-center gap-3 rounded-xl border-2 px-4 py-3 text-left transition-colors",
+                          "glass-card flex min-h-[60px] items-center gap-3 rounded-xl border-2 px-4 py-3 text-left transition-colors",
                           isSelected
-                            ? "glass-card-cyan-border border-primary/50"
+                            ? "border-primary/50"
                             : "border-transparent"
                         )}
                         aria-pressed={isSelected}
@@ -244,7 +244,7 @@ export default function OnboardingPage() {
               transition={transition}
               className="flex flex-col"
             >
-              <div className="glass-card glass-card-cyan-border glass-card-hover rounded-2xl p-8">
+              <div className="glass-card rounded-2xl p-8">
                 <h2 className="text-xl font-bold tracking-tight">
                   Create your first wallet
                 </h2>

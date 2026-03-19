@@ -87,7 +87,7 @@ export function RecentActivity() {
 
   if (recent.length === 0) {
     return (
-      <Card className="glass-card glass-card-hover">
+      <Card className="glass-card">
         <CardHeader>
           <CardTitle className="text-sm font-medium text-muted-foreground">
             Recent Activity
@@ -107,7 +107,7 @@ export function RecentActivity() {
   }
 
   return (
-    <Card className="glass-card glass-card-hover">
+    <Card className="glass-card">
       <CardHeader>
         <CardTitle className="text-sm font-medium text-muted-foreground">
           Recent Activity
@@ -138,7 +138,7 @@ export function RecentActivity() {
               </div>
               <span
                 className={`shrink-0 whitespace-nowrap text-right text-sm font-medium tabular-nums ${
-                  tx.type === "income" ? "text-emerald-400" : "text-amber-500"
+                  tx.type === "income" ? "text-emerald-600 dark:text-emerald-400" : "text-foreground"
                 }`}
                 title="Converted at Frankfurter rate"
               >

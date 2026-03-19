@@ -161,7 +161,7 @@ export function TransactionsTable() {
           <div className="flex-1" />
           <Skeleton className="h-9 w-40" />
         </div>
-        <Card className="glass-card glass-card-hover">
+        <Card className="glass-card">
           <CardContent className="p-0">
             <div className="overflow-x-auto min-h-[400px]">
               <table className="w-full text-sm">
@@ -273,7 +273,7 @@ export function TransactionsTable() {
           </Button>
         </div>
 
-        <Card className="glass-card glass-card-hover min-w-0 overflow-hidden">
+        <Card className="glass-card min-w-0 overflow-hidden">
           <CardContent className="p-0">
             {filtered.length === 0 ? (
               <EmptyState
@@ -362,8 +362,8 @@ export function TransactionsTable() {
                             <span
                               className={
                                 tx.type === "income"
-                                  ? "text-emerald-500"
-                                  : "text-red-400"
+                                  ? "text-emerald-600 dark:text-emerald-400"
+                                  : "text-foreground"
                               }
                             >
                               <span className="sr-only">

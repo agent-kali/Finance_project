@@ -60,9 +60,9 @@ export function WalletChart() {
 
   if (isLoading) {
     return (
-      <Card className="glass-card glass-card-chart rounded-2xl">
+      <Card className="glass-card">
         <CardHeader>
-          <Skeleton className="h-5 w-48" />
+          <Skeleton className="h-3 w-48" />
         </CardHeader>
         <CardContent>
           <Skeleton className="min-h-[300px] w-full rounded-lg" />
@@ -72,7 +72,7 @@ export function WalletChart() {
   }
 
   return (
-    <Card className="glass-card glass-card-hover glass-card-chart rounded-2xl">
+    <Card className="glass-card">
       <CardHeader>
         <CardTitle className="text-sm font-medium text-muted-foreground">
           Wallet Balances ({displayCurrency} equivalent)

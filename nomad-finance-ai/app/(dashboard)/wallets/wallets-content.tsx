@@ -41,15 +41,6 @@ import { Wallet, Plus, Trash2, Loader2, Star } from "lucide-react";
 import type { Wallet as WalletType } from "@/types/database.types";
 import { MobileFab } from "@/components/dashboard/mobile-fab";
 
-const CURRENCY_ACCENTS: Record<string, { border: string; text: string }> = {
-  EUR: { border: "border-l-cyan-400", text: "text-cyan-400" },
-  USD: { border: "border-l-emerald-400", text: "text-emerald-400" },
-  PLN: { border: "border-l-amber-500", text: "text-amber-500" },
-  GBP: { border: "border-l-violet-400", text: "text-violet-400" },
-  VND: { border: "border-l-orange-400", text: "text-orange-400" },
-};
-
-const DEFAULT_ACCENT = { border: "border-l-cyan-400", text: "text-cyan-400" };
 
 export function WalletsContent() {
   const router = useRouter();
@@ -137,7 +128,7 @@ export function WalletsContent() {
             initial={prefersReducedMotion ? false : { opacity: 0, scale: 0.95 }}
             animate={{ opacity: 1, scale: 1 }}
             transition={prefersReducedMotion ? { duration: 0 } : undefined}
-            className="glass-card glass-card-hover min-w-0 overflow-hidden rounded-xl px-5 py-3"
+            className="glass-card min-w-0 overflow-hidden rounded-xl px-5 py-3"
             title="Converted at Frankfurter rate"
           >
             <p className="text-xs font-medium uppercase tracking-wider text-muted-foreground">
@@ -157,7 +148,7 @@ export function WalletsContent() {
       {isLoading ? (
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
           {Array.from({ length: 3 }).map((_, i) => (
-            <Card key={i} className="glass-card glass-card-hover min-h-[140px]">
+            <Card key={i} className="glass-card min-h-[140px]">
               <CardHeader>
                 <Skeleton className="h-5 w-32" />
               </CardHeader>
@@ -174,7 +165,6 @@ export function WalletsContent() {
             const currency = w.currency as SupportedCurrency;
             const symbol = CURRENCY_SYMBOLS[currency] ?? "";
             const displayValue = convertCurrency(w.balance, currency, displayCurrency);
-            const accent = CURRENCY_ACCENTS[currency] ?? DEFAULT_ACCENT;
             const isOptimistic = w.id.startsWith("temp-");
 
             return (
@@ -189,13 +179,13 @@ export function WalletsContent() {
                   isOptimistic && "opacity-50 animate-pulse pointer-events-none"
                 )}
               >
-                <Card className={`glass-card glass-card-hover border-l-2 ${accent.border}`}>
+                <Card className="glass-card">
                   <CardHeader className="flex flex-row items-center justify-between pb-2">
                     <CardTitle className="text-xs font-medium uppercase tracking-wider text-muted-foreground">
                       {w.currency} Wallet
                     </CardTitle>
                     <div className="flex items-center gap-2">
-                      <span className={`text-2xl font-bold ${accent.text}`}>{symbol}</span>
+                      <span className="text-2xl font-bold text-muted-foreground">{symbol}</span>
                       {!isOptimistic && (
                       <Button
                         variant="ghost"
