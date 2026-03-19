@@ -3,6 +3,7 @@
 import dynamic from "next/dynamic";
 import { ErrorBoundary } from "@/components/error-boundary";
 import { SummaryCards } from "@/components/dashboard/summary-cards";
+import { AiInsightCard } from "@/components/dashboard/ai-insight-card";
 import { RecentActivity } from "@/components/dashboard/recent-activity";
 import { TimeRangeToggle } from "@/components/dashboard/time-range-toggle";
 import { useTimeRange } from "@/lib/time-range-context";
@@ -80,6 +81,9 @@ function TimeRangeContent() {
           <SummaryCards />
         </ErrorBoundary>
       </section>
+      <ErrorBoundary fallbackTitle="Failed to load AI insight">
+        <AiInsightCard />
+      </ErrorBoundary>
       <section aria-label="Recent activity">
         <ErrorBoundary fallbackTitle="Failed to load recent activity">
           <RecentActivity />
