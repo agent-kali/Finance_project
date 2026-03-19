@@ -8,8 +8,8 @@ import { useTransactions } from "@/lib/hooks/use-transactions";
 import { useWallets } from "@/lib/hooks/use-wallets";
 import { useTimeRange, type TimeRange } from "@/lib/time-range-context";
 import { useDisplayCurrency } from "@/lib/hooks/use-profile";
-import { getDateRange, getPeriodLabel } from "@/lib/date-utils";
-import { convertCurrency } from "@/lib/currency";
+import { getDateRange } from "@/lib/date-utils";
+import { convertCurrency, formatCurrency } from "@/lib/currency";
 import type { SupportedCurrency } from "@/lib/constants";
 
 function getPreviousPeriodRange(timeRange: TimeRange): { start: Date; end: Date } {
@@ -35,7 +35,8 @@ export function AiInsightCard() {
 
     const { start, end } = getDateRange(timeRange);
     const prev = getPreviousPeriodRange(timeRange);
-    const periodLabel = getPeriodLabel(timeRange).toLowerCase();
+    const periodLabel = timeRange === "Today" ? "today" : timeRange === "This Week" ? "this week" : "this month";
+    const previousLabel = timeRange === "Today" ? "last day" : timeRange === "This Week" ? "last week" : "last month";
 
     const currentExpenses = transactions
       .filter((t) => {
@@ -43,6 +44,16 @@ export function AiInsightCard() {
         return t.type === "expense" && d >= start && d <= end;
       })
       .reduce((s, t) => s + convert(t.amount, t.currency), 0);
+
+    const currentIncomeTransactions = transactions.filter((t) => {
+      const d = new Date(t.date);
+      return t.type === "income" && d >= start && d <= end;
+    });
+
+    const currentIncome = currentIncomeTransactions.reduce(
+      (s, t) => s + convert(t.amount, t.currency),
+      0
+    );
 
     const previousExpenses = transactions
       .filter((t) => {
@@ -71,11 +82,15 @@ export function AiInsightCard() {
         ? Math.round((topCategory[1] / currentExpenses) * 100)
         : 0;
 
+    if (currentIncome > 0 && currentExpenses === 0) {
+      return `Perfect ${timeRange === "Today" ? "day" : timeRange === "This Week" ? "week" : "month"} — all income, zero expenses.`;
+    }
+
     if (previousExpenses > 0 && currentExpenses > 0) {
       const change = ((currentExpenses - previousExpenses) / previousExpenses) * 100;
       if (Math.abs(change) >= 10) {
         const direction = change < 0 ? "dropped" : "increased";
-        return `Your expenses ${direction} ${Math.abs(Math.round(change))}% compared to last ${timeRange === "Today" ? "day" : timeRange === "This Week" ? "week" : "month"}.`;
+        return `Your spending ${direction} ${Math.abs(Math.round(change))}% compared to ${previousLabel}.`;
       }
     }
 
@@ -83,19 +98,19 @@ export function AiInsightCard() {
       return `${topCategory[0]} is ${topCategoryPct}% of your spending ${periodLabel}.`;
     }
 
-    const currentIncome = transactions
-      .filter((t) => {
-        const d = new Date(t.date);
-        return t.type === "income" && d >= start && d <= end;
-      })
-      .reduce((s, t) => s + convert(t.amount, t.currency), 0);
-
     if (currentIncome > 0 && currentExpenses > currentIncome) {
       return `You're spending more than you earn ${periodLabel}. Consider reviewing your expenses.`;
     }
 
-    const currencyCount = new Set(wallets.map((w) => w.currency)).size;
-    return `You have ${transactions.length} transactions across ${currencyCount} currenc${currencyCount === 1 ? "y" : "ies"}.`;
+    if (currentIncome > 0) {
+      return `Strong income ${timeRange === "Today" ? "day" : timeRange === "This Week" ? "week" : "period"} — ${formatCurrency(currentIncome, displayCurrency)} earned across ${currentIncomeTransactions.length} transaction${currentIncomeTransactions.length === 1 ? "" : "s"}.`;
+    }
+
+    if (topCategory && currentExpenses > 0) {
+      return `${topCategory[0]} is driving most of your spending ${periodLabel}.`;
+    }
+
+    return null;
   }, [transactions, wallets, timeRange, displayCurrency]);
 
   if (txLoading || walletsLoading || !insight) return null;

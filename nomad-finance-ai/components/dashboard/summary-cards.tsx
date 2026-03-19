@@ -1,16 +1,11 @@
 "use client";
 
-import Link from "next/link";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useWallets } from "@/lib/hooks/use-wallets";
 import { useTransactions } from "@/lib/hooks/use-transactions";
 import { useDisplayCurrency } from "@/lib/hooks/use-profile";
 import { useTimeRange } from "@/lib/time-range-context";
-import {
-  getDateRange,
-  getPeriodLabel,
-  getSavingsSubtitle,
-} from "@/lib/date-utils";
+import { getDateRange } from "@/lib/date-utils";
 import { useCurrencyConversion } from "@/lib/currency-conversion-context";
 import { convertCurrency, formatForCard } from "@/lib/currency";
 import type { SupportedCurrency } from "@/lib/constants";
@@ -28,7 +23,7 @@ export function SummaryCards() {
 
   if (isLoading) {
     return (
-      <div className="space-y-6">
+      <div className="space-y-10">
         <div>
           <Skeleton className="h-14 w-72 sm:h-16 sm:w-96" />
           <Skeleton className="mt-2 h-4 w-56" />
@@ -38,7 +33,6 @@ export function SummaryCards() {
             <div key={i} className="sm:px-6 first:sm:pl-0 last:sm:pr-0">
               <Skeleton className="h-3 w-20" />
               <Skeleton className="mt-2 h-8 w-28" />
-              <Skeleton className="mt-1 h-3 w-16" />
             </div>
           ))}
         </div>
@@ -46,9 +40,7 @@ export function SummaryCards() {
     );
   }
 
-  const periodLabel = getPeriodLabel(timeRange);
   const { start: rangeStart, end: rangeEnd } = getDateRange(timeRange);
-  const { start: weekStart, end: weekEnd } = getDateRange("This Week");
 
   const totalBalance = (wallets ?? []).reduce(
     (sum, w) =>
@@ -82,28 +74,7 @@ export function SummaryCards() {
       ? ((incomeInRange - expensesInRange) / incomeInRange) * 100
       : 0;
 
-  const weekTransactions = (transactions ?? []).filter((t) => {
-    const d = new Date(t.date);
-    return d >= weekStart && d <= weekEnd;
-  });
-  const incomeThisWeek = weekTransactions
-    .filter((t) => t.type === "income")
-    .reduce(
-      (sum, t) =>
-        sum + convertCurrency(t.amount, t.currency as SupportedCurrency, displayCurrency),
-      0
-    );
-  const expensesThisWeek = weekTransactions
-    .filter((t) => t.type === "expense")
-    .reduce(
-      (sum, t) =>
-        sum + convertCurrency(t.amount, t.currency as SupportedCurrency, displayCurrency),
-      0
-    );
-
   const totalBalanceFormatted = formatForCard(totalBalance, displayCurrency);
-  const thisWeekIncomeFormatted = formatForCard(incomeThisWeek, displayCurrency);
-  const thisWeekExpensesFormatted = formatForCard(expensesThisWeek, displayCurrency);
 
   const walletCount = wallets?.length ?? 0;
   const currencyCount = new Set(wallets?.map((w) => w.currency) ?? []).size;
@@ -116,28 +87,22 @@ export function SummaryCards() {
 
   const metrics = [
     {
-      label: `Income ${periodLabel.toLowerCase()}`,
+      label: "Income",
       value: formatForCard(incomeInRange, displayCurrency),
-      detail: `${rangeTransactions.filter((t) => t.type === "income").length} transactions`,
-      extra: `This week: ${thisWeekIncomeFormatted}`,
     },
     {
-      label: `Expenses ${periodLabel.toLowerCase()}`,
+      label: "Expenses",
       value: formatForCard(expensesInRange, displayCurrency),
-      detail: `${rangeTransactions.filter((t) => t.type === "expense").length} transactions`,
-      extra: `This week: ${thisWeekExpensesFormatted}`,
     },
     {
       label: "Savings rate",
-      value: `${savingsRate.toFixed(1)}%`,
-      detail: getSavingsSubtitle(timeRange, incomeInRange > 0),
-      extra: null as string | null,
+      value: `${Math.round(savingsRate)}%`,
       savingsRate,
     },
   ];
 
   return (
-    <div aria-live="polite" aria-atomic="true" className="space-y-6">
+    <div aria-live="polite" aria-atomic="true" className="space-y-10">
       {/* Hero balance */}
       <div>
         <div
@@ -146,25 +111,7 @@ export function SummaryCards() {
         >
           {totalBalanceFormatted}
         </div>
-        <p className="mt-1 text-sm text-muted-foreground">
-          {contextLine}
-          {walletCount > 0 && (
-            <>
-              {" \u00B7 "}
-              <Link href="/wallets" className="underline-offset-2 hover:underline hover:text-foreground transition-colors">
-                View wallets
-              </Link>
-            </>
-          )}
-          {walletCount === 0 && (
-            <>
-              {" "}
-              <Link href="/wallets" className="underline-offset-2 hover:underline hover:text-foreground transition-colors">
-                Create a wallet to get started
-              </Link>
-            </>
-          )}
-        </p>
+        {contextLine ? <p className="mt-1 text-sm text-muted-foreground">{contextLine}</p> : null}
       </div>
 
       {/* Metrics row */}
@@ -180,10 +127,6 @@ export function SummaryCards() {
             <p className="mt-1 text-2xl font-semibold tabular-nums text-foreground sm:text-3xl">
               {m.value}
             </p>
-            <p className="mt-0.5 text-xs text-muted-foreground">{m.detail}</p>
-            {m.extra && (
-              <p className="text-xs text-muted-foreground">{m.extra}</p>
-            )}
             {m.savingsRate !== undefined && (
               <div
                 className="mt-2 w-full max-w-[200px]"
@@ -199,9 +142,6 @@ export function SummaryCards() {
                     style={{ width: `${Math.min(100, (m.savingsRate / SAVINGS_GOAL_PCT) * 100)}%` }}
                   />
                 </div>
-                <p className="mt-1 text-[10px] text-muted-foreground">
-                  Toward {SAVINGS_GOAL_PCT}% goal
-                </p>
               </div>
             )}
           </div>

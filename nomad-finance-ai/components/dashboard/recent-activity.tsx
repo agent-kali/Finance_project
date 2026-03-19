@@ -160,6 +160,8 @@ export function RecentActivity() {
           {recent.map((tx) => {
             const isOptimistic = tx.id.startsWith("temp-");
             const Icon = getCategoryIcon(tx.category);
+            const merchant = getMerchant(tx);
+            const showCategory = merchant !== tx.category;
             return (
             <li
               key={tx.id}
@@ -173,12 +175,11 @@ export function RecentActivity() {
               </div>
               <div className="min-w-0 flex-1 overflow-hidden">
                 <span className="block truncate text-sm font-medium text-foreground">
-                  {getMerchant(tx)}
+                  {merchant}
                 </span>
                 <div className="mt-0.5 flex flex-wrap items-center gap-x-2 gap-y-0 text-xs text-muted-foreground">
-                  <span className="inline-flex shrink-0 rounded-md bg-muted/40 px-2 py-0.5 font-medium text-muted-foreground">
-                    {tx.category}
-                  </span>
+                  {showCategory && <span>{tx.category}</span>}
+                  {showCategory && <span aria-hidden>·</span>}
                   <span className="shrink-0 tabular-nums">{formatTime(tx)}</span>
                 </div>
               </div>
