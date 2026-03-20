@@ -41,6 +41,7 @@ const CATEGORY_EMOJI: Record<string, string> = {
 
 const STEP_EASE = [0.32, 0, 0.67, 0] as const;
 const SPRING = { type: "spring" as const, damping: 32, stiffness: 380 };
+const REDUCED_TRANSITION = { duration: 0.2 } as const;
 const TAP_SCALE = 0.94;
 
 type AddTransactionSheetProps = {
@@ -53,6 +54,11 @@ export function AddTransactionSheet({ open, onOpenChange }: AddTransactionSheetP
   const effectiveDefaultWalletId = useEffectiveDefaultWalletId();
   const isDemo = useDemoMode().isDemo;
   const reducedMotion = useReducedMotion();
+  const initialDate = new Date().toISOString().split("T")[0];
+  const initialTime = (() => {
+    const d = new Date();
+    return `${d.getHours().toString().padStart(2, "0")}:${d.getMinutes().toString().padStart(2, "0")}`;
+  })();
 
   const [step, setStep] = useState(1);
   const [stepDirection, setStepDirection] = useState(0);
@@ -60,14 +66,9 @@ export function AddTransactionSheet({ open, onOpenChange }: AddTransactionSheetP
   const [amountStr, setAmountStr] = useState("0");
   const [category, setCategory] = useState("");
   const [description, setDescription] = useState("");
-  const [dateStr, setDateStr] = useState(() =>
-    new Date().toISOString().split("T")[0]
-  );
-  const [timeStr, setTimeStr] = useState(() => {
-    const d = new Date();
-    return `${d.getHours().toString().padStart(2, "0")}:${d.getMinutes().toString().padStart(2, "0")}`;
-  });
-  const [walletId, setWalletId] = useState("");
+  const [dateStr, setDateStr] = useState(initialDate);
+  const [timeStr, setTimeStr] = useState(initialTime);
+  const [walletId, setWalletId] = useState(effectiveDefaultWalletId ?? wallets?.[0]?.id ?? "");
   const [saveSuccess, setSaveSuccess] = useState(false);
   const dateInputRef = useRef<HTMLInputElement>(null);
   const timeInputRef = useRef<HTMLInputElement>(null);
@@ -75,12 +76,10 @@ export function AddTransactionSheet({ open, onOpenChange }: AddTransactionSheetP
 
   const defaultWalletId =
     effectiveDefaultWalletId ?? wallets?.[0]?.id ?? "";
-  useEffect(() => {
-    if (walletId === "" && defaultWalletId) setWalletId(defaultWalletId);
-  }, [defaultWalletId, walletId]);
+  const effectiveWalletId = walletId || defaultWalletId;
 
   const currency =
-    (wallets?.find((w) => w.id === walletId || w.id === defaultWalletId)
+    (wallets?.find((w) => w.id === effectiveWalletId)
       ?.currency as SupportedCurrency) ?? "EUR";
   const symbol = CURRENCY_SYMBOLS[currency];
 
@@ -126,9 +125,7 @@ export function AddTransactionSheet({ open, onOpenChange }: AddTransactionSheetP
   const handleDragStartY = useRef(0);
   const isDraggingFromHandle = useRef(false);
 
-  const transition = reducedMotion
-    ? { duration: 0.2 }
-    : SPRING;
+  const transition = reducedMotion ? REDUCED_TRANSITION : SPRING;
 
   const handlePointerDownOnHandle = useCallback(() => {
     isDraggingFromHandle.current = true;
@@ -176,34 +173,17 @@ export function AddTransactionSheet({ open, onOpenChange }: AddTransactionSheetP
       setAmountStr("0");
       setCategory("");
       setDescription("");
-      setDateStr(new Date().toISOString().split("T")[0]);
-      setTimeStr(
-        `${new Date().getHours().toString().padStart(2, "0")}:${new Date().getMinutes().toString().padStart(2, "0")}`
-      );
+      setDateStr(initialDate);
+      setTimeStr(initialTime);
       setWalletId(defaultWalletId);
       setSaveSuccess(false);
       sheetY.set(0);
     });
-  }, [onOpenChange, defaultWalletId, sheetY, transition]);
+  }, [defaultWalletId, initialDate, initialTime, onOpenChange, sheetY, transition]);
 
   const handleClose = useCallback(() => {
     closeWithAnimation();
   }, [closeWithAnimation]);
-
-  useEffect(() => {
-    if (!open) return;
-    setStep(1);
-    setType("expense");
-    setAmountStr("0");
-    setCategory("");
-    setDescription("");
-    setDateStr(new Date().toISOString().split("T")[0]);
-    setTimeStr(
-      `${new Date().getHours().toString().padStart(2, "0")}:${new Date().getMinutes().toString().padStart(2, "0")}`
-    );
-    setWalletId(defaultWalletId);
-    setSaveSuccess(false);
-  }, [open, defaultWalletId]);
 
   const addDigit = (d: string) => {
     if (amountStr === "0" && d !== ".") {
@@ -232,9 +212,9 @@ export function AddTransactionSheet({ open, onOpenChange }: AddTransactionSheetP
     type === "income" ? [...INCOME_CATEGORIES] : [...EXPENSE_CATEGORIES];
 
   const handleSave = () => {
-    if (!walletId || amountNum <= 0 || !category) return;
+    if (!effectiveWalletId || amountNum <= 0 || !category) return;
     const payload = {
-      wallet_id: walletId,
+      wallet_id: effectiveWalletId,
       amount: amountNum,
       type,
       category,
@@ -324,7 +304,6 @@ export function AddTransactionSheet({ open, onOpenChange }: AddTransactionSheetP
               <Step2Category
                 key="step2"
                 direction={stepDirection}
-                type={type}
                 category={category}
                 setCategory={setCategory}
                 categories={categories}
@@ -549,7 +528,6 @@ function Step1Amount({
 
 function Step2Category({
   direction,
-  type,
   category,
   setCategory,
   categories,
@@ -558,7 +536,6 @@ function Step2Category({
   reducedMotion,
 }: {
   direction: number;
-  type: "expense" | "income";
   category: string;
   setCategory: (c: string) => void;
   categories: readonly string[];

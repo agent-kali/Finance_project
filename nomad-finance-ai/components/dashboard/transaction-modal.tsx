@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { useForm, useWatch } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -77,6 +77,23 @@ export function TransactionModal({
   const { isDemo } = useDemoMode();
   const effectiveDefaultWalletId = useEffectiveDefaultWalletId();
   const isEditing = !!transaction;
+  const initialValues: TransactionFormValues = transaction
+    ? {
+        type: transaction.type,
+        amount: transaction.amount,
+        category: transaction.category,
+        wallet_id: transaction.wallet_id,
+        date: transaction.date,
+        description: transaction.description ?? "",
+      }
+    : {
+        type: "expense",
+        amount: 0,
+        category: "",
+        wallet_id: effectiveDefaultWalletId ?? wallets?.[0]?.id ?? "",
+        date: new Date().toISOString().split("T")[0],
+        description: "",
+      };
 
   const mutation = useOptimisticMutation<Transaction, TransactionFormValues>({
     queryKey: ["transactions", isDemo],
@@ -116,45 +133,14 @@ export function TransactionModal({
 
   const form = useForm<TransactionFormValues>({
     resolver: zodResolver(transactionSchema),
-    defaultValues: {
-      type: "expense",
-      amount: 0,
-      category: "",
-      wallet_id: "",
-      date: new Date().toISOString().split("T")[0],
-      description: "",
-    },
+    defaultValues: initialValues,
   });
 
   const watchedType = useWatch({ control: form.control, name: "type" });
 
-  const [amountDisplay, setAmountDisplay] = useState<string>("");
-
-  useEffect(() => {
-    if (transaction) {
-      form.reset({
-        type: transaction.type,
-        amount: transaction.amount,
-        category: transaction.category,
-        wallet_id: transaction.wallet_id,
-        date: transaction.date,
-        description: transaction.description ?? "",
-      });
-      setAmountDisplay(
-        transaction.amount ? formatAmountDisplay(transaction.amount) : ""
-      );
-    } else {
-      form.reset({
-        type: "expense",
-        amount: 0,
-        category: "",
-        wallet_id: effectiveDefaultWalletId ?? wallets?.[0]?.id ?? "",
-        date: new Date().toISOString().split("T")[0],
-        description: "",
-      });
-      setAmountDisplay("");
-    }
-  }, [transaction, wallets, effectiveDefaultWalletId, form]);
+  const [amountDisplay, setAmountDisplay] = useState<string>(
+    transaction?.amount ? formatAmountDisplay(transaction.amount) : ""
+  );
 
   function onSubmit(values: TransactionFormValues) {
     mutation.mutate(values);

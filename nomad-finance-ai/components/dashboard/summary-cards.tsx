@@ -29,7 +29,7 @@ export function SummaryCards() {
           <Skeleton className="mt-2 h-4 w-56" />
         </div>
         <div className="rounded-2xl border border-border/30 bg-card/35 px-4 py-4 sm:px-6 sm:py-5">
-          <div className="grid grid-cols-3 divide-x divide-border/30">
+        <div className="grid grid-cols-3 divide-x divide-border/30">
           {Array.from({ length: 3 }).map((_, i) => (
               <div key={i} className="min-w-0 px-3 first:pl-0 last:pr-0 sm:px-6 sm:first:pl-0 sm:last:pr-0">
               <Skeleton className="h-3 w-20" />
@@ -127,7 +127,7 @@ export function SummaryCards() {
       {/* Metrics row */}
       <div className="rounded-2xl border border-border/30 bg-card/35 px-4 py-4 sm:px-6 sm:py-5">
         <div className="grid grid-cols-3 divide-x divide-border/30">
-        {metrics.map((m, i) => (
+        {metrics.map((m) => (
           <div
             key={m.id}
             className="min-w-0 px-3 first:pl-0 last:pr-0 sm:px-6 sm:first:pl-0 sm:last:pr-0"

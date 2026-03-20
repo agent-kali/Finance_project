@@ -7,7 +7,6 @@ import { useDemoMode } from "@/lib/demo-context";
 import {
   Card,
   CardContent,
-  CardHeader,
 } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -412,15 +411,20 @@ export function TransactionsTable() {
         </Card>
       </div>
 
-      <TransactionModal
-        open={modalOpen}
-        onOpenChange={setModalOpen}
-        transaction={editingTx}
-      />
-      <AddTransactionSheet
-        open={sheetOpen}
-        onOpenChange={setSheetOpen}
-      />
+      {modalOpen ? (
+        <TransactionModal
+          key={editingTx?.id ?? "new"}
+          open={modalOpen}
+          onOpenChange={setModalOpen}
+          transaction={editingTx}
+        />
+      ) : null}
+      {sheetOpen ? (
+        <AddTransactionSheet
+          open={sheetOpen}
+          onOpenChange={setSheetOpen}
+        />
+      ) : null}
     </>
   );
 }
