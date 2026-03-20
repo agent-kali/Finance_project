@@ -54,11 +54,11 @@ export function CategoryChart() {
 
   if (isLoading) {
     return (
-      <Card className="glass-card">
+      <Card className="glass-card flex h-full min-h-[360px] flex-col">
         <CardHeader>
           <Skeleton className="h-3 w-48" />
         </CardHeader>
-        <CardContent>
+        <CardContent className="flex-1">
           <Skeleton className="min-h-[300px] w-full rounded-lg" />
         </CardContent>
       </Card>
@@ -66,67 +66,67 @@ export function CategoryChart() {
   }
 
   return (
-    <Card className="glass-card">
+    <Card className="glass-card flex h-full min-h-[360px] flex-col">
       <CardHeader>
-        <CardTitle className="text-[11px] font-medium uppercase tracking-widest text-muted-foreground">
-          Spending by Category ({getPeriodLabel(timeRange)})
+        <CardTitle className="text-sm font-semibold uppercase tracking-wider text-muted-foreground">
+          Spending by Category
         </CardTitle>
       </CardHeader>
-      <CardContent className="min-w-0 overflow-hidden">
+      <CardContent className="flex min-w-0 flex-1 overflow-hidden">
         {listData.length === 0 ? (
           <EmptyState
             icon={PieChart}
             heading="No spending data"
-            className="min-h-[200px]"
+            className="min-h-[300px]"
           />
         ) : (
           <div
-            className="min-w-0 w-full"
+            className="flex min-h-[300px] min-w-0 w-full flex-col justify-center"
             role="img"
             aria-label={`Spending by category for ${getPeriodLabel(timeRange)}`}
           >
             {chartSummary && <p className="sr-only">{chartSummary}</p>}
-          <ul className="space-y-3">
-            {listData.map((entry, i) => {
-              const opacity = Math.max(0.2, 1 - i * 0.15);
-              const color = i === 0 ? ACCENT : accentAtOpacity(opacity);
-              const pct = maxValue > 0 ? (entry.value / maxValue) * 100 : 0;
-              return (
-                <li
-                  key={entry.name}
-                  className="flex min-w-0 items-center gap-2 sm:gap-3"
-                >
-                  <div
-                    className="h-2 w-2 shrink-0 rounded-full"
-                    style={{ backgroundColor: color }}
-                  />
-                  <span className="min-w-0 flex-1 truncate text-xs font-medium text-foreground sm:text-sm">
-                    {entry.name}
-                  </span>
-                  <div className="flex w-12 shrink-0 items-center sm:w-20">
-                    <div
-                      className="h-1 w-full overflow-hidden rounded-full bg-muted/60"
-                      role="presentation"
-                    >
-                      <div
-                        className="h-full rounded-full transition-all duration-300"
-                        style={{
-                          width: `${pct}%`,
-                          backgroundColor: color,
-                        }}
-                      />
-                    </div>
-                  </div>
-                  <span
-                    className="w-14 shrink-0 text-right text-sm font-medium tabular-nums text-foreground sm:w-20"
-                    title="Converted at Frankfurter rate"
+            <ul className="space-y-3">
+              {listData.map((entry, i) => {
+                const opacity = Math.max(0.2, 1 - i * 0.15);
+                const color = i === 0 ? ACCENT : accentAtOpacity(opacity);
+                const pct = maxValue > 0 ? (entry.value / maxValue) * 100 : 0;
+                return (
+                  <li
+                    key={entry.name}
+                    className="flex min-w-0 items-center gap-2 sm:gap-3"
                   >
-                    {formatCurrency(entry.value, displayCurrency)}
-                  </span>
-                </li>
-              );
-            })}
-          </ul>
+                    <div
+                      className="h-2 w-2 shrink-0 rounded-full"
+                      style={{ backgroundColor: color }}
+                    />
+                    <span className="min-w-0 flex-1 truncate text-xs font-medium text-foreground sm:text-sm">
+                      {entry.name}
+                    </span>
+                    <div className="flex w-12 shrink-0 items-center sm:w-20">
+                      <div
+                        className="h-1 w-full overflow-hidden rounded-full bg-muted/60"
+                        role="presentation"
+                      >
+                        <div
+                          className="h-full rounded-full transition-all duration-300"
+                          style={{
+                            width: `${pct}%`,
+                            backgroundColor: color,
+                          }}
+                        />
+                      </div>
+                    </div>
+                    <span
+                      className="w-14 shrink-0 text-right text-sm font-medium tabular-nums text-foreground sm:w-20"
+                      title="Converted at Frankfurter rate"
+                    >
+                      {formatCurrency(entry.value, displayCurrency)}
+                    </span>
+                  </li>
+                );
+              })}
+            </ul>
           </div>
         )}
       </CardContent>

@@ -18,11 +18,11 @@ const SpendingChart = dynamic(
   {
     ssr: false,
     loading: () => (
-      <Card className="glass-card">
+      <Card className="glass-card flex h-full min-h-[360px] flex-col">
         <CardHeader>
-          <Skeleton className="h-5 w-40" />
+          <Skeleton className="h-3 w-40" />
         </CardHeader>
-        <CardContent>
+        <CardContent className="flex-1">
           <Skeleton className="min-h-[300px] w-full rounded-lg" />
         </CardContent>
       </Card>
@@ -38,11 +38,11 @@ const CategoryChart = dynamic(
   {
     ssr: false,
     loading: () => (
-      <Card className="glass-card">
+      <Card className="glass-card flex h-full min-h-[360px] flex-col">
         <CardHeader>
-          <Skeleton className="h-5 w-40" />
+          <Skeleton className="h-3 w-40" />
         </CardHeader>
-        <CardContent>
+        <CardContent className="flex-1">
           <Skeleton className="min-h-[300px] w-full rounded-lg" />
         </CardContent>
       </Card>
@@ -58,11 +58,11 @@ const WalletChart = dynamic(
   {
     ssr: false,
     loading: () => (
-      <Card className="glass-card">
+      <Card className="glass-card flex min-h-[360px] flex-col">
         <CardHeader>
-          <Skeleton className="h-5 w-40" />
+          <Skeleton className="h-3 w-40" />
         </CardHeader>
-        <CardContent>
+        <CardContent className="flex-1">
           <Skeleton className="min-h-[300px] w-full rounded-lg" />
         </CardContent>
       </Card>
@@ -89,7 +89,7 @@ function TimeRangeContent() {
           <RecentActivity />
         </ErrorBoundary>
       </section>
-      <section aria-label="Spending and category charts" className="grid min-w-0 gap-6 lg:grid-cols-2">
+      <section aria-label="Spending and category charts" className="grid min-w-0 gap-6 lg:grid-cols-2 lg:items-stretch">
         <ErrorBoundary fallbackTitle="Failed to load spending chart">
           <SpendingChart />
         </ErrorBoundary>

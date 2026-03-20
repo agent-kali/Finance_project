@@ -244,11 +244,11 @@ export function SpendingChart() {
 
   if (isLoading) {
     return (
-      <Card className="glass-card">
+      <Card className="glass-card flex h-full min-h-[360px] flex-col">
         <CardHeader>
           <Skeleton className="h-3 w-48" />
         </CardHeader>
-        <CardContent>
+        <CardContent className="flex-1">
           <Skeleton className="min-h-[300px] w-full rounded-lg" />
         </CardContent>
       </Card>
@@ -271,13 +271,13 @@ export function SpendingChart() {
   };
 
   return (
-    <Card className="glass-card">
+    <Card className="glass-card flex h-full min-h-[360px] flex-col">
       <CardHeader>
-        <CardTitle className="text-[11px] font-medium uppercase tracking-widest text-muted-foreground">
+        <CardTitle className="text-sm font-semibold uppercase tracking-wider text-muted-foreground">
           {title}
         </CardTitle>
       </CardHeader>
-      <CardContent className="min-w-0 overflow-hidden">
+      <CardContent className="flex min-w-0 flex-1 overflow-hidden">
         <div
           ref={ref}
           className="h-[300px] min-w-0 w-full"

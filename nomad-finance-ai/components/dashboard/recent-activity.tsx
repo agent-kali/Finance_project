@@ -1,6 +1,7 @@
 "use client";
 
 import { useMemo } from "react";
+import Link from "next/link";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { EmptyState } from "@/components/ui/empty-state";
 import { cn } from "@/lib/utils";
@@ -130,10 +131,13 @@ export function RecentActivity() {
   if (recent.length === 0) {
     return (
       <Card className="glass-card">
-        <CardHeader>
-          <CardTitle className="text-[11px] font-medium uppercase tracking-widest text-muted-foreground">
+        <CardHeader className="flex flex-row items-center justify-between space-y-0">
+          <CardTitle className="text-sm font-semibold uppercase tracking-wider text-muted-foreground">
             Recent Activity
           </CardTitle>
+          <Link href="/transactions" className="text-xs font-medium text-primary">
+            View all -&gt;
+          </Link>
         </CardHeader>
         <CardContent className="p-0">
           <EmptyState
@@ -150,10 +154,13 @@ export function RecentActivity() {
 
   return (
     <Card className="glass-card">
-      <CardHeader>
-        <CardTitle className="text-[11px] font-medium uppercase tracking-widest text-muted-foreground">
+      <CardHeader className="flex flex-row items-center justify-between space-y-0">
+        <CardTitle className="text-sm font-semibold uppercase tracking-wider text-muted-foreground">
           Recent Activity
         </CardTitle>
+        <Link href="/transactions" className="text-xs font-medium text-primary">
+          View all -&gt;
+        </Link>
       </CardHeader>
       <CardContent>
         <ul className="divide-y divide-border/30">

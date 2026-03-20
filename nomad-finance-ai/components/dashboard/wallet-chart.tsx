@@ -58,11 +58,11 @@ export function WalletChart() {
 
   if (isLoading) {
     return (
-      <Card className="glass-card">
+      <Card className="glass-card flex min-h-[360px] flex-col">
         <CardHeader>
           <Skeleton className="h-3 w-48" />
         </CardHeader>
-        <CardContent>
+        <CardContent className="flex-1">
           <Skeleton className="min-h-[300px] w-full rounded-lg" />
         </CardContent>
       </Card>
@@ -70,13 +70,13 @@ export function WalletChart() {
   }
 
   return (
-    <Card className="glass-card">
+    <Card className="glass-card flex min-h-[360px] flex-col">
       <CardHeader>
-        <CardTitle className="text-[11px] font-medium uppercase tracking-widest text-muted-foreground">
-          Wallet Balances ({displayCurrency} equivalent)
+        <CardTitle className="text-sm font-semibold uppercase tracking-wider text-muted-foreground">
+          Wallet Balances
         </CardTitle>
       </CardHeader>
-      <CardContent className="min-w-0 overflow-hidden">
+      <CardContent className="flex min-w-0 flex-1 overflow-hidden">
         {chartData.length === 0 ? (
           <EmptyState
             icon={Wallet}
