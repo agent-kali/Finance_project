@@ -33,9 +33,10 @@ export function AiInsightCard() {
 
     const { start, end } = getDateRange(timeRange);
     const prev = getPreviousPeriodRange(timeRange);
-    const periodLabel = timeRange === "Today" ? "today" : timeRange === "This Week" ? "this week" : "this month";
-    const previousLabel =
-      timeRange === "Today" ? "the previous day" : timeRange === "This Week" ? "last week" : "last month";
+    const periodLabel =
+      timeRange === "Today" ? "today" : timeRange === "This Week" ? "this week" : "this month";
+    const previousPeriodLabel =
+      timeRange === "Today" ? "day" : timeRange === "This Week" ? "week" : "month";
 
     const currentExpenseTransactions = transactions.filter((t) => {
       const d = new Date(t.date);
@@ -61,9 +62,6 @@ export function AiInsightCard() {
       })
       .reduce((s, t) => s + convert(t.amount, t.currency), 0);
 
-    const savingsRate =
-      currentIncome > 0 ? Math.round(((currentIncome - currentExpenses) / currentIncome) * 100) : 0;
-
     const currentByCategory: Record<string, number> = {};
     currentExpenseTransactions.forEach((t) => {
       currentByCategory[t.category] =
@@ -79,21 +77,21 @@ export function AiInsightCard() {
         ? Math.round((topCategory[1] / currentExpenses) * 100)
         : 0;
 
+    if (currentExpenses === 0 && currentIncome > 0) {
+      return `Zero expenses ${periodLabel} - all income saved.`;
+    }
+
     if (previousExpenses > 0 && currentExpenses > 0) {
       const change = ((currentExpenses - previousExpenses) / previousExpenses) * 100;
       const changePct = Math.round(Math.abs(change));
       if (changePct > 0 && change < 0) {
-        return `Your spending is down ${changePct}% compared to ${previousLabel}.`;
+        return `Spending is down ${changePct}% compared to last ${previousPeriodLabel}.`;
       }
       if (changePct > 0 && change > 0) {
         return topCategory
-          ? `Spending is up ${changePct}% ${periodLabel}, and ${topCategory[0]} is the biggest driver.`
-          : `Spending is up ${changePct}% ${periodLabel}.`;
+          ? `Spending is up ${changePct}% - ${topCategory[0]} is the main driver.`
+          : `Spending is up ${changePct}%.`;
       }
-    }
-
-    if (savingsRate === 100) {
-      return `Zero expenses ${periodLabel} - all income saved.`;
     }
 
     if (topCategory && topCategoryPct >= 50) {
@@ -111,7 +109,7 @@ export function AiInsightCard() {
 
   return (
     <div className="w-full max-w-2xl">
-      <Card className="glass-card">
+      <Card className="glass-card border-border/30 bg-card">
         <CardContent className="flex flex-col gap-3 py-4 sm:flex-row sm:items-center sm:gap-4">
           <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-primary/10">
             <Sparkles className="h-4 w-4 text-primary" />

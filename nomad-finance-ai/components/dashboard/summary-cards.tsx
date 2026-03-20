@@ -89,15 +89,23 @@ export function SummaryCards() {
 
   const metrics = [
     {
+      id: "income",
       label: "Income",
       value: formatForCard(incomeInRange, displayCurrency),
     },
     {
+      id: "expenses",
       label: "Expenses",
       value: formatForCard(expensesInRange, displayCurrency),
     },
     {
-      label: "Savings rate",
+      id: "savings",
+      label: (
+        <>
+          <span className="sm:hidden">Savings</span>
+          <span className="hidden sm:inline">Savings rate</span>
+        </>
+      ),
       value: `${Math.round(savingsRate)}%`,
       savingsRate,
     },
@@ -121,7 +129,7 @@ export function SummaryCards() {
         <div className="grid grid-cols-3 divide-x divide-border/30">
         {metrics.map((m, i) => (
           <div
-            key={m.label}
+            key={m.id}
             className="min-w-0 px-3 first:pl-0 last:pr-0 sm:px-6 sm:first:pl-0 sm:last:pr-0"
           >
             <p className="text-[11px] font-medium uppercase tracking-widest text-muted-foreground">
