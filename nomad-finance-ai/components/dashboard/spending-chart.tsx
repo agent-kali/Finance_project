@@ -26,18 +26,18 @@ import type { SupportedCurrency } from "@/lib/constants";
 import { EmptyState } from "@/components/ui/empty-state";
 import { BarChart3 } from "lucide-react";
 
-const ACCENT = "#2dd4bf";
-const ACCENT_60 = "rgba(45, 212, 191, 0.6)";
-const ACCENT_30 = "rgba(45, 212, 191, 0.3)";
+const ACCENT = "#C9A96E";
+const ACCENT_60 = "#B8944F";
+const ACCENT_35 = "#A07D3A";
 const MIN_BAR_HEIGHT_PX = 4;
 
 const CHART_LIGHT = {
-  gridStroke: "oklch(0.88 0.01 270 / 0.4)",
-  tickFill: "oklch(0.5 0.02 270)",
+  gridStroke: "oklch(0.88 0.01 55 / 0.4)",
+  tickFill: "oklch(0.5 0.02 55)",
 };
 const CHART_DARK = {
-  gridStroke: "oklch(0.3 0.01 270 / 0.15)",
-  tickFill: "oklch(0.55 0.02 270)",
+  gridStroke: "oklch(0.25 0.008 55 / 0.15)",
+  tickFill: "oklch(0.55 0.02 60)",
 };
 
 function getChartTitle(timeRange: TimeRange): string {
@@ -273,7 +273,7 @@ export function SpendingChart() {
   return (
     <Card className="glass-card flex h-full min-h-[360px] flex-col">
       <CardHeader>
-        <CardTitle className="text-sm font-semibold uppercase tracking-wider text-muted-foreground">
+        <CardTitle className="text-xs font-semibold uppercase tracking-[0.15em] text-muted-foreground">
           {title}
         </CardTitle>
       </CardHeader>
@@ -362,7 +362,7 @@ export function SpendingChart() {
                       const h = Math.max(height, MIN_BAR_HEIGHT_PX);
                       const ny = height > 0 ? y : y + height - h;
                       const isDailyAvg = payload?.name === "Daily Avg";
-                      const barFill = isDailyAvg ? ACCENT_30 : ACCENT;
+                      const barFill = isDailyAvg ? ACCENT_35 : ACCENT;
                       return (
                         <rect
                           x={x}
@@ -379,7 +379,7 @@ export function SpendingChart() {
                     {(chartData as { name: string }[]).map((entry, i) => (
                       <Cell
                         key={i}
-                        fill={entry.name === "Today" ? ACCENT : ACCENT_30}
+                        fill={entry.name === "Today" ? ACCENT : ACCENT_35}
                       />
                     ))}
                   </Bar>
@@ -436,7 +436,7 @@ export function SpendingChart() {
                   <Bar
                     dataKey="lastWeek"
                     name="Last Week"
-                    fill={ACCENT_30}
+                    fill={ACCENT_35}
                     radius={[6, 6, 0, 0]}
                     strokeWidth={0}
                   />

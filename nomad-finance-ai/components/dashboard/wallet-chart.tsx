@@ -22,19 +22,15 @@ import { CURRENCY_SYMBOLS, type SupportedCurrency } from "@/lib/constants";
 import { EmptyState } from "@/components/ui/empty-state";
 import { Wallet } from "lucide-react";
 
-const ACCENT = "#2dd4bf";
-
-function accentAtOpacity(opacity: number): string {
-  return `rgba(45, 212, 191, ${opacity})`;
-}
+const WALLET_FILLS = ["#C9A96E", "#B8944F", "#A07D3A", "#8A6C30", "#735A28"];
 
 const CHART_LIGHT = {
-  gridStroke: "oklch(0.88 0.01 270 / 0.4)",
-  tickFill: "oklch(0.5 0.02 270)",
+  gridStroke: "oklch(0.88 0.01 55 / 0.4)",
+  tickFill: "oklch(0.5 0.02 55)",
 };
 const CHART_DARK = {
-  gridStroke: "oklch(0.3 0.01 270 / 0.15)",
-  tickFill: "oklch(0.55 0.02 270)",
+  gridStroke: "oklch(0.25 0.008 55 / 0.15)",
+  tickFill: "oklch(0.55 0.02 60)",
 };
 
 export function WalletChart() {
@@ -72,7 +68,7 @@ export function WalletChart() {
   return (
     <Card className="glass-card flex min-h-[360px] flex-col">
       <CardHeader>
-        <CardTitle className="text-sm font-semibold uppercase tracking-wider text-muted-foreground">
+        <CardTitle className="text-xs font-semibold uppercase tracking-[0.15em] text-muted-foreground">
           Wallet Balances
         </CardTitle>
       </CardHeader>
@@ -146,7 +142,7 @@ export function WalletChart() {
                           {formatCurrency(item.original, item.currency)}
                         </p>
                         <p className="text-xs text-muted-foreground">
-                          ≈ {formatCurrency(item.balance, displayCurrency)}
+                          &asymp; {formatCurrency(item.balance, displayCurrency)}
                         </p>
                       </div>
                     );
@@ -157,15 +153,12 @@ export function WalletChart() {
                   radius={[6, 6, 0, 0]}
                   isAnimationActive={!prefersReducedMotion}
                 >
-                  {chartData.map((_, i) => {
-                    const opacity = Math.max(0.3, 1 - i * 0.2);
-                    return (
-                      <Cell
-                        key={i}
-                        fill={i === 0 ? ACCENT : accentAtOpacity(opacity)}
-                      />
-                    );
-                  })}
+                  {chartData.map((_, i) => (
+                    <Cell
+                      key={i}
+                      fill={WALLET_FILLS[i % WALLET_FILLS.length]}
+                    />
+                  ))}
                 </Bar>
               </BarChart>
               );
