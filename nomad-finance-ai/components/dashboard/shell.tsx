@@ -159,7 +159,7 @@ export function DashboardShell({
             {/* Serif "N" logo */}
             <Link
               href="/dashboard"
-              className="flex h-10 w-10 items-center justify-center font-serif text-xl font-semibold text-foreground"
+              className="flex h-10 w-10 items-center justify-center text-xl font-semibold text-foreground"
               aria-label="Dashboard home"
             >
               N
@@ -208,7 +208,7 @@ export function DashboardShell({
                 <SheetContent side="left" className="w-64 p-0">
                   <SheetTitle className="sr-only">Navigation</SheetTitle>
                   <div className="flex h-14 items-center gap-2 border-b border-border/50 px-4">
-                    <span className="font-serif text-xl font-semibold text-foreground">N</span>
+                    <span className="text-xl font-semibold text-foreground">N</span>
                     <span className="font-semibold tracking-tight">{APP_NAME}</span>
                   </div>
                   <div className="px-3 py-4">

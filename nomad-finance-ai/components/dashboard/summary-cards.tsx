@@ -102,7 +102,7 @@ export function SummaryCards() {
         </p>
         <div
           key={displayCurrency}
-          className="relative z-10 mt-2 font-serif text-5xl font-light tabular-nums tracking-tight text-balance-cream sm:text-7xl md:text-8xl"
+          className="relative z-10 mt-2 text-5xl font-light tabular-nums tracking-tight text-balance-cream sm:text-7xl md:text-8xl"
         >
           {totalBalanceFormatted}
         </div>
