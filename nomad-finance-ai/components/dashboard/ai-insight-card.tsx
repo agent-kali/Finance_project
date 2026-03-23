@@ -2,6 +2,7 @@
 
 import { useMemo } from "react";
 import Link from "next/link";
+import { Sparkles } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useTransactions } from "@/lib/hooks/use-transactions";
 import { useTimeRange, type TimeRange } from "@/lib/time-range-context";
@@ -145,15 +146,27 @@ export function AiInsightCard() {
 
   if (txLoading) {
     return (
-      <div className="mx-auto w-full max-w-2xl space-y-4 py-6 text-center">
-        <Skeleton className="mx-auto h-5 w-5 rounded-full" />
-        <Skeleton className="mx-auto h-4 w-72" />
-        <div className="flex justify-center gap-2">
-          <Skeleton className="h-8 w-32 rounded-full" />
-          <Skeleton className="h-8 w-28 rounded-full" />
-          <Skeleton className="h-8 w-36 rounded-full" />
+      <section aria-label="AI insight" className="px-4 py-6 sm:px-0">
+        <div
+          className="mx-auto w-full max-w-2xl rounded-xl border px-6 py-5 text-center"
+          style={{
+            borderColor: "rgba(201, 169, 110, 0.28)",
+            backgroundColor: "rgba(201, 169, 110, 0.03)",
+            boxShadow:
+              "0 0 20px rgba(201, 169, 110, 0.08), 0 0 40px rgba(201, 169, 110, 0.04)",
+          }}
+        >
+          <div className="space-y-4">
+            <Skeleton className="mx-auto h-5 w-5 rounded-full" />
+            <Skeleton className="mx-auto h-4 w-72 max-w-full" />
+            <div className="flex flex-wrap items-center justify-center gap-2">
+              <Skeleton className="h-8 w-32 rounded-full" />
+              <Skeleton className="h-8 w-28 rounded-full" />
+              <Skeleton className="h-8 w-36 rounded-full" />
+            </div>
+          </div>
         </div>
-      </div>
+      </section>
     );
   }
 
@@ -166,26 +179,33 @@ export function AiInsightCard() {
   ];
 
   return (
-    <section aria-label="AI insight" className="py-6">
-      <div className="mx-auto w-full max-w-2xl space-y-5 text-center">
-        <span className="block text-lg text-[#C9A96E]" aria-hidden="true">
-          &#10022;
-        </span>
-        <p className="text-sm leading-relaxed italic text-[#C9A96E]">
-          {insight}
-        </p>
-        <div className="flex flex-wrap items-center justify-center gap-2">
-          {pills.map((pill) => (
-            <Link
-              key={pill.label}
-              href={pill.href}
-              className="rounded-full border border-border/20 px-4 py-1.5 text-xs text-muted-foreground transition-colors hover:border-border/40 hover:text-foreground"
-            >
-              {pill.label}
-            </Link>
-          ))}
+    <section aria-label="AI insight" className="px-4 py-6 sm:px-0">
+      <div
+        className="mx-auto w-full max-w-2xl rounded-xl border px-6 py-5 text-center"
+        style={{
+          borderColor: "rgba(201, 169, 110, 0.28)",
+          backgroundColor: "rgba(201, 169, 110, 0.03)",
+          boxShadow:
+            "0 0 20px rgba(201, 169, 110, 0.08), 0 0 40px rgba(201, 169, 110, 0.04)",
+        }}
+      >
+        <div className="space-y-5">
+          <Sparkles className="mx-auto h-5 w-5 text-[#D8B67B]" aria-hidden="true" />
+          <p className="text-sm leading-relaxed italic text-[#C9A96E]">
+            {insight}
+          </p>
+          <div className="flex flex-wrap items-center justify-center gap-2">
+            {pills.map((pill) => (
+              <Link
+                key={pill.label}
+                href={pill.href}
+                className="rounded-full border border-[rgba(201,169,110,0.25)] px-4 py-1.5 text-xs text-muted-foreground transition-colors hover:border-[rgba(201,169,110,0.4)] hover:text-foreground"
+              >
+                {pill.label}
+              </Link>
+            ))}
+          </div>
         </div>
-        <hr className="border-border/15" />
       </div>
     </section>
   );
