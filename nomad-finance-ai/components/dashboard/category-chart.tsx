@@ -14,12 +14,9 @@ import { PieChart } from "lucide-react";
 
 const SEGMENT_COLORS = [
   "#C9A96E",
-  "#C27C6B",
-  "#7A9B6D",
-  "#A78BA5",
-  "#CC8844",
-  "#8A9BAE",
-  "#A89080",
+  "#D4907A",
+  "#8BA089",
+  "#B08D4A",
 ];
 
 export function CategoryChart() {
@@ -65,7 +62,7 @@ export function CategoryChart() {
           <Skeleton className="h-3 w-48" />
         </CardHeader>
         <CardContent className="flex-1">
-          <Skeleton className="min-h-[300px] w-full rounded-lg" />
+          <Skeleton className="min-h-[220px] w-full rounded-lg" />
         </CardContent>
       </Card>
     );
@@ -83,10 +80,10 @@ export function CategoryChart() {
           <EmptyState
             icon={PieChart}
             heading="No spending data"
-            className="min-h-[300px]"
+            className="min-h-[220px]"
           />
         ) : listData.length === 1 ? (
-          <div className="flex min-h-[300px] w-full flex-col items-center justify-center text-center">
+          <div className="flex min-h-[220px] w-full flex-col items-center justify-center text-center">
             <p className="max-w-sm text-sm text-muted-foreground">
               All spending {periodText}:{" "}
               <span className="font-medium text-foreground">
@@ -99,14 +96,14 @@ export function CategoryChart() {
           </div>
         ) : (
           <div
-            className="flex min-h-[300px] min-w-0 w-full flex-col justify-center gap-6"
+            className="flex min-h-[220px] min-w-0 w-full flex-col justify-center gap-5"
             role="img"
             aria-label={`Spending by category for ${getPeriodLabel(timeRange)}`}
           >
             {chartSummary && <p className="sr-only">{chartSummary}</p>}
 
             {/* Horizontal stacked bar */}
-            <div className="flex h-6 w-full overflow-hidden rounded-md" role="presentation">
+            <div className="flex h-4 w-full overflow-hidden rounded-full" role="presentation">
               {listData.map((entry, i) => {
                 const pct = total > 0 ? (entry.value / total) * 100 : 0;
                 if (pct < 0.5) return null;
@@ -122,24 +119,6 @@ export function CategoryChart() {
                   />
                 );
               })}
-            </div>
-
-            {/* Legend */}
-            <div className="flex flex-wrap items-center gap-x-5 gap-y-2">
-              {listData.slice(0, 6).map((entry, i) => (
-                <div key={entry.name} className="flex items-center gap-1.5">
-                  <div
-                    className="h-2.5 w-2.5 shrink-0 rounded-sm"
-                    style={{ backgroundColor: SEGMENT_COLORS[i % SEGMENT_COLORS.length] }}
-                  />
-                  <span className="text-xs text-muted-foreground">{entry.name}</span>
-                </div>
-              ))}
-              {listData.length > 6 && (
-                <span className="text-xs text-muted-foreground">
-                  +{listData.length - 6} more
-                </span>
-              )}
             </div>
 
             {/* Detailed list */}

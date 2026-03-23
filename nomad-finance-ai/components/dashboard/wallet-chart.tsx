@@ -22,14 +22,14 @@ import { CURRENCY_SYMBOLS, type SupportedCurrency } from "@/lib/constants";
 import { EmptyState } from "@/components/ui/empty-state";
 import { Wallet } from "lucide-react";
 
-const WALLET_FILLS = ["#C9A96E", "#B8944F", "#A07D3A", "#8A6C30", "#735A28"];
+const WALLET_FILLS = ["#C9A96E", "#B08D4A", "#8B7039", "#C9A96E", "#B08D4A"];
 
 const CHART_LIGHT = {
-  gridStroke: "oklch(0.88 0.01 55 / 0.4)",
+  gridStroke: "oklch(0.88 0.01 55 / 0.12)",
   tickFill: "oklch(0.5 0.02 55)",
 };
 const CHART_DARK = {
-  gridStroke: "oklch(0.25 0.008 55 / 0.15)",
+  gridStroke: "oklch(0.25 0.008 55 / 0.12)",
   tickFill: "oklch(0.55 0.02 60)",
 };
 
@@ -59,7 +59,7 @@ export function WalletChart() {
           <Skeleton className="h-3 w-48" />
         </CardHeader>
         <CardContent className="flex-1">
-          <Skeleton className="min-h-[300px] w-full rounded-lg" />
+          <Skeleton className="min-h-[220px] w-full rounded-lg" />
         </CardContent>
       </Card>
     );
@@ -78,10 +78,10 @@ export function WalletChart() {
             icon={Wallet}
             heading="No wallets yet"
             subtext="Create a wallet to see your balance breakdown"
-            className="min-h-[300px]"
+            className="min-h-[220px]"
           />
         ) : chartData.length === 1 ? (
-          <div className="flex min-h-[300px] w-full items-center justify-center">
+          <div className="flex min-h-[220px] w-full items-center justify-center">
             <div className="w-full max-w-sm rounded-2xl border border-border/30 bg-card/35 px-5 py-5 text-center">
               <p className="text-[11px] font-medium uppercase tracking-[0.15em] text-muted-foreground">
                 {chartData[0].currency} Wallet
@@ -102,7 +102,7 @@ export function WalletChart() {
         ) : (
           <div
             ref={ref}
-            className="h-[300px] min-w-0 w-full"
+            className="h-[220px] min-w-0 w-full"
             role="img"
             aria-label={`Wallet balances in ${displayCurrency} equivalent`}
           >
@@ -116,7 +116,7 @@ export function WalletChart() {
             </p>
             {width > 0 && height > 0 && (() => {
               const isNarrow = width < 400;
-              const tickFontSize = isNarrow ? 10 : 11;
+              const tickFontSize = isNarrow ? 11 : 12;
               const formatTick = (v: number) =>
                 isNarrow ? formatCompact(v, displayCurrency) : formatCurrency(v, displayCurrency);
               return (
@@ -124,11 +124,10 @@ export function WalletChart() {
                 width={width}
                 height={height}
                 data={chartData}
-                margin={{ top: 8, right: 8, left: isNarrow ? 40 : 28, bottom: 0 }}
-                barSize={Math.min(
-                  52,
-                  Math.max(24, Math.floor((width - 60) / Math.max(chartData.length, 1)))
-                )}
+                margin={{ top: 8, right: 8, left: isNarrow ? 42 : 32, bottom: 0 }}
+                barSize={32}
+                maxBarSize={40}
+                barCategoryGap="30%"
               >
                 <CartesianGrid
                   strokeDasharray="3 3"
@@ -140,12 +139,14 @@ export function WalletChart() {
                   axisLine={false}
                   tickLine={false}
                   tick={{ fill: chartColors.tickFill, fontSize: tickFontSize }}
+                  tickMargin={10}
                 />
                 <YAxis
                   axisLine={false}
                   tickLine={false}
                   tick={{ fill: chartColors.tickFill, fontSize: tickFontSize }}
                   tickFormatter={(v: number) => formatTick(v)}
+                  tickMargin={10}
                 />
                 <Tooltip
                   cursor={false}
@@ -155,8 +156,16 @@ export function WalletChart() {
                     if (!active || !payload?.length) return null;
                     const item = payload[0].payload as (typeof chartData)[number];
                     return (
-                      <div className="glass-tooltip rounded-xl px-4 py-3" title="Converted at Frankfurter rate">
-                        <p className="text-sm font-semibold text-foreground">{item.name}</p>
+                      <div
+                        className="rounded-lg px-3 py-2.5 text-sm"
+                        style={{
+                          backgroundColor: "hsl(var(--card))",
+                          border: "1px solid rgba(201, 169, 110, 0.2)",
+                          boxShadow: "0 8px 24px rgba(0, 0, 0, 0.12)",
+                        }}
+                        title="Converted at Frankfurter rate"
+                      >
+                        <p className="text-xs text-muted-foreground">{item.name}</p>
                         <p className="text-sm font-medium text-foreground">
                           {formatCurrency(item.original, item.currency)}
                         </p>
@@ -169,8 +178,9 @@ export function WalletChart() {
                 />
                 <Bar
                   dataKey="balance"
-                  radius={[6, 6, 0, 0]}
+                  radius={[4, 4, 0, 0]}
                   isAnimationActive={!prefersReducedMotion}
+                  minPointSize={6}
                 >
                   {chartData.map((_, i) => (
                     <Cell

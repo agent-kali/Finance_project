@@ -27,16 +27,16 @@ import { EmptyState } from "@/components/ui/empty-state";
 import { BarChart3 } from "lucide-react";
 
 const ACCENT = "#C9A96E";
-const ACCENT_60 = "#B8944F";
-const ACCENT_35 = "#A07D3A";
+const ACCENT_60 = "#B08D4A";
+const ACCENT_35 = "#8B7039";
 const MIN_BAR_HEIGHT_PX = 4;
 
 const CHART_LIGHT = {
-  gridStroke: "oklch(0.88 0.01 55 / 0.4)",
+  gridStroke: "oklch(0.88 0.01 55 / 0.12)",
   tickFill: "oklch(0.5 0.02 55)",
 };
 const CHART_DARK = {
-  gridStroke: "oklch(0.25 0.008 55 / 0.15)",
+  gridStroke: "oklch(0.25 0.008 55 / 0.12)",
   tickFill: "oklch(0.55 0.02 60)",
 };
 
@@ -268,7 +268,7 @@ export function SpendingChart() {
           <Skeleton className="h-3 w-48" />
         </CardHeader>
         <CardContent className="flex-1">
-          <Skeleton className="min-h-[300px] w-full rounded-lg" />
+          <Skeleton className="min-h-[220px] w-full rounded-lg" />
         </CardContent>
       </Card>
     );
@@ -277,8 +277,8 @@ export function SpendingChart() {
   const title = getChartTitle(timeRange);
 
   const isNarrow = width > 0 && width < 400;
-  const chartMargin = { top: 8, right: 8, left: isNarrow ? 40 : 28, bottom: 0 };
-  const tickFontSize = isNarrow ? 10 : 11;
+  const chartMargin = { top: 8, right: 8, left: isNarrow ? 42 : 32, bottom: 0 };
+  const tickFontSize = isNarrow ? 11 : 12;
   const formatTick = (v: number) =>
     isNarrow ? formatCompact(v, displayCurrency) : formatCurrency(v, displayCurrency);
 
@@ -299,7 +299,7 @@ export function SpendingChart() {
       <CardContent className="flex min-w-0 flex-1 overflow-hidden">
         <div
           ref={ref}
-          className="h-[300px] min-w-0 w-full"
+          className="h-[220px] min-w-0 w-full"
           role="img"
           aria-label={chartAriaLabel}
         >
@@ -307,7 +307,7 @@ export function SpendingChart() {
             <p className="sr-only">{chartSummary}</p>
           )}
           {todaySparseState ? (
-            <div className="flex min-h-[300px] w-full flex-col items-center justify-center text-center">
+            <div className="flex min-h-[220px] w-full flex-col items-center justify-center text-center">
               <p className="text-sm font-medium text-foreground">{todaySparseState.heading}</p>
               <p className="mt-2 max-w-sm text-sm text-muted-foreground">
                 {todaySparseState.subtext}
@@ -324,12 +324,12 @@ export function SpendingChart() {
               icon={BarChart3}
               heading="No spending data"
               subtext={getEmptyMessage(timeRange)}
-              className="min-h-[300px]"
+              className="min-h-[220px]"
             />
           ) : width > 0 && height > 0 && chartData.length > 0 ? (
             <>
               {chartType === "today" && (
-                <BarChart {...sharedChartProps} data={chartData}>
+                <BarChart {...sharedChartProps} data={chartData} barSize={32} maxBarSize={40} barCategoryGap="34%">
                   <CartesianGrid
                     strokeDasharray="3 3"
                     stroke={chartColors.gridStroke}
@@ -340,6 +340,7 @@ export function SpendingChart() {
                     axisLine={false}
                     tickLine={false}
                     tick={{ fill: chartColors.tickFill, fontSize: tickFontSize }}
+                    tickMargin={10}
                     tickFormatter={(name) =>
                       name === "Today" && todayValueZero ? "No data yet" : name
                     }
@@ -348,6 +349,7 @@ export function SpendingChart() {
                     axisLine={false}
                     tickLine={false}
                     tick={{ fill: chartColors.tickFill, fontSize: tickFontSize }}
+                    tickMargin={10}
                     tickFormatter={(v: number) => formatTick(v)}
                   />
                   <Tooltip
@@ -359,8 +361,15 @@ export function SpendingChart() {
                       const rawLabel = (payload[0].payload as { name: string }).name;
                       const displayLabel = rawLabel === "Today" && todayValueZero ? "No data yet" : rawLabel;
                       return (
-                        <div className="glass-tooltip rounded-xl px-4 py-3">
-                          <p className="mb-1 text-sm font-semibold text-foreground">{displayLabel}</p>
+                        <div
+                          className="rounded-lg px-3 py-2.5 text-sm"
+                          style={{
+                            backgroundColor: "hsl(var(--card))",
+                            border: "1px solid rgba(201, 169, 110, 0.2)",
+                            boxShadow: "0 8px 24px rgba(0, 0, 0, 0.12)",
+                          }}
+                        >
+                          <p className="mb-1 text-xs text-muted-foreground">{displayLabel}</p>
                           {payload.map((entry) => (
                             <p key={entry.name} className="text-sm text-muted-foreground">
                               <span className="capitalize text-foreground">
@@ -378,8 +387,9 @@ export function SpendingChart() {
                   />
                   <Bar
                     dataKey="value"
-                    radius={[6, 6, 0, 0]}
+                    radius={[4, 4, 0, 0]}
                     strokeWidth={0}
+                    minPointSize={6}
                     shape={(
                       props: {
                         x: number;
@@ -402,7 +412,7 @@ export function SpendingChart() {
                           width={width}
                           height={h}
                           fill={barFill}
-                          rx={6}
+                          rx={4}
                           ry={0}
                         />
                       );
@@ -419,7 +429,7 @@ export function SpendingChart() {
               )}
 
               {chartType === "week" && (
-                <BarChart {...sharedChartProps} data={chartData}>
+                <BarChart {...sharedChartProps} data={chartData} maxBarSize={14} barGap={8} barCategoryGap="28%">
                   <CartesianGrid
                     strokeDasharray="3 3"
                     stroke={chartColors.gridStroke}
@@ -430,11 +440,13 @@ export function SpendingChart() {
                     axisLine={false}
                     tickLine={false}
                     tick={{ fill: chartColors.tickFill, fontSize: tickFontSize }}
+                    tickMargin={10}
                   />
                   <YAxis
                     axisLine={false}
                     tickLine={false}
                     tick={{ fill: chartColors.tickFill, fontSize: tickFontSize }}
+                    tickMargin={10}
                     tickFormatter={(v: number) => formatTick(v)}
                   />
                   <Tooltip
@@ -444,8 +456,16 @@ export function SpendingChart() {
                     content={({ active, payload, label }) => {
                       if (!active || !payload?.length) return null;
                       return (
-                        <div className="glass-tooltip rounded-xl px-4 py-3" title="Converted at Frankfurter rate">
-                          <p className="mb-1 text-sm font-semibold text-foreground">{label}</p>
+                        <div
+                          className="rounded-lg px-3 py-2.5 text-sm"
+                          style={{
+                            backgroundColor: "hsl(var(--card))",
+                            border: "1px solid rgba(201, 169, 110, 0.2)",
+                            boxShadow: "0 8px 24px rgba(0, 0, 0, 0.12)",
+                          }}
+                          title="Converted at Frankfurter rate"
+                        >
+                          <p className="mb-1 text-xs text-muted-foreground">{label}</p>
                           {payload.map((entry) => (
                             <p key={entry.name} className="text-sm text-muted-foreground">
                               <span className="capitalize text-foreground">{entry.name}</span>:{" "}
@@ -462,15 +482,17 @@ export function SpendingChart() {
                     dataKey="thisWeek"
                     name="This Week"
                     fill={ACCENT}
-                    radius={[6, 6, 0, 0]}
+                    radius={[4, 4, 0, 0]}
                     strokeWidth={0}
+                    minPointSize={5}
                   />
                   <Bar
                     dataKey="lastWeek"
                     name="Last Week"
                     fill={ACCENT_35}
-                    radius={[6, 6, 0, 0]}
+                    radius={[4, 4, 0, 0]}
                     strokeWidth={0}
+                    minPointSize={5}
                   />
                 </BarChart>
               )}
@@ -497,11 +519,13 @@ export function SpendingChart() {
                     axisLine={false}
                     tickLine={false}
                     tick={{ fill: chartColors.tickFill, fontSize: tickFontSize }}
+                    tickMargin={10}
                   />
                   <YAxis
                     axisLine={false}
                     tickLine={false}
                     tick={{ fill: chartColors.tickFill, fontSize: tickFontSize }}
+                    tickMargin={10}
                     tickFormatter={(v: number) => formatTick(v)}
                   />
                   <Tooltip
@@ -511,8 +535,16 @@ export function SpendingChart() {
                     content={({ active, payload, label }) => {
                       if (!active || !payload?.length) return null;
                       return (
-                        <div className="glass-tooltip rounded-xl px-4 py-3" title="Converted at Frankfurter rate">
-                          <p className="mb-1 text-sm font-semibold text-foreground">{label}</p>
+                        <div
+                          className="rounded-lg px-3 py-2.5 text-sm"
+                          style={{
+                            backgroundColor: "hsl(var(--card))",
+                            border: "1px solid rgba(201, 169, 110, 0.2)",
+                            boxShadow: "0 8px 24px rgba(0, 0, 0, 0.12)",
+                          }}
+                          title="Converted at Frankfurter rate"
+                        >
+                          <p className="mb-1 text-xs text-muted-foreground">{label}</p>
                           {payload.map((entry) => (
                             <p key={entry.name} className="text-sm text-muted-foreground">
                               <span className="capitalize text-foreground">{entry.name}</span>:{" "}
