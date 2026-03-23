@@ -15,6 +15,13 @@ const W_EUR = "wallet-eur-0001";
 const W_USD = "wallet-usd-0002";
 const W_PLN = "wallet-pln-0003";
 
+function formatLocalDate(date: Date): string {
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, "0");
+  const day = String(date.getDate()).padStart(2, "0");
+  return `${year}-${month}-${day}`;
+}
+
 export const DEMO_WALLETS: Wallet[] = [
   { id: W_EUR, user_id: DEMO_USER_ID, currency: "EUR", balance: 4250.0, created_at: "2025-08-01T00:00:00Z" },
   { id: W_USD, user_id: DEMO_USER_ID, currency: "USD", balance: 2180.5, created_at: "2025-08-01T00:00:00Z" },
@@ -24,7 +31,13 @@ export const DEMO_WALLETS: Wallet[] = [
 function d(monthsAgo: number, day: number): string {
   const now = new Date();
   const date = new Date(now.getFullYear(), now.getMonth() - monthsAgo, day);
-  return date.toISOString().split("T")[0];
+  return formatLocalDate(date);
+}
+
+function daysAgo(days: number): string {
+  const now = new Date();
+  const date = new Date(now.getFullYear(), now.getMonth(), now.getDate() - days);
+  return formatLocalDate(date);
 }
 
 let txId = 0;
@@ -45,6 +58,7 @@ export const DEMO_TRANSACTIONS: Transaction[] = [
   tx({ wallet_id: W_EUR, type: "income", amount: 3200, currency: "EUR", category: "Freelance", description: "Client payment — website redesign", date: d(0, 2) }),
   tx({ wallet_id: W_EUR, type: "income", amount: 2500, currency: "EUR", category: "Salary", description: "Monthly retainer — consulting", date: d(0, 1) }),
   tx({ wallet_id: W_USD, type: "income", amount: 850, currency: "USD", category: "Freelance", description: "Logo design project", date: d(0, 5) }),
+  tx({ wallet_id: W_USD, type: "income", amount: 620, currency: "USD", category: "Freelance", description: "Rush homepage refresh", date: daysAgo(0) }),
   tx({ wallet_id: W_EUR, type: "expense", amount: 1100, currency: "EUR", category: "Housing", description: "Airbnb Lisbon — 1 month", date: d(0, 1) }),
   tx({ wallet_id: W_EUR, type: "expense", amount: 125, currency: "EUR", category: "Coworking", description: "WeWork day pass x5", date: d(0, 3) }),
   tx({ wallet_id: W_EUR, type: "expense", amount: 85, currency: "EUR", category: "Food & Dining", description: "Groceries — week 1", date: d(0, 4) }),
@@ -53,6 +67,10 @@ export const DEMO_TRANSACTIONS: Transaction[] = [
   tx({ wallet_id: W_USD, type: "expense", amount: 83, currency: "USD", category: "Health & Insurance", description: "SafetyWing insurance", date: d(0, 1) }),
   tx({ wallet_id: W_USD, type: "expense", amount: 45, currency: "USD", category: "SaaS & Tools", description: "Figma + Notion + Vercel", date: d(0, 1) }),
   tx({ wallet_id: W_EUR, type: "expense", amount: 22, currency: "EUR", category: "Entertainment", description: "Spotify + Netflix", date: d(0, 1) }),
+  tx({ wallet_id: W_EUR, type: "expense", amount: 46, currency: "EUR", category: "Food & Dining", description: "Brunch with client", date: daysAgo(0) }),
+  tx({ wallet_id: W_EUR, type: "expense", amount: 18, currency: "EUR", category: "Transportation", description: "Metro and airport shuttle", date: daysAgo(0) }),
+  tx({ wallet_id: W_USD, type: "expense", amount: 31, currency: "USD", category: "SaaS & Tools", description: "Cursor + hosting top-up", date: daysAgo(1) }),
+  tx({ wallet_id: W_EUR, type: "expense", amount: 27, currency: "EUR", category: "Coworking", description: "Half-day coworking pass", date: daysAgo(2) }),
 
   // --- Month 1 ---
   tx({ wallet_id: W_EUR, type: "income", amount: 2500, currency: "EUR", category: "Salary", description: "Monthly retainer — consulting", date: d(1, 1) }),

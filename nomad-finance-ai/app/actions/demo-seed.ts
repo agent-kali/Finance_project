@@ -10,6 +10,13 @@ const DEMO_WALLETS = [
 
 type Currency = "EUR" | "USD" | "VND" | "GBP" | "PLN";
 
+function formatLocalDate(date: Date): string {
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, "0");
+  const day = String(date.getDate()).padStart(2, "0");
+  return `${year}-${month}-${day}`;
+}
+
 function generateDemoTransactions(
   userId: string,
   walletMap: Record<string, { id: string; currency: Currency }>
@@ -78,9 +85,69 @@ function generateDemoTransactions(
         currency: t.cur,
         category: t.category,
         description: t.desc,
-        date: d.toISOString().split("T")[0],
+        date: formatLocalDate(d),
       });
     }
+  }
+
+  const guaranteedRecent = [
+    {
+      type: "income" as const,
+      category: "Freelance",
+      description: "Rush homepage refresh",
+      currency: "USD" as const,
+      amount: 620,
+      daysAgo: 0,
+    },
+    {
+      type: "expense" as const,
+      category: "Food & Dining",
+      description: "Brunch with client",
+      currency: "EUR" as const,
+      amount: 46,
+      daysAgo: 0,
+    },
+    {
+      type: "expense" as const,
+      category: "Transportation",
+      description: "Metro and airport shuttle",
+      currency: "EUR" as const,
+      amount: 18,
+      daysAgo: 0,
+    },
+    {
+      type: "expense" as const,
+      category: "SaaS & Tools",
+      description: "Cursor + hosting top-up",
+      currency: "USD" as const,
+      amount: 31,
+      daysAgo: 1,
+    },
+    {
+      type: "expense" as const,
+      category: "Coworking",
+      description: "Half-day coworking pass",
+      currency: "EUR" as const,
+      amount: 27,
+      daysAgo: 2,
+    },
+  ];
+
+  for (const item of guaranteedRecent) {
+    const wallet = walletMap[item.currency];
+    if (!wallet) continue;
+
+    const d = new Date(now.getFullYear(), now.getMonth(), now.getDate() - item.daysAgo);
+    txs.push({
+      user_id: userId,
+      wallet_id: wallet.id,
+      type: item.type,
+      amount: item.amount,
+      currency: item.currency,
+      category: item.category,
+      description: item.description,
+      date: formatLocalDate(d),
+    });
   }
 
   return txs;
