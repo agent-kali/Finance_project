@@ -12,11 +12,15 @@ import type { SupportedCurrency } from "@/lib/constants";
 import { EmptyState } from "@/components/ui/empty-state";
 import { PieChart } from "lucide-react";
 
-const ACCENT = "#2dd4bf";
-
-function accentAtOpacity(opacity: number): string {
-  return `rgba(45, 212, 191, ${opacity})`;
-}
+const SEGMENT_COLORS = [
+  "#C9A96E",
+  "#C27C6B",
+  "#7A9B6D",
+  "#A78BA5",
+  "#CC8844",
+  "#8A9BAE",
+  "#A89080",
+];
 
 export function CategoryChart() {
   const { data: transactions, isLoading } = useTransactions();
@@ -42,7 +46,7 @@ export function CategoryChart() {
       .sort((a, b) => b.value - a.value);
   }, [transactions, timeRange, displayCurrency]);
 
-  const maxValue = listData.length > 0 ? listData[0].value : 0;
+  const total = listData.reduce((s, d) => s + d.value, 0);
 
   const chartSummary =
     listData.length > 0
@@ -68,8 +72,8 @@ export function CategoryChart() {
   return (
     <Card className="glass-card flex h-full min-h-[360px] flex-col">
       <CardHeader>
-        <CardTitle className="text-sm font-semibold uppercase tracking-wider text-muted-foreground">
-          Spending by Category
+        <CardTitle className="text-xs font-semibold uppercase tracking-[0.15em] text-muted-foreground">
+          Category Breakdown
         </CardTitle>
       </CardHeader>
       <CardContent className="flex min-w-0 flex-1 overflow-hidden">
@@ -81,16 +85,53 @@ export function CategoryChart() {
           />
         ) : (
           <div
-            className="flex min-h-[300px] min-w-0 w-full flex-col justify-center"
+            className="flex min-h-[300px] min-w-0 w-full flex-col justify-center gap-6"
             role="img"
             aria-label={`Spending by category for ${getPeriodLabel(timeRange)}`}
           >
             {chartSummary && <p className="sr-only">{chartSummary}</p>}
-            <ul className="space-y-3">
+
+            {/* Horizontal stacked bar */}
+            <div className="flex h-6 w-full overflow-hidden rounded-md" role="presentation">
               {listData.map((entry, i) => {
-                const opacity = Math.max(0.2, 1 - i * 0.15);
-                const color = i === 0 ? ACCENT : accentAtOpacity(opacity);
-                const pct = maxValue > 0 ? (entry.value / maxValue) * 100 : 0;
+                const pct = total > 0 ? (entry.value / total) * 100 : 0;
+                if (pct < 0.5) return null;
+                return (
+                  <div
+                    key={entry.name}
+                    className="h-full transition-all duration-300"
+                    style={{
+                      width: `${pct}%`,
+                      backgroundColor: SEGMENT_COLORS[i % SEGMENT_COLORS.length],
+                    }}
+                    title={`${entry.name}: ${formatCurrency(entry.value, displayCurrency)}`}
+                  />
+                );
+              })}
+            </div>
+
+            {/* Legend */}
+            <div className="flex flex-wrap items-center gap-x-5 gap-y-2">
+              {listData.slice(0, 6).map((entry, i) => (
+                <div key={entry.name} className="flex items-center gap-1.5">
+                  <div
+                    className="h-2.5 w-2.5 shrink-0 rounded-sm"
+                    style={{ backgroundColor: SEGMENT_COLORS[i % SEGMENT_COLORS.length] }}
+                  />
+                  <span className="text-xs text-muted-foreground">{entry.name}</span>
+                </div>
+              ))}
+              {listData.length > 6 && (
+                <span className="text-xs text-muted-foreground">
+                  +{listData.length - 6} more
+                </span>
+              )}
+            </div>
+
+            {/* Detailed list */}
+            <ul className="space-y-2">
+              {listData.map((entry, i) => {
+                const pct = total > 0 ? Math.round((entry.value / total) * 100) : 0;
                 return (
                   <li
                     key={entry.name}
@@ -98,25 +139,14 @@ export function CategoryChart() {
                   >
                     <div
                       className="h-2 w-2 shrink-0 rounded-full"
-                      style={{ backgroundColor: color }}
+                      style={{ backgroundColor: SEGMENT_COLORS[i % SEGMENT_COLORS.length] }}
                     />
                     <span className="min-w-0 flex-1 truncate text-xs font-medium text-foreground sm:text-sm">
                       {entry.name}
                     </span>
-                    <div className="flex w-12 shrink-0 items-center sm:w-20">
-                      <div
-                        className="h-1 w-full overflow-hidden rounded-full bg-muted/60"
-                        role="presentation"
-                      >
-                        <div
-                          className="h-full rounded-full transition-all duration-300"
-                          style={{
-                            width: `${pct}%`,
-                            backgroundColor: color,
-                          }}
-                        />
-                      </div>
-                    </div>
+                    <span className="shrink-0 text-xs tabular-nums text-muted-foreground">
+                      {pct}%
+                    </span>
                     <span
                       className="w-14 shrink-0 text-right text-sm font-medium tabular-nums text-foreground sm:w-20"
                       title="Converted at Frankfurter rate"
