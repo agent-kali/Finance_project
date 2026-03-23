@@ -110,11 +110,9 @@ function TimeRangeContent() {
 export function DashboardContent() {
   return (
     <div className="space-y-8">
-      <div className="flex flex-col gap-3">
-        <h1 className="text-2xl font-bold tracking-tight sm:text-3xl">Dashboard</h1>
-        <div className="flex flex-wrap items-center gap-3">
-          <TimeRangeToggle />
-        </div>
+      <div className="flex items-center gap-3">
+        <h1 className="sr-only">Dashboard</h1>
+        <TimeRangeToggle />
       </div>
       <TimeRangeContent />
       <MobileFab />

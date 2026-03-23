@@ -398,7 +398,7 @@ function Step1Amount({
     amountNum > 0
       ? type === "expense"
         ? "text-amber-400"
-        : "text-emerald-400"
+        : "text-primary"
       : "text-zinc-100";
 
   const numpadRows = [
@@ -661,7 +661,7 @@ function Step3Details({
 }) {
   const emoji = CATEGORY_EMOJI[category] ?? "📦";
   const amountColor =
-    type === "expense" ? "text-amber-400" : "text-emerald-400";
+    type === "expense" ? "text-amber-400" : "text-primary";
   const formattedDate = (() => {
     const d = new Date(dateStr);
     const today = new Date();
@@ -834,7 +834,7 @@ function Step3Details({
         disabled={isPending}
         className={cn(
           "flex h-14 w-full items-center justify-center gap-2 rounded-2xl font-semibold text-black",
-          type === "expense" ? "bg-amber-500" : "bg-emerald-500"
+          type === "expense" ? "bg-amber-500" : "bg-primary"
         )}
         whileTap={
           !isPending && !reducedMotion ? { scale: 0.97 } : undefined

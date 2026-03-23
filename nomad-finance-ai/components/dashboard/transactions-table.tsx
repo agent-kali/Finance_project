@@ -361,7 +361,7 @@ export function TransactionsTable() {
                             <span
                               className={
                                 tx.type === "income"
-                                  ? "text-emerald-600 dark:text-emerald-400"
+                                  ? "text-primary"
                                   : "text-foreground"
                               }
                             >
