@@ -26,6 +26,8 @@ export function CategoryChart() {
   const { data: transactions, isLoading } = useTransactions();
   const { timeRange } = useTimeRange();
   const displayCurrency = useDisplayCurrency();
+  const periodText =
+    timeRange === "Today" ? "today" : timeRange === "This Week" ? "this week" : "this month";
 
   const listData = useMemo(() => {
     const txs = transactions ?? [];
@@ -83,6 +85,18 @@ export function CategoryChart() {
             heading="No spending data"
             className="min-h-[300px]"
           />
+        ) : listData.length === 1 ? (
+          <div className="flex min-h-[300px] w-full flex-col items-center justify-center text-center">
+            <p className="max-w-sm text-sm text-muted-foreground">
+              All spending {periodText}:{" "}
+              <span className="font-medium text-foreground">
+                {listData[0].name} - {formatCurrency(listData[0].value, displayCurrency)}
+              </span>
+            </p>
+            <p className="mt-2 text-xs text-muted-foreground">
+              Add more transactions to see category breakdown.
+            </p>
+          </div>
         ) : (
           <div
             className="flex min-h-[300px] min-w-0 w-full flex-col justify-center gap-6"

@@ -242,6 +242,25 @@ export function SpendingChart() {
     return `Total income: ${formatCurrency(totalIncome, displayCurrency)}. Total expenses: ${formatCurrency(totalExpenses, displayCurrency)}.`;
   }, [chartType, chartData, hasAnyData, displayCurrency]);
 
+  const todaySparseState = useMemo(() => {
+    if (chartType !== "today" || !todayData) return null;
+    const today = todayData.find((d) => d.name === "Today")?.value ?? 0;
+    const dailyAvg = todayData.find((d) => d.name === "Daily Avg")?.value ?? 0;
+    const meaningfulBars = [today, dailyAvg].filter((value) => value > 0).length;
+
+    if (meaningfulBars > 1) return null;
+
+    return {
+      today,
+      dailyAvg,
+      heading: "Not enough data yet",
+      subtext:
+        meaningfulBars === 0
+          ? "Check back after a few days of tracking."
+          : "Track spending across a few more days to make this comparison useful.",
+    };
+  }, [chartType, todayData]);
+
   if (isLoading) {
     return (
       <Card className="glass-card flex h-full min-h-[360px] flex-col">
@@ -287,7 +306,20 @@ export function SpendingChart() {
           {chartSummary && (
             <p className="sr-only">{chartSummary}</p>
           )}
-          {!hasAnyData ? (
+          {todaySparseState ? (
+            <div className="flex min-h-[300px] w-full flex-col items-center justify-center text-center">
+              <p className="text-sm font-medium text-foreground">{todaySparseState.heading}</p>
+              <p className="mt-2 max-w-sm text-sm text-muted-foreground">
+                {todaySparseState.subtext}
+              </p>
+              {(todaySparseState.today > 0 || todaySparseState.dailyAvg > 0) && (
+                <p className="mt-3 text-xs tabular-nums text-muted-foreground">
+                  Today {formatCurrency(todaySparseState.today, displayCurrency)} · Daily avg{" "}
+                  {formatCurrency(todaySparseState.dailyAvg, displayCurrency)}
+                </p>
+              )}
+            </div>
+          ) : !hasAnyData ? (
             <EmptyState
               icon={BarChart3}
               heading="No spending data"

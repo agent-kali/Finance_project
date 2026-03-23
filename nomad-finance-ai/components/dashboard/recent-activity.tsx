@@ -191,6 +191,11 @@ export function RecentActivity() {
             );
           })}
         </ul>
+        {recent.length <= 2 ? (
+          <p className="mt-4 text-xs text-muted-foreground">
+            Add more transactions to see trends and insights.
+          </p>
+        ) : null}
       </CardContent>
     </Card>
   );

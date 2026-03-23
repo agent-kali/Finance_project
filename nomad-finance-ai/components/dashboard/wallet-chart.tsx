@@ -80,6 +80,25 @@ export function WalletChart() {
             subtext="Create a wallet to see your balance breakdown"
             className="min-h-[300px]"
           />
+        ) : chartData.length === 1 ? (
+          <div className="flex min-h-[300px] w-full items-center justify-center">
+            <div className="w-full max-w-sm rounded-2xl border border-border/30 bg-card/35 px-5 py-5 text-center">
+              <p className="text-[11px] font-medium uppercase tracking-[0.15em] text-muted-foreground">
+                {chartData[0].currency} Wallet
+              </p>
+              <p className="mt-2 text-2xl font-semibold tabular-nums text-foreground">
+                {formatCurrency(chartData[0].original, chartData[0].currency)}
+              </p>
+              <p className="mt-2 text-sm text-muted-foreground">
+                {chartData[0].currency} {CURRENCY_SYMBOLS[chartData[0].currency] ?? ""}
+              </p>
+              {chartData[0].currency !== displayCurrency ? (
+                <p className="mt-1 text-xs tabular-nums text-muted-foreground">
+                  Approx. {formatCurrency(chartData[0].balance, displayCurrency)}
+                </p>
+              ) : null}
+            </div>
+          </div>
         ) : (
           <div
             ref={ref}
