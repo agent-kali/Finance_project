@@ -52,7 +52,37 @@ export function TimeRangeProvider({ children }: { children: ReactNode }) {
   const timeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   useEffect(() => {
     const stored = readStored();
+    // #region agent log
+    fetch("http://127.0.0.1:7859/ingest/b30ba92e-e835-4f4c-893f-e95fcfbd0e5b", {
+      method: "POST",
+      headers: { "Content-Type": "application/json", "X-Debug-Session-Id": "58c2c5" },
+      body: JSON.stringify({
+        sessionId: "58c2c5",
+        runId: "pre-fix",
+        hypothesisId: "H2",
+        location: "time-range-context.tsx:mountEffect",
+        message: "timeRange mount effect evaluated",
+        data: { stored, currentTimeRange: timeRange, willSetState: Boolean(stored && stored !== timeRange) },
+        timestamp: Date.now(),
+      }),
+    }).catch(() => {});
+    // #endregion
     if (stored && stored !== timeRange) {
+      // #region agent log
+      fetch("http://127.0.0.1:7859/ingest/b30ba92e-e835-4f4c-893f-e95fcfbd0e5b", {
+        method: "POST",
+        headers: { "Content-Type": "application/json", "X-Debug-Session-Id": "58c2c5" },
+        body: JSON.stringify({
+          sessionId: "58c2c5",
+          runId: "pre-fix",
+          hypothesisId: "H3",
+          location: "time-range-context.tsx:mountEffect",
+          message: "setTimeRangeState called from effect",
+          data: { nextTimeRange: stored },
+          timestamp: Date.now(),
+        }),
+      }).catch(() => {});
+      // #endregion
       setTimeRangeState(stored);
     }
   }, []);
