@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo } from "react";
+import { useMemo } from "react";
 import Link from "next/link";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { EmptyState } from "@/components/ui/empty-state";
@@ -80,33 +80,6 @@ export function RecentActivity() {
     });
     return sorted.slice(0, 5);
   }, [transactions]);
-
-  // #region agent log
-  useEffect(() => {
-    fetch("http://127.0.0.1:7859/ingest/b30ba92e-e835-4f4c-893f-e95fcfbd0e5b", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        "X-Debug-Session-Id": "4346b3",
-      },
-      body: JSON.stringify({
-        sessionId: "4346b3",
-        runId: "initial-hydration",
-        hypothesisId: "H3",
-        location: "components/dashboard/recent-activity.tsx:68",
-        message: "RecentActivity render branch",
-        data: {
-          timeRange,
-          transactionCount: transactions?.length ?? 0,
-          recentCount: recent.length,
-          returnsNull: timeRange === "This Month",
-          isLoading,
-        },
-        timestamp: Date.now(),
-      }),
-    }).catch(() => {});
-  }, [timeRange, transactions?.length, recent.length, isLoading]);
-  // #endregion
 
   if (timeRange === "This Month") return null;
 
