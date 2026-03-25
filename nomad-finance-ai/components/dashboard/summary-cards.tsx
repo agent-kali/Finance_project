@@ -20,29 +20,6 @@ export function SummaryCards() {
   const { ratesDate } = useCurrencyConversion() ?? { ratesDate: null };
 
   const isLoading = walletsLoading || txLoading;
-
-  if (isLoading) {
-    return (
-      <div className="space-y-12">
-        <div className="flex flex-col items-center text-center">
-          <Skeleton className="h-3 w-20" />
-          <Skeleton className="mt-4 h-16 w-72 sm:h-20 sm:w-96" />
-          <Skeleton className="mt-3 h-4 w-56" />
-        </div>
-        <div className="mx-auto max-w-lg">
-          <div className="grid grid-cols-3 divide-x divide-border/30">
-            {Array.from({ length: 3 }).map((_, i) => (
-              <div key={i} className="min-w-0 px-3 text-center first:pl-0 last:pr-0 sm:px-6">
-                <Skeleton className="mx-auto h-3 w-16" />
-                <Skeleton className="mx-auto mt-2 h-6 w-12 sm:h-8 sm:w-20" />
-              </div>
-            ))}
-          </div>
-        </div>
-      </div>
-    );
-  }
-
   const { start: rangeStart, end: rangeEnd } = getDateRange(timeRange);
 
   const totalBalance = (wallets ?? []).reduce(
@@ -78,6 +55,8 @@ export function SummaryCards() {
       : 0;
 
   const totalBalanceFormatted = formatForCard(totalBalance, displayCurrency);
+  const incomeFormatted = formatForCard(incomeInRange, displayCurrency);
+  const expensesFormatted = formatForCard(expensesInRange, displayCurrency);
 
   const walletCount = wallets?.length ?? 0;
   const currencyCount = new Set(wallets?.map((w) => w.currency) ?? []).size;
@@ -91,6 +70,28 @@ export function SummaryCards() {
   const incomeTrend = incomeInRange >= 0;
   const expenseTrend = expensesInRange > 0;
   const savingsTrend = savingsRate >= 0;
+
+  if (isLoading) {
+    return (
+      <div className="space-y-12">
+        <div className="flex flex-col items-center text-center">
+          <Skeleton className="h-3 w-20" />
+          <Skeleton className="mt-4 h-16 w-72 sm:h-20 sm:w-96" />
+          <Skeleton className="mt-3 h-4 w-56" />
+        </div>
+        <div className="mx-auto max-w-lg">
+          <div className="grid grid-cols-3 divide-x divide-border/30">
+            {Array.from({ length: 3 }).map((_, i) => (
+              <div key={i} className="min-w-0 px-3 text-center first:pl-0 last:pr-0 sm:px-6">
+                <Skeleton className="mx-auto h-3 w-16" />
+                <Skeleton className="mx-auto mt-2 h-6 w-12 sm:h-8 sm:w-20" />
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div aria-live="polite" aria-atomic="true" className="space-y-12">
@@ -118,8 +119,10 @@ export function SummaryCards() {
             <p className="text-[11px] font-medium uppercase tracking-[0.15em] text-muted-foreground">
               Income
             </p>
-            <p className="mt-1 text-lg font-semibold tabular-nums text-foreground sm:text-2xl">
-              {formatForCard(incomeInRange, displayCurrency)}
+            <p
+              className="mt-1 whitespace-nowrap text-base font-semibold tabular-nums text-foreground sm:text-xl"
+            >
+              {incomeFormatted}
               <span className={`ml-1 text-xs ${incomeTrend ? "text-primary" : "text-destructive/70"}`}>
                 {incomeTrend ? "\u2191" : "\u2193"}
               </span>
@@ -129,8 +132,10 @@ export function SummaryCards() {
             <p className="text-[11px] font-medium uppercase tracking-[0.15em] text-muted-foreground">
               Expenses
             </p>
-            <p className="mt-1 text-lg font-semibold tabular-nums text-foreground sm:text-2xl">
-              {formatForCard(expensesInRange, displayCurrency)}
+            <p
+              className="mt-1 whitespace-nowrap text-base font-semibold tabular-nums text-foreground sm:text-xl"
+            >
+              {expensesFormatted}
               <span className={`ml-1 text-xs ${expenseTrend ? "text-destructive/70" : "text-primary"}`}>
                 {expenseTrend ? "\u2193" : "\u2191"}
               </span>
@@ -141,7 +146,9 @@ export function SummaryCards() {
               <span className="sm:hidden">Savings</span>
               <span className="hidden sm:inline">Savings</span>
             </p>
-            <p className="mt-1 text-lg font-semibold tabular-nums text-foreground sm:text-2xl">
+            <p
+              className="mt-1 whitespace-nowrap text-base font-semibold tabular-nums text-foreground sm:text-xl"
+            >
               {Math.round(savingsRate)}%
               <span className={`ml-1 text-xs ${savingsTrend ? "text-primary" : "text-destructive/70"}`}>
                 {savingsTrend ? "\u2191" : "\u2193"}
