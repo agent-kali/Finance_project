@@ -1,20 +1,37 @@
 # Finance Project
 
-Personal finance and portfolio projects — multi-currency tracking, dashboards, and AI-powered insights.
+![CI](https://github.com/agent-kali/Finance_project/actions/workflows/ci.yml/badge.svg)
 
-## Projects
+Personal finance platform for multi-currency tracking, dashboards, and AI-powered insights.
 
-### [NomadFinance AI](nomad-finance-ai/)
+Live demo: [finance-project-ecru.vercel.app](https://finance-project-ecru.vercel.app)
 
-**Multi-currency finance platform for digital nomads.** Track expenses across currencies (EUR, USD, VND, GBP, PLN), visualize spending with Recharts, and get AI-powered financial advice (Groq + Vercel AI SDK).
+## Screenshots
 
-- Next.js 16 (App Router, React 19), Supabase (Auth + RLS), TanStack Query v5
-- Demo mode, optimistic mutations, glassmorphism UI
-- Full setup and architecture: see [nomad-finance-ai/README.md](nomad-finance-ai/README.md)
+<div align="center">
+  <img src="nomad-finance-ai/public/screenshots/dashboard.png" 
+       width="49%" alt="Dashboard" />
+  <img src="nomad-finance-ai/public/screenshots/ai-advisor.png" 
+       width="49%" alt="AI Advisor" />
+  <img src="nomad-finance-ai/public/screenshots/onboarding.png" 
+       width="49%" alt="Onboarding" />
+  <img src="nomad-finance-ai/public/screenshots/dashboard-mobile.png" 
+       width="24%" alt="Mobile" />
+</div>
 
-### [Nomad Portfolio 2026](nomad-portfolio-2026/)
+## Tech Stack
 
-Portfolio and related projects — see the folder for details.
+| Layer | Tech |
+|-------|------|
+| Framework | Next.js 16 (App Router, Server Actions, React 19) |
+| Styling | Tailwind CSS 4 + shadcn/ui + Radix primitives |
+| State | TanStack Query v5 |
+| Database | Supabase (PostgreSQL + Row Level Security) |
+| Auth | Supabase Auth (SSR-compatible) |
+| AI | Vercel AI SDK + Groq (Llama 3.3 70B) |
+| Charts | Recharts (Area, Pie, Bar) |
+| Forms | react-hook-form + Zod v4 |
+| Animations | prefers-reduced-motion respected globally |
 
 ## Quick start (NomadFinance AI)
 
