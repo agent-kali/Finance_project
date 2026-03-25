@@ -149,7 +149,7 @@ export function DashboardShell({
 
   return (
     <CommandPaletteProvider>
-      <div className="relative flex min-h-svh bg-gradient-nomad">
+      <div className="relative flex min-h-svh overflow-x-hidden bg-gradient-nomad">
         <div className="bg-ambient-glow" aria-hidden="true" />
         <div className="bg-particles" aria-hidden="true" />
 
@@ -194,9 +194,9 @@ export function DashboardShell({
           </div>
         </aside>
 
-        <div className="relative z-10 flex min-w-0 flex-1 flex-col">
+        <div className="relative z-10 flex min-w-0 flex-1 flex-col overflow-x-hidden">
           {/* Top bar — minimal */}
-          <header className="glass-header flex min-h-14 min-w-0 items-center gap-3 px-4 md:px-6">
+          <header className="glass-header flex min-h-14 min-w-0 items-center gap-2 overflow-x-hidden px-4 md:px-6">
             {mounted ? (
               <Sheet open={mobileOpen} onOpenChange={setMobileOpen}>
                 <SheetTrigger asChild>
@@ -226,9 +226,9 @@ export function DashboardShell({
             <div className="flex-1" />
 
             {mounted && (
-              <div className="flex min-w-0 items-center gap-1.5">
+              <div className="flex min-w-0 items-center gap-1">
                 <span className="hidden shrink-0 text-xs text-muted-foreground sm:inline">View in</span>
-                <CurrencySelector className="min-w-0 max-w-[120px] sm:max-w-none" />
+                <CurrencySelector className="min-w-0 max-w-[96px] sm:max-w-none" />
               </div>
             )}
 
@@ -275,7 +275,7 @@ export function DashboardShell({
           </header>
 
           {/* Page content */}
-          <main id="main-content" className="relative z-10 flex-1 overflow-auto p-4 md:p-6">{children}</main>
+          <main id="main-content" className="relative z-10 flex-1 overflow-x-hidden overflow-y-auto p-4 md:p-6">{children}</main>
         </div>
       </div>
 

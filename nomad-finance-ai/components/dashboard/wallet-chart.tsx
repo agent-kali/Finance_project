@@ -66,13 +66,13 @@ export function WalletChart() {
   }
 
   return (
-    <Card className="glass-card flex min-h-[360px] flex-col">
+    <Card className="glass-card flex min-h-[360px] flex-col overflow-hidden">
       <CardHeader>
         <CardTitle className="text-xs font-semibold uppercase tracking-[0.15em] text-muted-foreground">
           Wallet Balances
         </CardTitle>
       </CardHeader>
-      <CardContent className="flex min-w-0 flex-1 overflow-hidden">
+      <CardContent className="flex min-w-0 flex-1 overflow-hidden px-4 sm:px-6">
         {chartData.length === 0 ? (
           <EmptyState
             icon={Wallet}
@@ -102,7 +102,7 @@ export function WalletChart() {
         ) : (
           <div
             ref={ref}
-            className="h-[220px] min-w-0 w-full"
+            className="h-[220px] min-w-0 w-full px-1 sm:px-0"
             role="img"
             aria-label={`Wallet balances in ${displayCurrency} equivalent`}
           >
@@ -116,7 +116,8 @@ export function WalletChart() {
             </p>
             {width > 0 && height > 0 && (() => {
               const isNarrow = width < 400;
-              const tickFontSize = isNarrow ? 11 : 12;
+              const tickFontSize = isNarrow ? 10 : 12;
+              const tickMargin = isNarrow ? 6 : 10;
               const formatTick = (v: number) =>
                 isNarrow ? formatCompact(v, displayCurrency) : formatCurrency(v, displayCurrency);
               return (
@@ -124,10 +125,10 @@ export function WalletChart() {
                 width={width}
                 height={height}
                 data={chartData}
-                margin={{ top: 8, right: 8, left: isNarrow ? 42 : 32, bottom: 0 }}
-                barSize={32}
-                maxBarSize={40}
-                barCategoryGap="30%"
+                margin={{ top: 8, right: isNarrow ? 2 : 8, left: isNarrow ? 30 : 32, bottom: 0 }}
+                barSize={isNarrow ? 24 : 32}
+                maxBarSize={isNarrow ? 28 : 40}
+                barCategoryGap={isNarrow ? "22%" : "30%"}
               >
                 <CartesianGrid
                   strokeDasharray="3 3"
@@ -139,14 +140,14 @@ export function WalletChart() {
                   axisLine={false}
                   tickLine={false}
                   tick={{ fill: chartColors.tickFill, fontSize: tickFontSize }}
-                  tickMargin={10}
+                  tickMargin={tickMargin}
                 />
                 <YAxis
                   axisLine={false}
                   tickLine={false}
                   tick={{ fill: chartColors.tickFill, fontSize: tickFontSize }}
                   tickFormatter={(v: number) => formatTick(v)}
-                  tickMargin={10}
+                  tickMargin={tickMargin}
                 />
                 <Tooltip
                   cursor={false}

@@ -69,13 +69,13 @@ export function CategoryChart() {
   }
 
   return (
-    <Card className="glass-card flex h-full min-h-[360px] flex-col">
+    <Card className="glass-card flex h-full min-h-[360px] flex-col overflow-hidden">
       <CardHeader>
         <CardTitle className="text-xs font-semibold uppercase tracking-[0.15em] text-muted-foreground">
           Category Breakdown
         </CardTitle>
       </CardHeader>
-      <CardContent className="flex min-w-0 flex-1 overflow-hidden">
+      <CardContent className="flex min-w-0 flex-1 overflow-hidden px-5 sm:px-6">
         {listData.length === 0 ? (
           <EmptyState
             icon={PieChart}
@@ -96,14 +96,17 @@ export function CategoryChart() {
           </div>
         ) : (
           <div
-            className="flex min-h-[220px] min-w-0 w-full flex-col justify-center gap-5"
+            className="flex min-h-[220px] min-w-0 w-full flex-col justify-center gap-5 px-1 sm:px-0"
             role="img"
             aria-label={`Spending by category for ${getPeriodLabel(timeRange)}`}
           >
             {chartSummary && <p className="sr-only">{chartSummary}</p>}
 
             {/* Horizontal stacked bar */}
-            <div className="flex h-4 w-full overflow-hidden rounded-full" role="presentation">
+            <div
+              className="flex h-3.5 w-full max-w-[calc(100%-0.75rem)] shrink-0 self-center overflow-hidden rounded-full"
+              role="presentation"
+            >
               {listData.map((entry, i) => {
                 const pct = total > 0 ? (entry.value / total) * 100 : 0;
                 if (pct < 0.5) return null;
@@ -126,10 +129,7 @@ export function CategoryChart() {
               {listData.map((entry, i) => {
                 const pct = total > 0 ? Math.round((entry.value / total) * 100) : 0;
                 return (
-                  <li
-                    key={entry.name}
-                    className="flex min-w-0 items-center gap-2 sm:gap-3"
-                  >
+                  <li key={entry.name} className="flex min-w-0 items-center gap-2 sm:gap-3">
                     <div
                       className="h-2 w-2 shrink-0 rounded-full"
                       style={{ backgroundColor: SEGMENT_COLORS[i % SEGMENT_COLORS.length] }}
@@ -137,11 +137,11 @@ export function CategoryChart() {
                     <span className="min-w-0 flex-1 truncate text-xs font-medium text-foreground sm:text-sm">
                       {entry.name}
                     </span>
-                    <span className="shrink-0 text-xs tabular-nums text-muted-foreground">
+                    <span className="shrink-0 text-[11px] tabular-nums text-muted-foreground sm:text-xs">
                       {pct}%
                     </span>
                     <span
-                      className="w-14 shrink-0 text-right text-sm font-medium tabular-nums text-foreground sm:w-20"
+                      className="w-12 shrink-0 text-right text-xs font-medium tabular-nums text-foreground sm:w-20 sm:text-sm"
                       title="Converted at Frankfurter rate"
                     >
                       {formatCurrency(entry.value, displayCurrency)}

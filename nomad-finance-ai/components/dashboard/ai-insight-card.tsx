@@ -190,8 +190,8 @@ export function AiInsightCard() {
         }}
       >
         <div className="space-y-5">
-          <Sparkles className="mx-auto h-5 w-5 text-[#D8B67B]" aria-hidden="true" />
-          <p className="text-sm leading-relaxed italic text-[#C9A96E]">
+          <Sparkles className="mx-auto h-5 w-5 text-[oklch(0.68_0.12_72)] dark:text-[#D8B67B]" aria-hidden="true" />
+          <p className="text-sm leading-relaxed italic text-[oklch(0.50_0.08_72)] dark:text-[#C9A96E]">
             {insight}
           </p>
           <div className="flex flex-wrap items-center justify-center gap-2">
@@ -199,7 +199,7 @@ export function AiInsightCard() {
               <Link
                 key={pill.label}
                 href={pill.href}
-                className="rounded-full border border-[rgba(201,169,110,0.25)] px-4 py-1.5 text-xs text-muted-foreground transition-colors hover:border-[rgba(201,169,110,0.4)] hover:text-foreground"
+                className="rounded-full border border-[rgba(201,169,110,0.28)] px-4 py-1.5 text-xs text-[oklch(0.38_0.02_60)] transition-colors hover:border-[rgba(201,169,110,0.45)] hover:text-foreground dark:text-muted-foreground"
               >
                 {pill.label}
               </Link>

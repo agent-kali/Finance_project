@@ -47,8 +47,35 @@ export function formatForCard(
   currency: SupportedCurrency
 ): string {
   const full = formatCurrency(amount, currency);
-  if (full.length <= 11) return full;
-  return formatCompact(amount, currency);
+  const result = full.length <= 11 ? full : formatCompact(amount, currency);
+  // #region agent log
+  fetch("http://127.0.0.1:7859/ingest/b30ba92e-e835-4f4c-893f-e95fcfbd0e5b", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      "X-Debug-Session-Id": "4346b3",
+    },
+    body: JSON.stringify({
+      sessionId: "4346b3",
+      runId: "initial",
+      hypothesisId: "A",
+      location: "lib/currency.ts:45",
+      message: "formatForCard decision",
+      data: {
+        amount,
+        currency,
+        full,
+        fullLength: full.length,
+        result,
+        resultLength: result.length,
+        usedCompact: result !== full,
+        hasBreakableSpace: result.includes(" "),
+      },
+      timestamp: Date.now(),
+    }),
+  }).catch(() => {});
+  // #endregion
+  return result;
 }
 
 export function formatCompact(

@@ -277,8 +277,9 @@ export function SpendingChart() {
   const title = getChartTitle(timeRange);
 
   const isNarrow = width > 0 && width < 400;
-  const chartMargin = { top: 8, right: 8, left: isNarrow ? 42 : 32, bottom: 0 };
-  const tickFontSize = isNarrow ? 11 : 12;
+  const chartMargin = { top: 8, right: isNarrow ? 2 : 8, left: isNarrow ? 30 : 32, bottom: 0 };
+  const tickFontSize = isNarrow ? 10 : 12;
+  const tickMargin = isNarrow ? 6 : 10;
   const formatTick = (v: number) =>
     isNarrow ? formatCompact(v, displayCurrency) : formatCurrency(v, displayCurrency);
 
@@ -290,16 +291,16 @@ export function SpendingChart() {
   };
 
   return (
-    <Card className="glass-card flex h-full min-h-[360px] flex-col">
+    <Card className="glass-card flex h-full min-h-[360px] flex-col overflow-hidden">
       <CardHeader>
         <CardTitle className="text-xs font-semibold uppercase tracking-[0.15em] text-muted-foreground">
           {title}
         </CardTitle>
       </CardHeader>
-      <CardContent className="flex min-w-0 flex-1 overflow-hidden">
+      <CardContent className="flex min-w-0 flex-1 overflow-hidden px-4 sm:px-6">
         <div
           ref={ref}
-          className="h-[220px] min-w-0 w-full"
+          className="h-[220px] min-w-0 w-full px-1 sm:px-0"
           role="img"
           aria-label={chartAriaLabel}
         >
@@ -329,7 +330,13 @@ export function SpendingChart() {
           ) : width > 0 && height > 0 && chartData.length > 0 ? (
             <>
               {chartType === "today" && (
-                <BarChart {...sharedChartProps} data={chartData} barSize={32} maxBarSize={40} barCategoryGap="34%">
+                <BarChart
+                  {...sharedChartProps}
+                  data={chartData}
+                  barSize={isNarrow ? 24 : 32}
+                  maxBarSize={isNarrow ? 28 : 40}
+                  barCategoryGap={isNarrow ? "28%" : "34%"}
+                >
                   <CartesianGrid
                     strokeDasharray="3 3"
                     stroke={chartColors.gridStroke}
@@ -340,7 +347,7 @@ export function SpendingChart() {
                     axisLine={false}
                     tickLine={false}
                     tick={{ fill: chartColors.tickFill, fontSize: tickFontSize }}
-                    tickMargin={10}
+                    tickMargin={tickMargin}
                     tickFormatter={(name) =>
                       name === "Today" && todayValueZero ? "No data yet" : name
                     }
@@ -349,7 +356,7 @@ export function SpendingChart() {
                     axisLine={false}
                     tickLine={false}
                     tick={{ fill: chartColors.tickFill, fontSize: tickFontSize }}
-                    tickMargin={10}
+                    tickMargin={tickMargin}
                     tickFormatter={(v: number) => formatTick(v)}
                   />
                   <Tooltip
@@ -429,7 +436,13 @@ export function SpendingChart() {
               )}
 
               {chartType === "week" && (
-                <BarChart {...sharedChartProps} data={chartData} maxBarSize={14} barGap={8} barCategoryGap="28%">
+                <BarChart
+                  {...sharedChartProps}
+                  data={chartData}
+                  maxBarSize={isNarrow ? 10 : 14}
+                  barGap={isNarrow ? 4 : 8}
+                  barCategoryGap={isNarrow ? "18%" : "28%"}
+                >
                   <CartesianGrid
                     strokeDasharray="3 3"
                     stroke={chartColors.gridStroke}
@@ -440,13 +453,13 @@ export function SpendingChart() {
                     axisLine={false}
                     tickLine={false}
                     tick={{ fill: chartColors.tickFill, fontSize: tickFontSize }}
-                    tickMargin={10}
+                    tickMargin={tickMargin}
                   />
                   <YAxis
                     axisLine={false}
                     tickLine={false}
                     tick={{ fill: chartColors.tickFill, fontSize: tickFontSize }}
-                    tickMargin={10}
+                    tickMargin={tickMargin}
                     tickFormatter={(v: number) => formatTick(v)}
                   />
                   <Tooltip
@@ -519,13 +532,13 @@ export function SpendingChart() {
                     axisLine={false}
                     tickLine={false}
                     tick={{ fill: chartColors.tickFill, fontSize: tickFontSize }}
-                    tickMargin={10}
+                    tickMargin={tickMargin}
                   />
                   <YAxis
                     axisLine={false}
                     tickLine={false}
                     tick={{ fill: chartColors.tickFill, fontSize: tickFontSize }}
-                    tickMargin={10}
+                    tickMargin={tickMargin}
                     tickFormatter={(v: number) => formatTick(v)}
                   />
                   <Tooltip

@@ -123,6 +123,11 @@
   * {
     @apply border-border outline-ring/50;
   }
+  html,
+  body {
+    max-width: 100%;
+    overflow-x: hidden;
+  }
   body {
     @apply bg-background text-foreground;
   }
@@ -166,7 +171,7 @@
   }
 
   .text-balance-cream {
-    color: oklch(0.93 0.03 75);
+    color: oklch(0.68 0.07 72);
   }
 
   .balance-glow {
@@ -177,19 +182,19 @@
     border-radius: 50%;
     background: radial-gradient(
       ellipse 60% 50% at 50% 50%,
-      oklch(0.55 0.08 75 / 0.10),
-      oklch(0.45 0.06 55 / 0.04) 50%,
+      oklch(0.72 0.05 75 / 0.05),
+      oklch(0.60 0.03 55 / 0.025) 50%,
       transparent 80%
     );
   }
 
   /* ----- Light mode (default) ----- */
   .glass-card {
-    background: oklch(1 0 0 / 0.85);
+    background: oklch(0.995 0.002 65 / 0.94);
     backdrop-filter: blur(40px);
     -webkit-backdrop-filter: blur(40px);
-    border: 1px solid oklch(0.90 0.008 55 / 0.3);
-    box-shadow: 0 2px 12px -4px oklch(0.2 0.02 55 / 0.06);
+    border: 1px solid oklch(0.86 0.01 55 / 0.45);
+    box-shadow: 0 6px 20px -12px oklch(0.2 0.02 55 / 0.08);
   }
   .glass-card-hover {
     transition: box-shadow 0.3s cubic-bezier(0.4, 0, 0.2, 1);
@@ -198,16 +203,16 @@
     box-shadow: 0 8px 24px -8px oklch(0.2 0.02 55 / 0.1);
   }
   .glass-sidebar {
-    background: oklch(0.98 0.005 55 / 0.9);
+    background: oklch(0.985 0.003 60 / 0.96);
     backdrop-filter: blur(40px);
     -webkit-backdrop-filter: blur(40px);
-    border-right: 1px solid oklch(0.90 0.008 55 / 0.3);
+    border-right: 1px solid oklch(0.86 0.01 55 / 0.45);
   }
   .glass-header {
-    background: oklch(0.99 0.003 55 / 0.85);
+    background: oklch(0.99 0.002 60 / 0.92);
     backdrop-filter: blur(24px);
     -webkit-backdrop-filter: blur(24px);
-    border-bottom: 1px solid oklch(0.90 0.008 55 / 0.3);
+    border-bottom: 1px solid oklch(0.86 0.01 55 / 0.4);
   }
   .glass-tooltip {
     background: oklch(1 0 0 / 0.95);
@@ -218,9 +223,9 @@
   }
   .bg-gradient-nomad {
     background:
-      radial-gradient(ellipse 80% 60% at 95% 95%, oklch(0.70 0.06 75 / 0.06), transparent),
-      radial-gradient(ellipse 50% 40% at 85% 80%, oklch(0.75 0.06 55 / 0.04), transparent),
-      linear-gradient(to bottom right, oklch(0.98 0.004 55), oklch(0.97 0.005 65), oklch(0.98 0.004 55));
+      radial-gradient(ellipse 70% 50% at 95% 95%, oklch(0.76 0.04 75 / 0.03), transparent),
+      radial-gradient(ellipse 45% 35% at 85% 80%, oklch(0.78 0.03 55 / 0.02), transparent),
+      linear-gradient(to bottom right, oklch(0.985 0.003 55), oklch(0.975 0.004 65), oklch(0.985 0.003 55));
   }
   .bg-ambient-glow {
     position: fixed;
@@ -228,16 +233,16 @@
     pointer-events: none;
     z-index: 0;
     background:
-      radial-gradient(ellipse 60% 50% at 90% 90%, oklch(0.70 0.06 75 / 0.04), transparent 70%),
-      radial-gradient(ellipse 40% 35% at 10% 10%, oklch(0.65 0.05 55 / 0.03), transparent 70%);
+      radial-gradient(ellipse 55% 45% at 90% 90%, oklch(0.72 0.04 75 / 0.02), transparent 70%),
+      radial-gradient(ellipse 35% 30% at 10% 10%, oklch(0.68 0.03 55 / 0.015), transparent 70%);
   }
   .bg-particles {
     position: fixed;
     inset: 0;
     pointer-events: none;
     z-index: 0;
-    opacity: 0.04;
-    background-image: radial-gradient(circle at 1px 1px, oklch(0.4 0.06 75) 1px, transparent 0);
+    opacity: 0.02;
+    background-image: radial-gradient(circle at 1px 1px, oklch(0.48 0.04 75) 1px, transparent 0);
     background-size: 40px 40px;
     animation: drift 30s ease-in-out infinite;
   }
