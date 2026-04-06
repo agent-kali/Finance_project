@@ -49,23 +49,7 @@ export function useTimeRange() {
 export function TimeRangeProvider({ children }: { children: ReactNode }) {
   const [timeRange, setTimeRangeState] = useState<TimeRange>(() => {
     const stored = readStored();
-    const initialValue = stored ?? SSR_SAFE_DEFAULT;
-    // #region agent log
-    fetch("http://127.0.0.1:7859/ingest/b30ba92e-e835-4f4c-893f-e95fcfbd0e5b", {
-      method: "POST",
-      headers: { "Content-Type": "application/json", "X-Debug-Session-Id": "58c2c5" },
-      body: JSON.stringify({
-        sessionId: "58c2c5",
-        runId: "post-fix",
-        hypothesisId: "H2",
-        location: "time-range-context.tsx:initializer",
-        message: "timeRange initialized lazily",
-        data: { stored, initialValue },
-        timestamp: Date.now(),
-      }),
-    }).catch(() => {});
-    // #endregion
-    return initialValue;
+    return stored ?? SSR_SAFE_DEFAULT;
   });
   const [isTransitioning, setIsTransitioning] = useState(false);
   const timeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);

@@ -69,7 +69,16 @@ export function TransactionsTable() {
   const [editingTx, setEditingTx] = useState<Transaction | null>(null);
 
   useEffect(() => {
+    // #region agent log
+    fetch("http://127.0.0.1:7289/ingest/b30ba92e-e835-4f4c-893f-e95fcfbd0e5b",{method:"POST",headers:{"Content-Type":"application/json","X-Debug-Session-Id":"09b5b5"},body:JSON.stringify({sessionId:"09b5b5",runId:"pre-fix",hypothesisId:"H3",location:"components/dashboard/transactions-table.tsx:TransactionsTable:mount",message:"TransactionsTable mounted",data:{search:searchParams.toString(),isMobile},timestamp:Date.now()})}).catch(()=>{});
+    // #endregion
+  }, [searchParams, isMobile]);
+
+  useEffect(() => {
     if (searchParams.get("action") === "create") {
+      // #region agent log
+      fetch("http://127.0.0.1:7289/ingest/b30ba92e-e835-4f4c-893f-e95fcfbd0e5b",{method:"POST",headers:{"Content-Type":"application/json","X-Debug-Session-Id":"09b5b5"},body:JSON.stringify({sessionId:"09b5b5",runId:"pre-fix",hypothesisId:"H4",location:"components/dashboard/transactions-table.tsx:action-create",message:"action=create branch executed",data:{isMobile,path:"/transactions"},timestamp:Date.now()})}).catch(()=>{});
+      // #endregion
       router.replace("/transactions");
       queueMicrotask(() => {
         setEditingTx(null);

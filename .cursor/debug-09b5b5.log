@@ -1,0 +1,8 @@
+{"sessionId":"09b5b5","runId":"pre-fix","hypothesisId":"H2","location":"app/providers.tsx:Providers:mount","message":"Providers mounted","data":{"href":"http://localhost:3000/login"},"timestamp":1775478365378}
+{"sessionId":"09b5b5","runId":"pre-fix","hypothesisId":"H2","location":"app/providers.tsx:Providers:mount","message":"Providers mounted","data":{"href":"http://localhost:3000/login"},"timestamp":1775478366188}
+{"sessionId":"09b5b5","runId":"pre-fix","hypothesisId":"H2","location":"app/providers.tsx:Providers:mount","message":"Providers mounted","data":{"href":"http://localhost:3000/dashboard"},"timestamp":1775478368092}
+{"sessionId":"09b5b5","runId":"pre-fix","hypothesisId":"H6","location":"lib/hooks/use-is-mobile.ts:useEffect","message":"useIsMobile subscribed","data":{"initial":false},"timestamp":1775478368116}
+{"sessionId":"09b5b5","runId":"pre-fix","hypothesisId":"H6","location":"lib/hooks/use-is-mobile.ts:useEffect","message":"useIsMobile subscribed","data":{"initial":false},"timestamp":1775478661146}
+{"sessionId":"09b5b5","runId":"pre-fix","hypothesisId":"H3","location":"components/dashboard/transactions-table.tsx:TransactionsTable:mount","message":"TransactionsTable mounted","data":{"search":"","isMobile":false},"timestamp":1775478661147}
+{"sessionId":"09b5b5","runId":"pre-fix","hypothesisId":"H6","location":"lib/hooks/use-is-mobile.ts:useEffect","message":"useIsMobile subscribed","data":{"initial":false},"timestamp":1775478661151}
+{"sessionId":"09b5b5","runId":"pre-fix","hypothesisId":"H3","location":"components/dashboard/transactions-table.tsx:TransactionsTable:mount","message":"TransactionsTable mounted","data":{"search":"","isMobile":false},"timestamp":1775478661152}
