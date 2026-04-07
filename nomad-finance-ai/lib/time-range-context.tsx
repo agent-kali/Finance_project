@@ -7,12 +7,14 @@ import {
   useCallback,
   useEffect,
   useRef,
+  useSyncExternalStore,
   type ReactNode,
 } from "react";
 
 export type TimeRange = "Today" | "This Week" | "This Month";
 
 const STORAGE_KEY = "nomad-finance-time-range";
+const STORAGE_SYNC_EVENT = "nomad-finance-time-range-change";
 
 const VALID_RANGES: TimeRange[] = ["Today", "This Week", "This Month"];
 
@@ -25,6 +27,29 @@ function readStored(): TimeRange | null {
     /* ignore */
   }
   return null;
+}
+
+function subscribeToStoredTimeRange(onStoreChange: () => void) {
+  if (typeof window === "undefined") {
+    return () => {};
+  }
+
+  const handleStorage = (event: StorageEvent) => {
+    if (event.key === STORAGE_KEY) {
+      onStoreChange();
+    }
+  };
+
+  const handleLocalChange = () => {
+    onStoreChange();
+  };
+
+  window.addEventListener("storage", handleStorage);
+  window.addEventListener(STORAGE_SYNC_EVENT, handleLocalChange);
+  return () => {
+    window.removeEventListener("storage", handleStorage);
+    window.removeEventListener(STORAGE_SYNC_EVENT, handleLocalChange);
+  };
 }
 
 /** Initial value must be the same on server and first client render to avoid hydration mismatch. */
@@ -47,38 +72,40 @@ export function useTimeRange() {
 }
 
 export function TimeRangeProvider({ children }: { children: ReactNode }) {
-  const [timeRange, setTimeRangeState] = useState<TimeRange>(SSR_SAFE_DEFAULT);
+  const storedTimeRange = useSyncExternalStore(
+    subscribeToStoredTimeRange,
+    () => readStored() ?? SSR_SAFE_DEFAULT,
+    () => SSR_SAFE_DEFAULT,
+  );
+  const [pendingTimeRange, setPendingTimeRange] = useState<TimeRange | null>(null);
   const [isTransitioning, setIsTransitioning] = useState(false);
   const timeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const timeRange = pendingTimeRange ?? storedTimeRange;
 
   useEffect(() => () => {
     if (timeoutRef.current) clearTimeout(timeoutRef.current);
   }, []);
 
-  useEffect(() => {
-    const stored = readStored();
-    if (stored) {
-      setTimeRangeState(stored);
-    }
-  }, []);
-
   const setTimeRange = useCallback((range: TimeRange) => {
-    setTimeRangeState((prev) => {
-      if (range === prev) return prev;
-      try {
-        localStorage.setItem(STORAGE_KEY, range);
-      } catch {
-        /* ignore */
-      }
-      return range;
-    });
+    if (range === timeRange) return;
+
+    setPendingTimeRange(range);
+
+    try {
+      localStorage.setItem(STORAGE_KEY, range);
+      window.dispatchEvent(new Event(STORAGE_SYNC_EVENT));
+    } catch {
+      /* ignore */
+    }
+
     setIsTransitioning(true);
     if (timeoutRef.current) clearTimeout(timeoutRef.current);
     timeoutRef.current = setTimeout(() => {
+      setPendingTimeRange(null);
       setIsTransitioning(false);
       timeoutRef.current = null;
     }, 120);
-  }, []);
+  }, [timeRange]);
 
   return (
     <TimeRangeContext.Provider value={{ timeRange, setTimeRange, isTransitioning }}>

@@ -264,9 +264,14 @@ function useCryptoPrices(): CryptoPrices {
   }, []);
 
   useEffect(() => {
-    fetchPrices();
+    const initialFetchId = window.setTimeout(() => {
+      void fetchPrices();
+    }, 0);
     const id = setInterval(fetchPrices, 60_000);
-    return () => clearInterval(id);
+    return () => {
+      window.clearTimeout(initialFetchId);
+      clearInterval(id);
+    };
   }, [fetchPrices]);
 
   return prices;
