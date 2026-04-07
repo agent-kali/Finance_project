@@ -256,7 +256,7 @@ export function AddTransactionSheet({ open, onOpenChange }: AddTransactionSheetP
         aria-hidden
       />
       <motion.div
-        className="fixed bottom-0 left-0 right-0 z-50 flex max-h-[92vh] flex-col rounded-t-3xl bg-zinc-900/95 backdrop-blur-2xl"
+        className="fixed bottom-0 left-0 right-0 z-50 flex max-h-[92vh] flex-col rounded-t-3xl sheet-surface backdrop-blur-2xl"
         style={{ y: sheetY }}
         onPointerDown={(e) => {
           const target = e.target as HTMLElement;
@@ -276,7 +276,7 @@ export function AddTransactionSheet({ open, onOpenChange }: AddTransactionSheetP
           tabIndex={0}
           aria-label="Drag to close"
         >
-          <div className="h-1.5 w-12 rounded-full bg-zinc-700" />
+          <div className="h-1.5 w-12 rounded-full bg-zinc-600/50" />
         </div>
 
         <div className="flex min-h-0 flex-1 flex-col overflow-hidden px-4 pb-6">
@@ -399,7 +399,7 @@ function Step1Amount({
       ? type === "expense"
         ? "text-amber-400"
         : "text-primary"
-      : "text-zinc-100";
+      : "text-balance-cream";
 
   const numpadRows = [
     ["1", "2", "3"],
@@ -434,10 +434,10 @@ function Step1Amount({
           type="button"
           onClick={() => setType("expense")}
           className={cn(
-            "rounded-full px-5 py-2.5 text-sm font-medium transition-colors",
+            "rounded-full px-5 py-2.5 text-sm font-medium transition-all",
             type === "expense"
-              ? "bg-cyan-500 text-black"
-              : "bg-transparent text-zinc-400"
+              ? "bg-amber-500/15 text-amber-300 ring-1 ring-amber-500/50"
+              : "bg-transparent text-zinc-500"
           )}
         >
           Expense
@@ -446,10 +446,10 @@ function Step1Amount({
           type="button"
           onClick={() => setType("income")}
           className={cn(
-            "rounded-full px-5 py-2.5 text-sm font-medium transition-colors",
+            "rounded-full px-5 py-2.5 text-sm font-medium transition-all",
             type === "income"
-              ? "bg-cyan-500 text-black"
-              : "bg-transparent text-zinc-400"
+              ? "bg-amber-500/15 text-amber-300 ring-1 ring-amber-500/50"
+              : "bg-transparent text-zinc-500"
           )}
         >
           Income
@@ -458,7 +458,7 @@ function Step1Amount({
 
       <div className="flex flex-col items-center gap-1">
         <div className="flex items-baseline justify-center gap-1">
-          <span className="text-2xl font-medium tabular-nums text-zinc-500">
+          <span className="text-4xl font-light tabular-nums tracking-tight text-balance-cream">
             {symbol}
           </span>
           <motion.span
@@ -467,7 +467,7 @@ function Step1Amount({
             animate={{ scale: 1 }}
             transition={reducedMotion ? undefined : { duration: 0.15 }}
             className={cn(
-              "text-5xl font-mono font-medium tabular-nums",
+              "text-6xl font-light tabular-nums tracking-tight",
               amountColor
             )}
           >
@@ -484,7 +484,7 @@ function Step1Amount({
                 key="back"
                 type="button"
                 onClick={backspace}
-                className="flex h-[72px] items-center justify-center rounded-2xl bg-zinc-800 text-amber-400 transition-colors active:bg-zinc-700"
+                className="flex h-[72px] items-center justify-center rounded-[18px] numpad-key text-amber-400"
                 aria-label="Backspace"
               >
                 <Delete className="h-6 w-6" />
@@ -494,7 +494,7 @@ function Step1Amount({
                 key={key}
                 type="button"
                 onClick={() => addDigit(key)}
-                className="flex h-[72px] items-center justify-center rounded-2xl bg-zinc-800 text-2xl font-medium text-zinc-100"
+                className="flex h-[72px] items-center justify-center rounded-[18px] numpad-key text-2xl font-medium text-zinc-100"
                 whileTap={reducedMotion ? undefined : { scale: TAP_SCALE }}
                 transition={SPRING}
               >
@@ -512,8 +512,8 @@ function Step1Amount({
         className={cn(
           "h-14 w-full rounded-2xl font-semibold transition-colors",
           amountNum <= 0
-            ? "bg-zinc-800 text-zinc-600"
-            : "bg-cyan-500 text-black"
+            ? "bg-amber-500/10 text-amber-500/40"
+            : "bg-amber-500 text-black"
         )}
         whileTap={
           amountNum > 0 && !reducedMotion ? { scale: 0.98 } : undefined
@@ -575,9 +575,9 @@ function Step2Category({
               type="button"
               onClick={() => setCategory(cat)}
               className={cn(
-                "flex h-[72px] w-[72px] flex-col items-center justify-center gap-1 rounded-2xl bg-zinc-800 text-center",
+                "flex h-[72px] w-[72px] flex-col items-center justify-center gap-1 rounded-[18px] numpad-key text-center",
                 selected &&
-                  "border-[1.5px] border-cyan-500 shadow-[0_0_12px_rgba(34,211,238,0.3)]"
+                  "border-[1.5px] border-amber-500/60 shadow-[0_0_12px_rgba(245,158,11,0.2)]"
               )}
               whileTap={reducedMotion ? undefined : { scale: 0.92 }}
               transition={SPRING}
@@ -597,7 +597,7 @@ function Step2Category({
         disabled={!category}
         className={cn(
           "h-14 w-full rounded-2xl font-semibold transition-colors",
-          !category ? "bg-zinc-800 text-zinc-600" : "bg-cyan-500 text-black"
+          !category ? "bg-amber-500/10 text-amber-500/40" : "bg-amber-500 text-black"
         )}
         whileTap={category && !reducedMotion ? { scale: 0.98 } : undefined}
         transition={SPRING}
@@ -705,7 +705,7 @@ function Step3Details({
           </p>
           <Link
             href="/wallets"
-            className="inline-block rounded-2xl bg-cyan-500 px-4 py-3 font-semibold text-black"
+            className="inline-block rounded-2xl bg-amber-500 px-4 py-3 font-semibold text-black"
           >
             Create a Wallet
           </Link>

@@ -6,3 +6,6 @@
 {"sessionId":"09b5b5","runId":"pre-fix","hypothesisId":"H3","location":"components/dashboard/transactions-table.tsx:TransactionsTable:mount","message":"TransactionsTable mounted","data":{"search":"","isMobile":false},"timestamp":1775478661147}
 {"sessionId":"09b5b5","runId":"pre-fix","hypothesisId":"H6","location":"lib/hooks/use-is-mobile.ts:useEffect","message":"useIsMobile subscribed","data":{"initial":false},"timestamp":1775478661151}
 {"sessionId":"09b5b5","runId":"pre-fix","hypothesisId":"H3","location":"components/dashboard/transactions-table.tsx:TransactionsTable:mount","message":"TransactionsTable mounted","data":{"search":"","isMobile":false},"timestamp":1775478661152}
+{"sessionId":"09b5b5","runId":"pre-fix","hypothesisId":"H6","location":"lib/hooks/use-is-mobile.ts:useEffect","message":"useIsMobile subscribed","data":{"initial":true},"timestamp":1775478823219}
+{"sessionId":"09b5b5","runId":"pre-fix","hypothesisId":"H6","location":"lib/hooks/use-is-mobile.ts:useEffect","message":"useIsMobile subscribed","data":{"initial":true},"timestamp":1775478823222}
+{"sessionId":"09b5b5","runId":"pre-fix","hypothesisId":"H6","location":"lib/hooks/use-is-mobile.ts:useEffect","message":"useIsMobile subscribed","data":{"initial":true},"timestamp":1775479187600}
