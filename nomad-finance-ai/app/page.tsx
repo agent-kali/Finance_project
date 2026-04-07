@@ -1,12 +1,12 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import { motion } from "framer-motion";
 import { LoginModal } from "@/components/auth/login-modal";
 import { handleDemoLogin } from "@/components/auth/demo-login-button";
 
-const gold = "#cd9e3c";
-const bg = "#0a0a0a";
+const gold = "#b8956a";
+const bg = "#0d0b09";
 const text = "#f5f0e8";
 
 const spring = [0.16, 1, 0.3, 1] as const;
@@ -30,11 +30,11 @@ const cardReveal = {
   }),
 };
 
-const gridBg = `repeating-linear-gradient(0deg, transparent, transparent 59px, rgba(205,158,60,0.025) 59px, rgba(205,158,60,0.025) 60px),
-repeating-linear-gradient(90deg, transparent, transparent 59px, rgba(205,158,60,0.025) 59px, rgba(205,158,60,0.025) 60px)`;
+const gridBg = `repeating-linear-gradient(0deg, transparent, transparent 59px, rgba(184,149,106,0.025) 59px, rgba(184,149,106,0.025) 60px),
+repeating-linear-gradient(90deg, transparent, transparent 59px, rgba(184,149,106,0.025) 59px, rgba(184,149,106,0.025) 60px)`;
 
 const shimmerGradient =
-  "linear-gradient(90deg, #cd9e3c 0%, #f5d080 40%, #cd9e3c 80%, #f5d080 100%)";
+  "linear-gradient(90deg, #b8956a 0%, #d4b48a 40%, #b8956a 80%, #d4b48a 100%)";
 
 const tickerItems = [
   { pair: "USD/EUR", rate: "0.9234", up: true },
@@ -42,6 +42,15 @@ const tickerItems = [
   { pair: "EUR/THB", rate: "39.12", up: false },
   { pair: "USD/JPY", rate: "149.8", up: true },
   { pair: "GBP/USD", rate: "1.2720", up: false },
+  { pair: "USD/SGD", rate: "1.3421", up: true },
+  { pair: "USD/THB", rate: "35.20", up: false },
+  { pair: "EUR/GBP", rate: "0.8534", up: true },
+  { pair: "USD/AUD", rate: "1.5312", up: false },
+  { pair: "USD/CAD", rate: "1.3680", up: true },
+  { pair: "USD/INR", rate: "83.42", up: true },
+  { pair: "USD/KRW", rate: "1342", up: true },
+  { pair: "EUR/JPY", rate: "161.3", up: true },
+  { pair: "GBP/CHF", rate: "1.1205", up: false },
 ];
 
 const flags = ["🇺🇸", "🇩🇪", "🇻🇳", "🇧🇷"];
@@ -53,7 +62,7 @@ function Blob({ style }: { style: React.CSSProperties }) {
         position: "absolute",
         width: 340,
         height: 340,
-        background: "radial-gradient(circle, rgba(205,158,60,0.08), transparent 70%)",
+        background: "radial-gradient(circle, rgba(184,149,106,0.08), transparent 70%)",
         filter: "blur(60px)",
         animation: "morphBlob 12s ease-in-out infinite",
         ...style,
@@ -69,7 +78,7 @@ function PulsingRing({ delay, size }: { delay: number; size: number }) {
         position: "absolute",
         width: size,
         height: size,
-        border: "1px solid rgba(205,158,60,0.07)",
+        border: "1px solid rgba(184,149,106,0.07)",
         borderRadius: "50%",
         left: "50%",
         top: "50%",
@@ -159,7 +168,21 @@ function FloatingSquare() {
   );
 }
 
-function TickerContent() {
+function CryptoItem({ symbol, price, change }: { symbol: string; price: string | null; change: number | null }) {
+  const up = change != null && change >= 0;
+  const pct = change != null ? `${up ? "+" : ""}${change.toFixed(1)}%` : "--";
+  return (
+    <span style={{ fontSize: 11, color: "rgba(184,149,106,0.6)" }}>
+      {symbol}{" "}
+      <span style={{ letterSpacing: "0.02em" }}>${price ?? "--"}</span>{" "}
+      <span style={{ color: up ? "rgba(74,222,128,0.5)" : "rgba(248,113,113,0.5)" }}>
+        {pct} {up ? "↑" : "↓"}
+      </span>
+    </span>
+  );
+}
+
+function TickerContent({ crypto }: { crypto: CryptoPrices }) {
   return (
     <div style={{ display: "flex", gap: 32, alignItems: "center", whiteSpace: "nowrap" }}>
       {tickerItems.map((t) => (
@@ -171,6 +194,10 @@ function TickerContent() {
           </span>
         </span>
       ))}
+      <span style={{ fontSize: 11, color: "rgba(184,149,106,0.25)" }}>◆</span>
+      <CryptoItem symbol="BTC" price={crypto.btc.price} change={crypto.btc.change} />
+      <CryptoItem symbol="ETH" price={crypto.eth.price} change={crypto.eth.change} />
+      <CryptoItem symbol="SOL" price={crypto.sol.price} change={crypto.sol.change} />
     </div>
   );
 }
@@ -178,8 +205,76 @@ function TickerContent() {
 const barHeights = [14, 22, 18, 28, 20];
 const barOpacities = [0.15, 0.25, 0.2, 0.35, 0.25];
 
+interface CryptoPrice {
+  price: string | null;
+  change: number | null;
+}
+
+interface CryptoPrices {
+  btc: CryptoPrice;
+  eth: CryptoPrice;
+  sol: CryptoPrice;
+}
+
+const COINGECKO_URL =
+  "https://api.coingecko.com/api/v3/simple/price?ids=bitcoin,ethereum,solana&vs_currencies=usd&include_24hr_change=true";
+
+const emptyCrypto: CryptoPrice = { price: null, change: null };
+
+function useCryptoPrices(): CryptoPrices {
+  const [prices, setPrices] = useState<CryptoPrices>({
+    btc: emptyCrypto,
+    eth: emptyCrypto,
+    sol: emptyCrypto,
+  });
+  const lastKnown = useRef(prices);
+
+  const fetchPrices = useCallback(async () => {
+    try {
+      const res = await fetch(COINGECKO_URL);
+      if (!res.ok) return;
+      const data = await res.json();
+
+      const next: CryptoPrices = {
+        btc: {
+          price: data.bitcoin?.usd != null
+            ? data.bitcoin.usd.toLocaleString("en-US", { maximumFractionDigits: 0 })
+            : lastKnown.current.btc.price,
+          change: data.bitcoin?.usd_24h_change ?? lastKnown.current.btc.change,
+        },
+        eth: {
+          price: data.ethereum?.usd != null
+            ? data.ethereum.usd.toLocaleString("en-US", { maximumFractionDigits: 0 })
+            : lastKnown.current.eth.price,
+          change: data.ethereum?.usd_24h_change ?? lastKnown.current.eth.change,
+        },
+        sol: {
+          price: data.solana?.usd != null
+            ? data.solana.usd.toLocaleString("en-US", { maximumFractionDigits: 0 })
+            : lastKnown.current.sol.price,
+          change: data.solana?.usd_24h_change ?? lastKnown.current.sol.change,
+        },
+      };
+
+      lastKnown.current = next;
+      setPrices(next);
+    } catch {
+      // Keep last known values on failure
+    }
+  }, []);
+
+  useEffect(() => {
+    fetchPrices();
+    const id = setInterval(fetchPrices, 60_000);
+    return () => clearInterval(id);
+  }, [fetchPrices]);
+
+  return prices;
+}
+
 export default function LandingPage() {
   const [showModal, setShowModal] = useState(false);
+  const crypto = useCryptoPrices();
 
   return (
     <div
@@ -277,7 +372,7 @@ export default function LandingPage() {
             display: "inline-flex",
             alignItems: "center",
             gap: 8,
-            border: "1px solid rgba(205,158,60,0.3)",
+            border: "1px solid rgba(184,149,106,0.3)",
             borderRadius: 100,
             padding: "6px 16px",
             marginBottom: 28,
@@ -297,7 +392,7 @@ export default function LandingPage() {
               fontSize: 11,
               letterSpacing: "0.1em",
               textTransform: "uppercase",
-              color: "rgba(205,158,60,0.85)",
+              color: "rgba(184,149,106,0.85)",
               fontWeight: 500,
             }}
           >
@@ -313,7 +408,7 @@ export default function LandingPage() {
           animate="visible"
           style={{
             fontSize: "clamp(34px, 5.5vw, 52px)",
-            fontWeight: 700,
+            fontWeight: 300,
             color: text,
             letterSpacing: "-0.03em",
             lineHeight: 1.1,
@@ -331,7 +426,7 @@ export default function LandingPage() {
           animate="visible"
           style={{
             fontSize: "clamp(34px, 5.5vw, 52px)",
-            fontWeight: 700,
+            fontWeight: 300,
             letterSpacing: "-0.03em",
             lineHeight: 1.1,
             margin: "2px 0 0",
@@ -528,7 +623,7 @@ export default function LandingPage() {
                     flex: 1,
                     height: h,
                     borderRadius: 3,
-                    background: `rgba(205,158,60,${barOpacities[i]})`,
+                    background: `rgba(184,149,106,${barOpacities[i]})`,
                   }}
                 />
               ))}
@@ -543,8 +638,8 @@ export default function LandingPage() {
             animate="visible"
             style={{
               width: 168,
-              background: "rgba(205,158,60,0.08)",
-              border: "1px solid rgba(205,158,60,0.18)",
+              background: "rgba(184,149,106,0.08)",
+              border: "1px solid rgba(184,149,106,0.18)",
               borderRadius: 18,
               padding: "16px 14px",
               textAlign: "left",
@@ -558,7 +653,7 @@ export default function LandingPage() {
                   width: 22,
                   height: 22,
                   borderRadius: 6,
-                  background: "rgba(205,158,60,0.15)",
+                  background: "rgba(184,149,106,0.15)",
                   display: "flex",
                   alignItems: "center",
                   justifyContent: "center",
@@ -622,7 +717,7 @@ export default function LandingPage() {
                 marginTop: 10,
                 fontSize: 10,
                 color: gold,
-                background: "rgba(205,158,60,0.1)",
+                background: "rgba(184,149,106,0.1)",
                 borderRadius: 100,
                 padding: "3px 10px",
                 display: "inline-block",
@@ -645,19 +740,19 @@ export default function LandingPage() {
           zIndex: 3,
           borderTop: "1px solid rgba(255,255,255,0.05)",
           overflow: "hidden",
+          whiteSpace: "nowrap",
           padding: "10px 0",
         }}
       >
         <div
           style={{
-            display: "flex",
+            display: "inline-flex",
             width: "max-content",
-            animation: "ticker 18s linear infinite",
+            animation: "ticker 45s linear infinite",
           }}
         >
-          <TickerContent />
-          <div style={{ width: 32 }} />
-          <TickerContent />
+          <TickerContent crypto={crypto} />
+          <TickerContent crypto={crypto} />
         </div>
       </div>
 

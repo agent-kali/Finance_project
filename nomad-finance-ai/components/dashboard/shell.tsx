@@ -136,12 +136,12 @@ export function DashboardShell({
   async function handleSignOut() {
     if (isDemo) {
       disableDemoMode();
-      router.push("/login");
+      router.push("/");
       return;
     }
     const supabase = createClient();
     await supabase.auth.signOut();
-    router.push("/login");
+    router.push("/");
     router.refresh();
   }
 
