@@ -3,24 +3,18 @@ import { createServerClient } from "@supabase/ssr";
 
 // Inlined for Vercel Edge (no @/ imports in proxy)
 const DEMO_COOKIE = "demo_mode";
-const AUTH_ROUTES = ["/login", "/register"] as const;
-const PROTECTED_ROUTES = [
-  "/dashboard",
-  "/onboarding",
-  "/transactions",
-  "/wallets",
-  "/ai-advisor",
-  "/settings",
-] as const;
+const PUBLIC_ROUTES = ["/", "/login", "/register", "/signup"] as const;
+const AUTH_ROUTES = ["/login", "/register", "/signup"] as const;
+
+function isPublicRoute(pathname: string): boolean {
+  if (pathname === "/") return true;
+  return PUBLIC_ROUTES.some(
+    (route) => route !== "/" && pathname.startsWith(route)
+  );
+}
 
 function isAuthRoute(pathname: string): boolean {
   return AUTH_ROUTES.some((route) => pathname.startsWith(route));
-}
-function isProtectedRoute(pathname: string): boolean {
-  return PROTECTED_ROUTES.some((route) => pathname.startsWith(route));
-}
-function getRootRedirectTarget(isDemo: boolean): "/dashboard" | "/login" {
-  return isDemo ? "/dashboard" : "/login";
 }
 
 export async function proxy(request: NextRequest) {
@@ -28,13 +22,7 @@ export async function proxy(request: NextRequest) {
     const { pathname } = request.nextUrl;
     const isDemoMode = request.cookies.has(DEMO_COOKIE);
     const authRoute = isAuthRoute(pathname);
-    const protectedRoute = isProtectedRoute(pathname);
-
-    if (pathname === "/") {
-      const url = request.nextUrl.clone();
-      url.pathname = getRootRedirectTarget(isDemoMode);
-      return NextResponse.redirect(url);
-    }
+    const protectedRoute = !isPublicRoute(pathname);
 
     if (isDemoMode && protectedRoute) {
       return NextResponse.next();

@@ -1,9 +1,11 @@
 /**
- * Canonical route definitions for auth and protected routes.
+ * Canonical route definitions for auth, public, and protected routes.
  * Used by proxy (inlined in proxy.ts) and root page to keep redirect logic in sync.
  */
 
-export const AUTH_ROUTES = ["/login", "/register"] as const;
+export const PUBLIC_ROUTES = ["/", "/login", "/register", "/signup"] as const;
+
+export const AUTH_ROUTES = ["/login", "/register", "/signup"] as const;
 
 export const PROTECTED_ROUTES = [
   "/dashboard",
@@ -13,14 +15,17 @@ export const PROTECTED_ROUTES = [
   "/settings",
 ] as const;
 
+export function isPublicRoute(pathname: string): boolean {
+  if (pathname === "/") return true;
+  return PUBLIC_ROUTES.some(
+    (route) => route !== "/" && pathname.startsWith(route)
+  );
+}
+
 export function isAuthRoute(pathname: string): boolean {
   return AUTH_ROUTES.some((route) => pathname.startsWith(route));
 }
 
 export function isProtectedRoute(pathname: string): boolean {
   return PROTECTED_ROUTES.some((route) => pathname.startsWith(route));
-}
-
-export function getRootRedirectTarget(isDemo: boolean): "/dashboard" | "/login" {
-  return isDemo ? "/dashboard" : "/login";
 }
