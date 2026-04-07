@@ -2,6 +2,7 @@
 
 import { useMemo } from "react";
 import Link from "next/link";
+import { motion } from "framer-motion";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { EmptyState } from "@/components/ui/empty-state";
 import { cn } from "@/lib/utils";
@@ -13,6 +14,16 @@ import { convertCurrency, formatCurrency } from "@/lib/currency";
 import type { SupportedCurrency } from "@/lib/constants";
 import type { Transaction } from "@/types/database.types";
 import { Activity } from "lucide-react";
+
+const listVariants = {
+  hidden: {},
+  visible: { transition: { staggerChildren: 0.06 } },
+};
+
+const itemVariants = {
+  hidden: { opacity: 0, y: 10 },
+  visible: { opacity: 1, y: 0, transition: { duration: 0.4, ease: "easeOut" as const } },
+};
 
 const CATEGORY_DOT_COLORS: Record<string, string> = {
   Housing: "#C9A96E",
@@ -85,7 +96,7 @@ export function RecentActivity() {
 
   if (isLoading) {
     return (
-      <Card className="glass-card min-h-[280px]">
+      <Card className="glass-card mx-auto max-w-[860px] min-h-[280px]">
         <CardHeader>
           <Skeleton className="h-3 w-36" />
         </CardHeader>
@@ -112,7 +123,7 @@ export function RecentActivity() {
 
   if (recent.length === 0) {
     return (
-      <Card className="glass-card">
+      <Card className="glass-card mx-auto max-w-[860px]">
         <CardHeader className="flex flex-row items-center justify-between space-y-0">
           <CardTitle className="text-xs font-semibold uppercase tracking-[0.15em] text-muted-foreground">
             Recent Activity
@@ -135,7 +146,7 @@ export function RecentActivity() {
   }
 
   return (
-    <Card className="glass-card">
+    <Card className="glass-card mx-auto max-w-[860px]">
       <CardHeader className="flex flex-row items-center justify-between space-y-0">
         <CardTitle className="text-xs font-semibold uppercase tracking-[0.15em] text-muted-foreground">
           Recent Activity
@@ -145,21 +156,27 @@ export function RecentActivity() {
         </Link>
       </CardHeader>
       <CardContent>
-        <ul className="divide-y divide-border/30">
+        <motion.ul
+          className="divide-y divide-border/30"
+          variants={listVariants}
+          initial="hidden"
+          animate="visible"
+        >
           {recent.map((tx) => {
             const isOptimistic = tx.id.startsWith("temp-");
             const merchant = getMerchant(tx);
             const showCategory = merchant !== tx.category;
             return (
-              <li
+              <motion.li
                 key={tx.id}
+                variants={itemVariants}
                 className={cn(
-                  "flex items-center gap-3 py-3 first:pt-0 last:pb-0 transition-opacity",
+                  "group flex items-center gap-3 rounded-[10px] px-2 py-3 first:pt-0 last:pb-0 transition-[background,opacity] duration-200 ease-in-out hover:bg-[rgba(184,149,106,0.06)]",
                   isOptimistic && "animate-pulse pointer-events-none opacity-50"
                 )}
               >
                 <div
-                  className="h-1.5 w-1.5 shrink-0 rounded-full"
+                  className="h-1.5 w-1.5 shrink-0 rounded-full transition-transform duration-200 ease-in-out group-hover:scale-[1.4]"
                   style={{ backgroundColor: getDotColor(tx.category) }}
                   aria-hidden="true"
                 />
@@ -174,7 +191,7 @@ export function RecentActivity() {
                   </div>
                 </div>
                 <span
-                  className={`shrink-0 whitespace-nowrap text-right text-sm font-medium tabular-nums ${
+                  className={`shrink-0 whitespace-nowrap text-right text-sm font-medium tabular-nums transition-transform duration-200 ease-in-out group-hover:translate-x-[2px] ${
                     tx.type === "income" ? "text-primary" : "text-foreground"
                   }`}
                 >
@@ -187,10 +204,10 @@ export function RecentActivity() {
                     displayCurrency
                   )}
                 </span>
-              </li>
+              </motion.li>
             );
           })}
-        </ul>
+        </motion.ul>
         {recent.length <= 2 ? (
           <p className="mt-4 text-xs text-muted-foreground">
             Add more transactions to see trends and insights.

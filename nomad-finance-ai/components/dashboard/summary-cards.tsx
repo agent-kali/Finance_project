@@ -1,5 +1,6 @@
 "use client";
 
+import { useEffect, useRef, useCallback } from "react";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useWallets } from "@/lib/hooks/use-wallets";
 import { useTransactions } from "@/lib/hooks/use-transactions";
@@ -11,6 +12,55 @@ import { convertCurrency, formatForCard } from "@/lib/currency";
 import type { SupportedCurrency } from "@/lib/constants";
 
 const SAVINGS_GOAL_PCT = 30;
+
+function easeOut(t: number): number {
+  return 1 - Math.pow(1 - t, 3);
+}
+
+function useCountUp(
+  target: number,
+  currency: SupportedCurrency,
+  duration: number = 1200
+) {
+  const ref = useRef<HTMLDivElement>(null);
+  const prevTarget = useRef(0);
+  const rafId = useRef(0);
+
+  const animate = useCallback(() => {
+    const el = ref.current;
+    if (!el) return;
+
+    cancelAnimationFrame(rafId.current);
+
+    const start = performance.now();
+    const from = 0;
+    const to = target;
+
+    const tick = (now: number) => {
+      const elapsed = now - start;
+      const progress = Math.min(elapsed / duration, 1);
+      const easedProgress = easeOut(progress);
+      const current = from + (to - from) * easedProgress;
+      el.textContent = formatForCard(current, currency);
+
+      if (progress < 1) {
+        rafId.current = requestAnimationFrame(tick);
+      }
+    };
+
+    rafId.current = requestAnimationFrame(tick);
+  }, [target, currency, duration]);
+
+  useEffect(() => {
+    if (target !== prevTarget.current) {
+      prevTarget.current = target;
+      animate();
+    }
+    return () => cancelAnimationFrame(rafId.current);
+  }, [target, animate]);
+
+  return ref;
+}
 
 export function SummaryCards() {
   const { data: wallets, isLoading: walletsLoading } = useWallets();
@@ -54,7 +104,6 @@ export function SummaryCards() {
       ? ((incomeInRange - expensesInRange) / incomeInRange) * 100
       : 0;
 
-  const totalBalanceFormatted = formatForCard(totalBalance, displayCurrency);
   const incomeFormatted = formatForCard(incomeInRange, displayCurrency);
   const expensesFormatted = formatForCard(expensesInRange, displayCurrency);
 
@@ -70,6 +119,11 @@ export function SummaryCards() {
   const incomeTrend = incomeInRange >= 0;
   const expenseTrend = expensesInRange > 0;
   const savingsTrend = savingsRate >= 0;
+
+  const balanceRef = useCountUp(
+    isLoading ? 0 : totalBalance,
+    displayCurrency
+  );
 
   if (isLoading) {
     return (
@@ -102,10 +156,11 @@ export function SummaryCards() {
           Balance
         </p>
         <div
-          key={displayCurrency}
+          ref={balanceRef}
+          key={`${displayCurrency}-${timeRange}`}
           className="relative z-10 mt-2 text-5xl font-light tabular-nums tracking-tight text-balance-cream sm:text-7xl md:text-8xl"
         >
-          {totalBalanceFormatted}
+          {formatForCard(totalBalance, displayCurrency)}
         </div>
         {contextLine ? (
           <p className="relative z-10 mt-3 text-sm text-muted-foreground">{contextLine}</p>

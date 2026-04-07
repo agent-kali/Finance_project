@@ -1,12 +1,12 @@
 "use client";
 
 import { useMemo } from "react";
+import { motion } from "framer-motion";
 import {
   AreaChart,
   Area,
   BarChart,
   Bar,
-  Cell,
   XAxis,
   YAxis,
   CartesianGrid,
@@ -39,6 +39,27 @@ const CHART_DARK = {
   gridStroke: "oklch(0.25 0.008 55 / 0.12)",
   tickFill: "oklch(0.55 0.02 60)",
 };
+
+function roundedTopRect(x: number, y: number, w: number, h: number, r: number): string {
+  const cr = Math.min(r, w / 2, h);
+  return [
+    `M${x},${y + h}`,
+    `V${y + cr}`,
+    `Q${x},${y} ${x + cr},${y}`,
+    `H${x + w - cr}`,
+    `Q${x + w},${y} ${x + w},${y + cr}`,
+    `V${y + h}`,
+    `Z`,
+  ].join(" ");
+}
+
+const TOOLTIP_STYLE = {
+  backgroundColor: "#1a1814",
+  border: "1px solid rgba(184, 149, 106, 0.3)",
+  borderRadius: 10,
+  padding: "8px 12px",
+  boxShadow: "0 8px 24px rgba(0, 0, 0, 0.12)",
+} as const;
 
 function getChartTitle(timeRange: TimeRange): string {
   switch (timeRange) {
@@ -333,10 +354,20 @@ export function SpendingChart() {
                 <BarChart
                   {...sharedChartProps}
                   data={chartData}
-                  barSize={isNarrow ? 24 : 32}
-                  maxBarSize={isNarrow ? 28 : 40}
-                  barCategoryGap={isNarrow ? "28%" : "34%"}
+                  barSize={64}
+                  barCategoryGap="35%"
+                  barGap={8}
                 >
+                  <defs>
+                    <linearGradient id="spendingBarGrad" x1="0" y1="0" x2="0" y2="1">
+                      <stop offset="0%" stopColor="#d4b48a" />
+                      <stop offset="100%" stopColor="#b8956a" />
+                    </linearGradient>
+                    <linearGradient id="spendingBarGradDim" x1="0" y1="0" x2="0" y2="1">
+                      <stop offset="0%" stopColor="#b8956a" stopOpacity={0.7} />
+                      <stop offset="100%" stopColor="#8B7039" stopOpacity={0.7} />
+                    </linearGradient>
+                  </defs>
                   <CartesianGrid
                     strokeDasharray="3 3"
                     stroke={chartColors.gridStroke}
@@ -368,22 +399,17 @@ export function SpendingChart() {
                       const rawLabel = (payload[0].payload as { name: string }).name;
                       const displayLabel = rawLabel === "Today" && todayValueZero ? "No data yet" : rawLabel;
                       return (
-                        <div
-                          className="rounded-lg px-3 py-2.5 text-sm"
-                          style={{
-                            backgroundColor: "hsl(var(--card))",
-                            border: "1px solid rgba(201, 169, 110, 0.2)",
-                            boxShadow: "0 8px 24px rgba(0, 0, 0, 0.12)",
-                          }}
-                        >
-                          <p className="mb-1 text-xs text-muted-foreground">{displayLabel}</p>
+                        <div style={TOOLTIP_STYLE}>
+                          <p style={{ color: "rgba(245, 240, 232, 0.6)", fontSize: 12, marginBottom: 4 }}>
+                            {displayLabel}
+                          </p>
                           {payload.map((entry) => (
-                            <p key={entry.name} className="text-sm text-muted-foreground">
-                              <span className="capitalize text-foreground">
+                            <p key={entry.name} style={{ color: "#f5f0e8", fontSize: 14 }}>
+                              <span style={{ textTransform: "capitalize" }}>
                                 {entry.name === "value" ? "Spending" : entry.name}
                               </span>
                               :{" "}
-                              <span className="font-medium text-foreground">
+                              <span style={{ fontWeight: 500 }}>
                                 {formatCurrency(entry.value as number, displayCurrency)}
                               </span>
                             </p>
@@ -394,44 +420,48 @@ export function SpendingChart() {
                   />
                   <Bar
                     dataKey="value"
-                    radius={[4, 4, 0, 0]}
+                    radius={[6, 6, 0, 0]}
                     strokeWidth={0}
                     minPointSize={6}
+                    isAnimationActive={false}
                     shape={(
                       props: {
-                        x: number;
-                        y: number;
-                        width: number;
-                        height: number;
-                        fill?: string;
+                        x?: number;
+                        y?: number;
+                        width?: number;
+                        height?: number;
+                        index?: number;
                         payload?: { name: string };
                       }
                     ) => {
-                      const { x, y, width, height, payload } = props;
-                      const h = Math.max(height, MIN_BAR_HEIGHT_PX);
-                      const ny = height > 0 ? y : y + height - h;
+                      const { x = 0, y = 0, width = 0, height: rawH = 0, index = 0, payload } = props;
+                      const h = Math.max(rawH, MIN_BAR_HEIGHT_PX);
+                      const ny = rawH > 0 ? y : y + rawH - h;
                       const isDailyAvg = payload?.name === "Daily Avg";
-                      const barFill = isDailyAvg ? ACCENT_35 : ACCENT;
+                      const fill = isDailyAvg ? "url(#spendingBarGradDim)" : "url(#spendingBarGrad)";
+                      const d = roundedTopRect(x, ny, width, h, 6);
+
+                      if (prefersReducedMotion) {
+                        return <path d={d} fill={fill} />;
+                      }
+
                       return (
-                        <rect
-                          x={x}
-                          y={ny}
-                          width={width}
-                          height={h}
-                          fill={barFill}
-                          rx={4}
-                          ry={0}
+                        <motion.path
+                          d={d}
+                          fill={fill}
+                          initial={{ scaleY: 0 }}
+                          animate={{ scaleY: 1 }}
+                          style={{ transformOrigin: `${x + width / 2}px ${ny + h}px` }}
+                          transition={{
+                            type: "spring",
+                            stiffness: 120,
+                            damping: 20,
+                            delay: (index ?? 0) * 0.15,
+                          }}
                         />
                       );
                     }}
-                  >
-                    {(chartData as { name: string }[]).map((entry, i) => (
-                      <Cell
-                        key={i}
-                        fill={entry.name === "Today" ? ACCENT : ACCENT_35}
-                      />
-                    ))}
-                  </Bar>
+                  />
                 </BarChart>
               )}
 
@@ -469,20 +499,14 @@ export function SpendingChart() {
                     content={({ active, payload, label }) => {
                       if (!active || !payload?.length) return null;
                       return (
-                        <div
-                          className="rounded-lg px-3 py-2.5 text-sm"
-                          style={{
-                            backgroundColor: "hsl(var(--card))",
-                            border: "1px solid rgba(201, 169, 110, 0.2)",
-                            boxShadow: "0 8px 24px rgba(0, 0, 0, 0.12)",
-                          }}
-                          title="Converted at Frankfurter rate"
-                        >
-                          <p className="mb-1 text-xs text-muted-foreground">{label}</p>
+                        <div style={TOOLTIP_STYLE} title="Converted at Frankfurter rate">
+                          <p style={{ color: "rgba(245, 240, 232, 0.6)", fontSize: 12, marginBottom: 4 }}>
+                            {label}
+                          </p>
                           {payload.map((entry) => (
-                            <p key={entry.name} className="text-sm text-muted-foreground">
-                              <span className="capitalize text-foreground">{entry.name}</span>:{" "}
-                              <span className="font-medium text-foreground">
+                            <p key={entry.name} style={{ color: "#f5f0e8", fontSize: 14 }}>
+                              <span style={{ textTransform: "capitalize" }}>{entry.name}</span>:{" "}
+                              <span style={{ fontWeight: 500 }}>
                                 {formatCurrency(entry.value as number, displayCurrency)}
                               </span>
                             </p>
@@ -548,20 +572,14 @@ export function SpendingChart() {
                     content={({ active, payload, label }) => {
                       if (!active || !payload?.length) return null;
                       return (
-                        <div
-                          className="rounded-lg px-3 py-2.5 text-sm"
-                          style={{
-                            backgroundColor: "hsl(var(--card))",
-                            border: "1px solid rgba(201, 169, 110, 0.2)",
-                            boxShadow: "0 8px 24px rgba(0, 0, 0, 0.12)",
-                          }}
-                          title="Converted at Frankfurter rate"
-                        >
-                          <p className="mb-1 text-xs text-muted-foreground">{label}</p>
+                        <div style={TOOLTIP_STYLE} title="Converted at Frankfurter rate">
+                          <p style={{ color: "rgba(245, 240, 232, 0.6)", fontSize: 12, marginBottom: 4 }}>
+                            {label}
+                          </p>
                           {payload.map((entry) => (
-                            <p key={entry.name} className="text-sm text-muted-foreground">
-                              <span className="capitalize text-foreground">{entry.name}</span>:{" "}
-                              <span className="font-medium text-foreground">
+                            <p key={entry.name} style={{ color: "#f5f0e8", fontSize: 14 }}>
+                              <span style={{ textTransform: "capitalize" }}>{entry.name}</span>:{" "}
+                              <span style={{ fontWeight: 500 }}>
                                 {formatCurrency(entry.value as number, displayCurrency)}
                               </span>
                             </p>

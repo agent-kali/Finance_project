@@ -1,6 +1,7 @@
 "use client";
 
 import { useMemo } from "react";
+import { motion } from "framer-motion";
 import {
   BarChart,
   Bar,
@@ -8,7 +9,7 @@ import {
   YAxis,
   CartesianGrid,
   Tooltip,
-  Cell,
+  LabelList,
 } from "recharts";
 import { useTheme } from "next-themes";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -22,8 +23,6 @@ import { CURRENCY_SYMBOLS, type SupportedCurrency } from "@/lib/constants";
 import { EmptyState } from "@/components/ui/empty-state";
 import { Wallet } from "lucide-react";
 
-const WALLET_FILLS = ["#C9A96E", "#B08D4A", "#8B7039", "#C9A96E", "#B08D4A"];
-
 const CHART_LIGHT = {
   gridStroke: "oklch(0.88 0.01 55 / 0.12)",
   tickFill: "oklch(0.5 0.02 55)",
@@ -32,6 +31,27 @@ const CHART_DARK = {
   gridStroke: "oklch(0.25 0.008 55 / 0.12)",
   tickFill: "oklch(0.55 0.02 60)",
 };
+
+const TOOLTIP_STYLE = {
+  backgroundColor: "#1a1814",
+  border: "1px solid rgba(184, 149, 106, 0.3)",
+  borderRadius: 10,
+  padding: "8px 12px",
+  boxShadow: "0 8px 24px rgba(0, 0, 0, 0.12)",
+} as const;
+
+function roundedTopRect(x: number, y: number, w: number, h: number, r: number): string {
+  const cr = Math.min(r, w / 2, h);
+  return [
+    `M${x},${y + h}`,
+    `V${y + cr}`,
+    `Q${x},${y} ${x + cr},${y}`,
+    `H${x + w - cr}`,
+    `Q${x + w},${y} ${x + w},${y + cr}`,
+    `V${y + h}`,
+    `Z`,
+  ].join(" ");
+}
 
 export function WalletChart() {
   const { resolvedTheme } = useTheme();
@@ -125,11 +145,16 @@ export function WalletChart() {
                 width={width}
                 height={height}
                 data={chartData}
-                margin={{ top: 8, right: isNarrow ? 2 : 8, left: isNarrow ? 30 : 32, bottom: 0 }}
-                barSize={isNarrow ? 24 : 32}
-                maxBarSize={isNarrow ? 28 : 40}
+                margin={{ top: 24, right: isNarrow ? 2 : 8, left: isNarrow ? 30 : 32, bottom: 0 }}
+                barSize={48}
                 barCategoryGap={isNarrow ? "22%" : "30%"}
               >
+                <defs>
+                  <linearGradient id="walletBarGrad" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="0%" stopColor="#d4b48a" />
+                    <stop offset="100%" stopColor="#b8956a" />
+                  </linearGradient>
+                </defs>
                 <CartesianGrid
                   strokeDasharray="3 3"
                   stroke={chartColors.gridStroke}
@@ -157,20 +182,14 @@ export function WalletChart() {
                     if (!active || !payload?.length) return null;
                     const item = payload[0].payload as (typeof chartData)[number];
                     return (
-                      <div
-                        className="rounded-lg px-3 py-2.5 text-sm"
-                        style={{
-                          backgroundColor: "hsl(var(--card))",
-                          border: "1px solid rgba(201, 169, 110, 0.2)",
-                          boxShadow: "0 8px 24px rgba(0, 0, 0, 0.12)",
-                        }}
-                        title="Converted at Frankfurter rate"
-                      >
-                        <p className="text-xs text-muted-foreground">{item.name}</p>
-                        <p className="text-sm font-medium text-foreground">
+                      <div style={TOOLTIP_STYLE} title="Converted at Frankfurter rate">
+                        <p style={{ color: "rgba(245, 240, 232, 0.6)", fontSize: 12, marginBottom: 4 }}>
+                          {item.name}
+                        </p>
+                        <p style={{ color: "#f5f0e8", fontSize: 14, fontWeight: 500 }}>
                           {formatCurrency(item.original, item.currency)}
                         </p>
-                        <p className="text-xs text-muted-foreground">
+                        <p style={{ color: "rgba(245, 240, 232, 0.6)", fontSize: 12 }}>
                           &asymp; {formatCurrency(item.balance, displayCurrency)}
                         </p>
                       </div>
@@ -179,16 +198,51 @@ export function WalletChart() {
                 />
                 <Bar
                   dataKey="balance"
-                  radius={[4, 4, 0, 0]}
-                  isAnimationActive={!prefersReducedMotion}
+                  radius={[6, 6, 0, 0]}
+                  isAnimationActive={false}
                   minPointSize={6}
+                  fill="url(#walletBarGrad)"
+                  shape={(
+                    props: {
+                      x?: number;
+                      y?: number;
+                      width?: number;
+                      height?: number;
+                      index?: number;
+                    }
+                  ) => {
+                    const { x = 0, y = 0, width = 0, height: rawH = 0, index = 0 } = props;
+                    const h = Math.max(rawH, 4);
+                    const ny = rawH > 0 ? y : y + rawH - h;
+                    const d = roundedTopRect(x, ny, width, h, 6);
+
+                    if (prefersReducedMotion) {
+                      return <path d={d} fill="url(#walletBarGrad)" />;
+                    }
+
+                    return (
+                      <motion.path
+                        d={d}
+                        fill="url(#walletBarGrad)"
+                        initial={{ scaleY: 0 }}
+                        animate={{ scaleY: 1 }}
+                        style={{ transformOrigin: `${x + width / 2}px ${ny + h}px` }}
+                        transition={{
+                          type: "spring",
+                          stiffness: 120,
+                          damping: 20,
+                          delay: (index ?? 0) * 0.1,
+                        }}
+                      />
+                    );
+                  }}
                 >
-                  {chartData.map((_, i) => (
-                    <Cell
-                      key={i}
-                      fill={WALLET_FILLS[i % WALLET_FILLS.length]}
-                    />
-                  ))}
+                  <LabelList
+                    dataKey="balance"
+                    position="top"
+                    style={{ fontSize: 12, fill: "rgba(245, 240, 232, 0.6)" }}
+                    formatter={(v: unknown) => formatCompact(Number(v), displayCurrency)}
+                  />
                 </Bar>
               </BarChart>
               );
