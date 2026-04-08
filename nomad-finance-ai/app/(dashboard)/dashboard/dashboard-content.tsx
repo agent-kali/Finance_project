@@ -7,6 +7,8 @@ import { SummaryCards } from "@/components/dashboard/summary-cards";
 import { AiInsightCard } from "@/components/dashboard/ai-insight-card";
 import { RecentActivity } from "@/components/dashboard/recent-activity";
 import { MobileFab } from "@/components/dashboard/mobile-fab";
+import { RunwayCard } from "@/components/dashboard/runway-card";
+import { SpendingBubbles } from "@/components/dashboard/spending-bubbles";
 import { TimeRangeToggle } from "@/components/dashboard/time-range-toggle";
 import { useTimeRange } from "@/lib/time-range-context";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -77,6 +79,24 @@ function TimeRangeContent() {
           <RecentActivity />
         </ErrorBoundary>
       </section>
+      <motion.section
+        aria-label="Runway and spending insights"
+        className="grid min-w-0 gap-4 lg:grid-cols-2"
+        initial="hidden"
+        whileInView="visible"
+        viewport={viewportConfig}
+      >
+        <motion.div variants={cardVariants} custom={0}>
+          <ErrorBoundary fallbackTitle="Failed to load runway">
+            <RunwayCard />
+          </ErrorBoundary>
+        </motion.div>
+        <motion.div variants={cardVariants} custom={1}>
+          <ErrorBoundary fallbackTitle="Failed to load spending bubbles">
+            <SpendingBubbles />
+          </ErrorBoundary>
+        </motion.div>
+      </motion.section>
       <motion.section
         aria-label="Spending and category charts"
         className="grid min-w-0 gap-6 lg:grid-cols-2 lg:items-stretch"
