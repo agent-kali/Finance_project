@@ -20,7 +20,7 @@ function easeOut(t: number): number {
 function useCountUp(
   target: number,
   currency: SupportedCurrency,
-  duration: number = 1200
+  duration: number = 800
 ) {
   const ref = useRef<HTMLDivElement>(null);
   const prevTarget = useRef(0);

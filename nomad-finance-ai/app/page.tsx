@@ -292,6 +292,8 @@ export default function LandingPage() {
         alignItems: "center",
         justifyContent: "center",
         overflow: "hidden",
+        userSelect: "none",
+        WebkitUserSelect: "none",
       }}
     >
       <style>{`
