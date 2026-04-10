@@ -133,8 +133,8 @@ export function SummaryCards() {
           <Skeleton className="mt-4 h-16 w-72 sm:h-20 sm:w-96" />
           <Skeleton className="mt-3 h-4 w-56" />
         </div>
-        <div className="mx-auto max-w-lg">
-          <div className="grid grid-cols-3 divide-x divide-border/30">
+        <div className="mx-auto w-full min-w-0 max-w-lg">
+          <div className="grid w-full min-w-0 grid-cols-1 gap-3 md:grid-cols-3 md:gap-0 md:divide-x md:divide-border/30">
             {Array.from({ length: 3 }).map((_, i) => (
               <div key={i} className="min-w-0 px-3 text-center first:pl-0 last:pr-0 sm:px-6">
                 <Skeleton className="mx-auto h-3 w-16" />
@@ -150,7 +150,7 @@ export function SummaryCards() {
   return (
     <div aria-live="polite" aria-atomic="true" className="space-y-12">
       {/* Hero balance with warm glow */}
-      <div className="relative flex flex-col items-center text-center">
+      <div className="relative flex w-full max-w-full min-w-0 flex-col items-center overflow-x-hidden text-center">
         <div className="balance-glow" aria-hidden="true" />
         <p className="relative z-10 uppercase" style={{ fontSize: 11, letterSpacing: "1.8px", color: "#8B7355", fontWeight: 500 }}>
           Balance
@@ -158,18 +158,21 @@ export function SummaryCards() {
         <div
           ref={balanceRef}
           key={`${displayCurrency}-${timeRange}`}
-          className="relative z-10 mt-2 text-5xl font-light tabular-nums tracking-tight text-balance-cream sm:text-7xl md:text-8xl"
+          className="relative z-10 mt-2 max-w-full min-w-0 px-1 text-5xl font-light tabular-nums tracking-tight text-balance-cream sm:text-7xl md:text-8xl"
         >
           {formatForCard(totalBalance, displayCurrency)}
         </div>
         {contextLine ? (
-          <p className="relative z-10 mt-3 text-sm text-muted-foreground">{contextLine}</p>
+          <p className="relative z-10 mt-3 max-w-full min-w-0 px-2 text-sm text-muted-foreground">{contextLine}</p>
         ) : null}
       </div>
 
       {/* Metrics row */}
-      <div className="mx-auto max-w-lg" style={{ borderTop: "1px solid rgba(255,255,255,0.06)", paddingTop: 16 }}>
-        <div className="grid grid-cols-3">
+      <div
+        className="mx-auto w-full min-w-0 max-w-lg"
+        style={{ borderTop: "1px solid rgba(255,255,255,0.06)", paddingTop: 16 }}
+      >
+        <div className="grid w-full min-w-0 grid-cols-1 gap-4 md:grid-cols-3 md:gap-0">
           <div className="min-w-0 px-3 text-center first:pl-0 last:pr-0 sm:px-6">
             <p className="text-[11px] font-medium uppercase tracking-[0.15em] text-muted-foreground">
               Income

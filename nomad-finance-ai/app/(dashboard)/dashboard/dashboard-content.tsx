@@ -27,10 +27,10 @@ function TimeRangeContent() {
   const { isTransitioning } = useTimeRange();
   return (
     <div
-      className={`space-y-8 transition-opacity duration-150 ease-out ${isTransitioning ? "opacity-60" : "opacity-100"}`}
+      className={`min-w-0 max-w-full space-y-8 transition-opacity duration-150 ease-out ${isTransitioning ? "opacity-60" : "opacity-100"}`}
     >
       {/* 1. Balance hero, recent activity, AI insight */}
-      <section aria-label="Summary">
+      <section aria-label="Summary" className="min-w-0 max-w-full">
         <ErrorBoundary fallbackTitle="Failed to load summary">
           <SummaryCards />
         </ErrorBoundary>
@@ -45,6 +45,7 @@ function TimeRangeContent() {
       {/* 2. Wallet balances */}
       <motion.section
         aria-label="Wallets"
+        className="min-w-0 max-w-full"
         style={{
           display: "flex",
           flexDirection: "column",
@@ -65,6 +66,7 @@ function TimeRangeContent() {
       {/* 3. Where it went — full width */}
       <motion.section
         aria-label="Spending breakdown"
+        className="min-w-0 max-w-full"
         initial="hidden"
         whileInView="visible"
         viewport={viewportConfig}
@@ -79,6 +81,7 @@ function TimeRangeContent() {
       {/* 4. Your Runway — full width, bottom */}
       <motion.section
         aria-label="Runway"
+        className="min-w-0 max-w-full"
         initial="hidden"
         whileInView="visible"
         viewport={viewportConfig}
@@ -95,16 +98,9 @@ function TimeRangeContent() {
 
 export function DashboardContent() {
   return (
-    <div
-      style={{
-        maxWidth: 1200,
-        margin: "0 auto",
-        padding: "0 24px",
-        width: "100%",
-      }}
-    >
-      <div className="space-y-8">
-        <div className="flex items-center gap-3">
+    <div className="mx-auto w-full min-w-0 max-w-[1200px] overflow-x-hidden px-4 md:px-6">
+      <div className="min-w-0 max-w-full space-y-8">
+        <div className="flex min-w-0 max-w-full items-center gap-3">
           <h1 className="sr-only">Dashboard</h1>
           <TimeRangeToggle />
         </div>

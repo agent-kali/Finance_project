@@ -78,6 +78,7 @@ export function RunwayCard() {
 
   return (
     <div
+      className="min-w-0 max-w-full"
       style={{
         width: "100%",
         background: "rgba(255,255,255,0.03)",
@@ -112,21 +113,16 @@ export function RunwayCard() {
           fontSize: 12,
           color: "#6B6560",
           margin: "6px 0 0",
+          whiteSpace: "normal",
+          maxWidth: "100%",
+          overflowWrap: "break-word",
         }}
       >
         balance {formatCurrency(totalBalance, displayCurrency)} &middot; spending{" "}
         {formatCurrency(todaySpending, displayCurrency)} today
       </p>
 
-      <div
-        style={{
-          width: "100%",
-          display: "grid",
-          gridTemplateColumns: "1fr 1fr 1fr",
-          gap: 12,
-          marginTop: 16,
-        }}
-      >
+      <div className="mt-4 grid w-full grid-cols-1 gap-3 md:grid-cols-3">
         {CITY_COSTS.map((city, i) => {
           const days =
             balanceInUSD > 0 && city.dailyCostUSD > 0
@@ -150,16 +146,7 @@ export function RunwayCard() {
                 textAlign: "center",
               }}
             >
-              <p
-                style={{
-                  fontSize: 13,
-                  color: "#6B6560",
-                  margin: 0,
-                  whiteSpace: "nowrap",
-                  overflow: "hidden",
-                  textOverflow: "ellipsis",
-                }}
-              >
+              <p className="m-0 whitespace-normal wrap-break-word text-[13px] text-[#6B6560] md:whitespace-nowrap md:overflow-hidden md:text-ellipsis">
                 {city.flag} {city.city}
               </p>
               <p

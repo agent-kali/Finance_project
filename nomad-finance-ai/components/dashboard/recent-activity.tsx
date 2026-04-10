@@ -109,7 +109,7 @@ export function RecentActivity() {
 
   if (isLoading) {
     return (
-      <div className="mx-auto max-w-[860px] min-h-[280px]" style={{ padding: "0 4px" }}>
+      <div className="mx-auto min-h-[280px] w-full min-w-0 max-w-[860px]" style={{ padding: "0 4px" }}>
         <div className="flex flex-row items-center justify-between space-y-0">
           <Skeleton className="h-3 w-36" />
           <Skeleton className="h-3 w-16" />
@@ -140,7 +140,7 @@ export function RecentActivity() {
 
   if (recent.length === 0) {
     return (
-      <div className="mx-auto max-w-[860px]">
+      <div className="mx-auto w-full min-w-0 max-w-[860px]">
         {header}
         <div className="mt-6">
           <EmptyState
@@ -156,9 +156,9 @@ export function RecentActivity() {
   }
 
   return (
-    <div className="mx-auto max-w-[860px]">
+    <div className="mx-auto w-full min-w-0 max-w-[860px]">
       {header}
-      <div style={{ padding: "0 4px" }} className="mt-6">
+      <div style={{ padding: "0 4px" }} className="mt-6 min-w-0 max-w-full">
         <motion.ul
           className="space-y-0"
           variants={listVariants}
@@ -174,7 +174,7 @@ export function RecentActivity() {
                 key={tx.id}
                 variants={itemVariants}
                 className={cn(
-                  "group flex items-center gap-3 rounded-[10px] px-2 py-3 first:pt-0 last:pb-0 transition-[background,opacity] duration-200 ease-in-out hover:bg-[rgba(184,149,106,0.06)]",
+                  "group flex w-full min-w-0 max-w-full items-center gap-2 rounded-[10px] px-1 py-3 first:pt-0 last:pb-0 transition-[background,opacity] duration-200 ease-in-out hover:bg-[rgba(184,149,106,0.06)] sm:gap-3 sm:px-2",
                   index !== recent.length - 1 && "border-b border-[rgba(255,255,255,0.04)]",
                   isOptimistic && "animate-pulse pointer-events-none opacity-50"
                 )}

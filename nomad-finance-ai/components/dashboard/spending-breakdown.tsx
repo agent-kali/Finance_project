@@ -212,7 +212,7 @@ function ProportionalStripSegment({
         padding: "10px 12px",
         background: category.bg,
         color: category.color,
-        opacity: isDimmed ? 0.15 : 1,
+        opacity: isDimmed ? 0.52 : 1,
         textAlign: "left",
         display: "flex",
         flexDirection: "column",
@@ -246,7 +246,7 @@ function ProportionalStripSegment({
             overflow: "hidden",
             textOverflow: "ellipsis",
             whiteSpace: "nowrap",
-            fontSize: "clamp(10px, 1.2vw, 13px)",
+            fontSize: "clamp(11px, 2.8vw, 13px)",
             lineHeight: 1.2,
           }}
         >
@@ -255,7 +255,8 @@ function ProportionalStripSegment({
             currency={displayCurrency}
             style={{
               fontWeight: 600,
-              color: "#f5f0e8",
+              color: "#faf7f2",
+              textShadow: "0 1px 2px rgba(0,0,0,0.45)",
               maxWidth: "100%",
               overflow: "hidden",
               textOverflow: "ellipsis",
@@ -273,7 +274,9 @@ function ProportionalStripSegment({
             textOverflow: "ellipsis",
             whiteSpace: "nowrap",
             fontSize: 11,
-            color: "rgba(245,240,232,0.5)",
+            fontWeight: 500,
+            color: "rgba(245,240,232,0.88)",
+            textShadow: "0 1px 2px rgba(0,0,0,0.5)",
             lineHeight: 1.2,
           }}
         >
@@ -402,7 +405,7 @@ export function SpendingBreakdown({
   }, [categories.length, prefersReducedMotion]);
 
   return (
-    <div style={{ width: "100%" }}>
+    <div className="min-w-0 max-w-full" style={{ width: "100%" }}>
       <div
         style={{
           display: "flex",
@@ -458,16 +461,11 @@ export function SpendingBreakdown({
         </div>
       ) : (
         <>
-          <div style={{ width: "100%", minWidth: 0, paddingTop: 20 }}>
+          <div className="hidden w-full min-w-0 flex-col overflow-hidden pt-5 md:flex">
             <div
+              className="flex h-14 w-full min-w-0 gap-0.5 overflow-hidden"
               style={{
-                width: "100%",
-                minWidth: 0,
-                display: "flex",
-                gap: 2,
-                height: 56,
                 boxSizing: "border-box",
-                overflow: "hidden",
               }}
             >
               {categories.map((category, index) => (

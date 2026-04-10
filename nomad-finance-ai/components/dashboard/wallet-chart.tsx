@@ -263,6 +263,7 @@ export function WalletChart() {
 
   return (
     <motion.div
+      className="min-w-0 max-w-full"
       initial={prefersReducedMotion ? false : { opacity: 0, y: 16 }}
       whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: true }}
@@ -272,14 +273,7 @@ export function WalletChart() {
       <p style={titleStyle}>WALLET BALANCES</p>
 
       {isLoading ? (
-        <div
-          style={{
-            marginTop: 18,
-            display: "grid",
-            gridTemplateColumns: "1fr 1fr 1fr",
-            gap: 10,
-          }}
-        >
+        <div className="mt-[18px] grid w-full grid-cols-1 gap-[10px] md:grid-cols-3">
           {Array.from({ length: 3 }).map((_, index) => (
             <div
               key={index}
@@ -320,13 +314,7 @@ export function WalletChart() {
           initial="hidden"
           whileInView="visible"
           viewport={{ once: true }}
-          style={{
-            width: "100%",
-            marginTop: 18,
-            display: "grid",
-            gridTemplateColumns: "1fr 1fr 1fr",
-            gap: 10,
-          }}
+          className="mt-[18px] grid w-full grid-cols-1 gap-[10px] md:grid-cols-3"
         >
           <p className="sr-only">{accessibilitySummary}</p>
           {walletCards.map((card, index) => {
@@ -418,6 +406,8 @@ export function WalletChart() {
                         fontWeight: 500,
                         color: "#f5f0e8",
                         lineHeight: 1.2,
+                        whiteSpace: "nowrap",
+                        overflow: "visible",
                       }}
                     >
                       {card.name}

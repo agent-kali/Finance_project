@@ -276,7 +276,12 @@ export function DashboardShell({
           </header>
 
           {/* Page content */}
-          <main id="main-content" className="relative z-10 min-h-0 flex-1 overflow-x-hidden overflow-y-auto p-4 md:p-6">{children}</main>
+          <main
+            id="main-content"
+            className="relative z-10 min-h-0 min-w-0 max-w-full flex-1 touch-pan-y overflow-x-hidden overflow-y-auto overscroll-x-none py-4 px-3 md:p-6"
+          >
+            {children}
+          </main>
         </div>
 
         {/* Above z-10 chrome so shapes show; pointer-events-none keeps UI clickable */}

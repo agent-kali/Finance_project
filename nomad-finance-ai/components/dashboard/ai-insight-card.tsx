@@ -353,7 +353,7 @@ export function AiInsightCard() {
 
   if (isLoading) {
     return (
-      <section aria-label="AI insight">
+      <section aria-label="AI insight" className="min-w-0 max-w-full">
         <div
           style={{
             width: "100%",
@@ -388,7 +388,7 @@ export function AiInsightCard() {
   });
 
   return (
-    <section aria-label="AI insight">
+    <section aria-label="AI insight" className="min-w-0 max-w-full">
       <style>{`
         @keyframes aiInsightDotBounce {
           0%, 100% { transform: translateY(0); }
@@ -397,6 +397,7 @@ export function AiInsightCard() {
       `}</style>
       <div
         aria-expanded={expanded}
+        className="min-w-0 max-w-full"
         style={{
           width: "100%",
           background: "rgba(255,255,255,0.03)",

@@ -14,7 +14,7 @@ export default function DashboardLoading() {
           <Skeleton className="mt-3 h-4 w-56" />
         </div>
         <div className="mx-auto max-w-lg">
-          <div className="grid grid-cols-3 divide-x divide-border/30">
+          <div className="grid grid-cols-1 gap-3 md:grid-cols-3 md:gap-0 md:divide-x md:divide-border/30">
             {Array.from({ length: 3 }).map((_, i) => (
               <div key={i} className="min-w-0 px-3 text-center sm:px-6">
                 <Skeleton className="mx-auto h-3 w-16" />
