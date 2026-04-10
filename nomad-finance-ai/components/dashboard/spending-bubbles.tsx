@@ -72,16 +72,6 @@ const bubbleEntrance: Variants = {
   },
 };
 
-interface CategoryBubble {
-  name: string;
-  value: number;
-  pct: number;
-  size: number;
-  alias: string;
-  emoji: string;
-  rgb: string;
-}
-
 export function SpendingBubbles() {
   const { data: transactions } = useTransactions();
   const displayCurrency = useDisplayCurrency();

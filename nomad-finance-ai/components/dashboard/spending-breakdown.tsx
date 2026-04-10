@@ -353,7 +353,11 @@ export function SpendingBreakdown({
   const hasPlayedInitialProgressAnimationRef = useRef(false);
   const [areProgressBarsAtTargetWidth, setAreProgressBarsAtTargetWidth] = useState(false);
   const [hasCompletedInitialProgressAnimation, setHasCompletedInitialProgressAnimation] =
-    useState(prefersReducedMotion);
+    useState(false);
+
+  const progressBarWidthAtTarget = prefersReducedMotion || areProgressBarsAtTargetWidth;
+  const progressBarTransitionOff =
+    prefersReducedMotion || hasCompletedInitialProgressAnimation;
 
   const highlightedId = selectedId ?? hoveredId;
 
@@ -370,24 +374,33 @@ export function SpendingBreakdown({
   useEffect(() => {
     if (prefersReducedMotion) {
       hasPlayedInitialProgressAnimationRef.current = true;
-      setAreProgressBarsAtTargetWidth(true);
-      setHasCompletedInitialProgressAnimation(true);
+    }
+  }, [prefersReducedMotion]);
+
+  useEffect(() => {
+    if (prefersReducedMotion) {
       return;
     }
 
     if (hasPlayedInitialProgressAnimationRef.current) {
-      setAreProgressBarsAtTargetWidth(true);
-      setHasCompletedInitialProgressAnimation(true);
+      queueMicrotask(() => {
+        setAreProgressBarsAtTargetWidth(true);
+        setHasCompletedInitialProgressAnimation(true);
+      });
       return;
     }
 
     if (categories.length === 0) {
-      setAreProgressBarsAtTargetWidth(false);
+      queueMicrotask(() => {
+        setAreProgressBarsAtTargetWidth(false);
+      });
       return;
     }
 
-    setAreProgressBarsAtTargetWidth(false);
-    setHasCompletedInitialProgressAnimation(false);
+    queueMicrotask(() => {
+      setAreProgressBarsAtTargetWidth(false);
+      setHasCompletedInitialProgressAnimation(false);
+    });
 
     const frameId = window.requestAnimationFrame(() => {
       setAreProgressBarsAtTargetWidth(true);
@@ -704,16 +717,15 @@ export function SpendingBreakdown({
                         >
                           <div
                             style={{
-                              width: areProgressBarsAtTargetWidth
+                              width: progressBarWidthAtTarget
                                 ? `${Math.max(category.pct, 0)}%`
                                 : "0%",
                               height: "100%",
                               borderRadius: 999,
                               background: category.color,
-                              transition:
-                                prefersReducedMotion || hasCompletedInitialProgressAnimation
-                                  ? "none"
-                                  : PROGRESS_BAR_TRANSITION,
+                              transition: progressBarTransitionOff
+                                ? "none"
+                                : PROGRESS_BAR_TRANSITION,
                             }}
                           />
                         </div>
