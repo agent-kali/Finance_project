@@ -38,16 +38,17 @@ interface WalletCardData {
 const cardStyle = {
   width: "100%",
   background: "rgba(255,255,255,0.03)",
-  border: "1px solid rgba(184,149,106,0.15)",
-  borderRadius: 14,
-  padding: 20,
+  border: "1px solid rgba(255,255,255,0.06)",
+  borderRadius: 16,
+  padding: 24,
 } as const;
 
 const titleStyle = {
-  fontSize: 10,
+  fontSize: 11,
   textTransform: "uppercase",
-  letterSpacing: "0.1em",
-  color: "rgba(184,149,106,0.6)",
+  letterSpacing: "1.8px",
+  color: "#8B7355",
+  fontWeight: 500,
   margin: 0,
 } as const;
 
@@ -329,31 +330,48 @@ export function WalletChart() {
         >
           <p className="sr-only">{accessibilitySummary}</p>
           {walletCards.map((card, index) => {
-            const badgeText = !card.hasTodayActivity
-              ? "quiet"
-              : card.todayActivity > 0
-                ? `+${formatCurrency(card.todayActivity, card.currency)}`
-                : card.todayActivity < 0
-                  ? `−${formatCurrency(Math.abs(card.todayActivity), card.currency)}`
-                  : "quiet";
+            const showActivityBadge = card.todayActivity !== 0;
 
-            const badgeStyle = !card.hasTodayActivity
-              ? {
-                  background: "rgba(255,255,255,0.04)",
-                  border: "1px solid rgba(255,255,255,0.06)",
-                  color: "rgba(245,240,232,0.3)",
-                }
-              : card.todayActivity > 0
-                ? {
-                    background: "rgba(74,222,128,0.1)",
-                    border: "1px solid rgba(74,222,128,0.2)",
-                    color: "#4ade80",
-                  }
-                : {
-                    background: "rgba(248,113,113,0.1)",
-                    border: "1px solid rgba(248,113,113,0.2)",
-                    color: "#f87171",
-                  };
+            const activityBadge =
+              showActivityBadge && card.todayActivity > 0 ? (
+                <span
+                  style={{
+                    marginLeft: "auto",
+                    position: "relative",
+                    zIndex: 1,
+                    padding: "3px 10px",
+                    borderRadius: 6,
+                    fontSize: 11,
+                    fontWeight: 500,
+                    lineHeight: 1,
+                    whiteSpace: "nowrap",
+                    background: "rgba(74, 222, 128, 0.08)",
+                    border: "1px solid rgba(74, 222, 128, 0.16)",
+                    color: "#86efac",
+                  }}
+                >
+                  {`+${formatCurrency(card.todayActivity, card.currency)}`}
+                </span>
+              ) : showActivityBadge ? (
+                <span
+                  style={{
+                    marginLeft: "auto",
+                    position: "relative",
+                    zIndex: 1,
+                    padding: "3px 10px",
+                    borderRadius: 6,
+                    fontSize: 11,
+                    fontWeight: 500,
+                    lineHeight: 1,
+                    whiteSpace: "nowrap",
+                    background: "rgba(224,122,95,0.08)",
+                    border: "1px solid rgba(224,122,95,0.16)",
+                    color: "#E07A5F",
+                  }}
+                >
+                  {`−${formatCurrency(Math.abs(card.todayActivity), card.currency)}`}
+                </span>
+              ) : null;
 
             return (
               <motion.article
@@ -415,22 +433,7 @@ export function WalletChart() {
                       {card.tag}
                     </p>
                   </div>
-                  <span
-                    style={{
-                      marginLeft: "auto",
-                      position: "relative",
-                      zIndex: 1,
-                      padding: "5px 8px",
-                      borderRadius: 999,
-                      fontSize: 10,
-                      fontWeight: 500,
-                      lineHeight: 1,
-                      whiteSpace: "nowrap",
-                      ...badgeStyle,
-                    }}
-                  >
-                    {badgeText}
-                  </span>
+                  {activityBadge}
                 </div>
 
                 <p
@@ -454,7 +457,7 @@ export function WalletChart() {
                     position: "relative",
                     zIndex: 1,
                     width: "100%",
-                    height: 3,
+                    height: 2,
                     borderRadius: 999,
                     background: "rgba(255,255,255,0.08)",
                     overflow: "hidden",
@@ -473,6 +476,7 @@ export function WalletChart() {
                       height: "100%",
                       borderRadius: 999,
                       background: card.palette.barGradient,
+                      opacity: 0.4,
                       minWidth: card.width > 0 ? 4 : 0,
                     }}
                   />

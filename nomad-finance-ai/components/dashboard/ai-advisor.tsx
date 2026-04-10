@@ -5,7 +5,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Brain, Send, AlertCircle, Lock } from "lucide-react";
+import { Brain, Send, AlertCircle } from "lucide-react";
 import { EmptyState } from "@/components/ui/empty-state";
 import { cn } from "@/lib/utils";
 import { useDemoMode } from "@/lib/demo-context";
@@ -137,42 +137,33 @@ export function AiAdvisor() {
         className="flex-1 space-y-4 overflow-y-auto p-4"
       >
         {messages.length === 0 && !error && (
-          <div className="flex h-full flex-col items-center justify-center gap-8 px-4 py-8">
-            {isDemo ? (
-              <div className="flex flex-col items-center gap-6 text-center">
-                <div className="rounded-2xl border border-amber-500/20 bg-amber-500/5 p-6 shadow-sm dark:border-amber-500/30 dark:bg-amber-500/10">
-                  <Lock className="h-10 w-10 text-amber-500" />
-                </div>
-                <div className="space-y-2">
-                  <h3 className="text-lg font-semibold">AI Advisor &mdash; Demo Mode</h3>
-                  <p className="max-w-sm text-sm text-muted-foreground">
-                    The AI Financial Advisor requires a Supabase account and a
-                    configured GROQ API key. Sign up and add your{" "}
-                    <code className="rounded-md bg-muted px-1.5 py-0.5 text-xs">GROQ_API_KEY</code>{" "}
-                    to <code className="rounded-md bg-muted px-1.5 py-0.5 text-xs">.env.local</code>{" "}
-                    to unlock personalized insights.
-                  </p>
-                </div>
-              </div>
-            ) : (
-              <div className="flex h-full w-full flex-col items-center justify-center">
-                <EmptyState
-                  icon={Brain}
-                  heading="Your AI financial advisor"
-                  subtext="Ask me anything about your spending, savings, or financial goals"
-                  iconSize="large"
-                  iconClassName="text-primary"
-                  suggestionChips={[
-                    "Analyze my spending this month",
-                    "How is my savings rate?",
-                    "Where can I cut expenses?",
-                  ]}
-                  onChipClick={sendMessage}
-                  chipDisabled={isStreaming}
-                  className="flex-1 min-h-0 w-full py-8"
-                />
-              </div>
+          <div className="flex h-full flex-col items-center justify-center gap-6 px-4 py-8">
+            {isDemo && (
+              <p
+                className="max-w-md rounded-lg border border-amber-500/25 bg-amber-500/5 px-3 py-2 text-center text-xs text-muted-foreground dark:border-amber-500/35 dark:bg-amber-500/10"
+                role="note"
+              >
+                Demo mode: answers use the built-in sample wallets and
+                transactions shown on the dashboard, not a real account.
+              </p>
             )}
+            <div className="flex h-full min-h-0 w-full flex-1 flex-col items-center justify-center">
+              <EmptyState
+                icon={Brain}
+                heading="Your AI financial advisor"
+                subtext="Ask me anything about your spending, savings, or financial goals"
+                iconSize="large"
+                iconClassName="text-primary"
+                suggestionChips={[
+                  "Analyze my spending this month",
+                  "How is my savings rate?",
+                  "Where can I cut expenses?",
+                ]}
+                onChipClick={sendMessage}
+                chipDisabled={isStreaming}
+                className="flex-1 min-h-0 w-full py-8"
+              />
+            </div>
           </div>
         )}
 

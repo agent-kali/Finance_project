@@ -1,21 +1,81 @@
+import { cookies } from "next/headers";
 import { streamText } from "ai";
 import { createGroq } from "@ai-sdk/groq";
 import { createClient } from "@/lib/supabase/server";
 import type { SupportedCurrency } from "@/lib/constants";
 import { CURRENCY_SYMBOLS } from "@/lib/constants";
+import {
+  DEMO_COOKIE,
+  DEMO_PRIMARY_CURRENCY,
+  DEMO_TRANSACTIONS,
+  DEMO_WALLETS,
+} from "@/lib/demo";
+
+type PromptTransaction = {
+  type: string;
+  amount: number;
+  currency: string;
+  category: string;
+  date: string;
+  description: string | null;
+};
+
+type DashboardInlineContext = {
+  balance: string;
+  todaySpending: string;
+  topCategory: string;
+  topPercent: number;
+  insightText: string;
+};
+
+function parseDashboardInlineContext(raw: unknown): DashboardInlineContext | null {
+  if (raw === null || raw === undefined || typeof raw !== "object") return null;
+  const o = raw as Record<string, unknown>;
+  const topPercent = o.topPercent;
+  if (
+    typeof o.balance === "string" &&
+    typeof o.todaySpending === "string" &&
+    typeof o.topCategory === "string" &&
+    typeof topPercent === "number" &&
+    Number.isFinite(topPercent) &&
+    typeof o.insightText === "string"
+  ) {
+    return {
+      balance: o.balance,
+      todaySpending: o.todaySpending,
+      topCategory: o.topCategory,
+      topPercent,
+      insightText: o.insightText,
+    };
+  }
+  return null;
+}
+
+function buildDashboardInlineSystemPrompt(
+  ctx: DashboardInlineContext,
+  options?: { isDemoSample?: boolean }
+) {
+  const preamble = options?.isDemoSample
+    ? "The user is exploring a product demo; figures in this context are sample data.\n\n"
+    : "";
+  return `${preamble}You are a personal finance AI advisor for a digital nomad.
+Current context: balance ${ctx.balance},
+today's spending ${ctx.todaySpending},
+top category ${ctx.topCategory} at ${ctx.topPercent}% of spending.
+AI insight shown: ${ctx.insightText}.
+Give concise, actionable advice in 2-3 sentences max.
+Be specific to nomad lifestyle. No markdown, plain text only.`;
+}
 
 function buildSystemPrompt(
-  transactions: Array<{
-    type: string;
-    amount: number;
-    currency: string;
-    category: string;
-    date: string;
-    description: string | null;
-  }>,
+  transactions: PromptTransaction[],
   wallets: Array<{ currency: string; balance: number }>,
-  primaryCurrency: string
+  primaryCurrency: string,
+  options?: { isDemoSample?: boolean }
 ) {
+  const preamble = options?.isDemoSample
+    ? "The user is exploring a product demo. All wallet and transaction figures below are fixed sample data—not their real finances.\n\n"
+    : "";
   const walletSummary = wallets
     .map(
       (w) =>
@@ -41,7 +101,7 @@ function buildSystemPrompt(
     .map(([cat, amt]) => `${cat}: €${amt.toFixed(0)}`)
     .join(", ");
 
-  return `You are a financial advisor specializing in digital nomads and EU tax compliance.
+  return `${preamble}You are a financial advisor specializing in digital nomads and EU tax compliance.
 You give concise, practical, and actionable advice.
 
 The user's primary currency is ${primaryCurrency}.
@@ -61,6 +121,20 @@ Provide specific, actionable advice about:
 Be concise. Use bullet points. Reference their actual numbers. Do not hallucinate data they don't have.`;
 }
 
+function demoTransactionsForPrompt(): PromptTransaction[] {
+  return [...DEMO_TRANSACTIONS]
+    .sort((a, b) => b.date.localeCompare(a.date))
+    .slice(0, 30)
+    .map((t) => ({
+      type: t.type,
+      amount: t.amount,
+      currency: t.currency,
+      category: t.category,
+      date: t.date,
+      description: t.description,
+    }));
+}
+
 function jsonError(message: string, status: number) {
   return new Response(JSON.stringify({ error: message }), {
     status,
@@ -77,14 +151,10 @@ export async function POST(request: Request) {
       );
     }
 
-    const supabase = await createClient();
-    const { data: { user }, error: authError } = await supabase.auth.getUser();
-
-    if (authError || !user) {
-      return jsonError("Unauthorized", 401);
-    }
-
-    let body: { messages?: Array<{ role: "user" | "assistant"; content: string }> };
+    let body: {
+      messages?: Array<{ role: "user" | "assistant"; content: string }>;
+      dashboardInlineContext?: unknown;
+    };
     try {
       body = await request.json();
     } catch {
@@ -96,37 +166,93 @@ export async function POST(request: Request) {
       return jsonError("Messages are required", 400);
     }
 
-    const [
-      { data: transactions },
-      { data: wallets },
-      { data: profile },
-    ] = await Promise.all([
-      supabase
-        .from("transactions")
-        .select("type, amount, currency, category, date, description")
-        .eq("user_id", user.id)
-        .order("date", { ascending: false })
-        .limit(30),
-      supabase
-        .from("wallets")
-        .select("currency, balance")
-        .eq("user_id", user.id),
-      supabase
-        .from("profiles")
-        .select("primary_currency")
-        .eq("id", user.id)
-        .maybeSingle(),
-    ]);
+    const dashboardInline = parseDashboardInlineContext(body.dashboardInlineContext);
+
+    const cookieStore = await cookies();
+    const isDemoRequest = cookieStore.has(DEMO_COOKIE);
+
+    let system: string;
+
+    if (dashboardInline) {
+      if (isDemoRequest) {
+        system = buildDashboardInlineSystemPrompt(dashboardInline, {
+          isDemoSample: true,
+        });
+      } else {
+        const supabase = await createClient();
+        const {
+          data: { user },
+          error: authError,
+        } = await supabase.auth.getUser();
+
+        if (authError || !user) {
+          return jsonError("Unauthorized", 401);
+        }
+
+        system = buildDashboardInlineSystemPrompt(dashboardInline);
+      }
+    } else {
+      let transactions: PromptTransaction[];
+      let wallets: Array<{ currency: string; balance: number }>;
+      let primaryCurrency: string;
+      let isDemoSample = false;
+
+      if (isDemoRequest) {
+        transactions = demoTransactionsForPrompt();
+        wallets = DEMO_WALLETS.map((w) => ({
+          currency: w.currency,
+          balance: w.balance,
+        }));
+        primaryCurrency = DEMO_PRIMARY_CURRENCY;
+        isDemoSample = true;
+      } else {
+        const supabase = await createClient();
+        const {
+          data: { user },
+          error: authError,
+        } = await supabase.auth.getUser();
+
+        if (authError || !user) {
+          return jsonError("Unauthorized", 401);
+        }
+
+        const [
+          { data: txRows },
+          { data: walletRows },
+          { data: profile },
+        ] = await Promise.all([
+          supabase
+            .from("transactions")
+            .select("type, amount, currency, category, date, description")
+            .eq("user_id", user.id)
+            .order("date", { ascending: false })
+            .limit(30),
+          supabase
+            .from("wallets")
+            .select("currency, balance")
+            .eq("user_id", user.id),
+          supabase
+            .from("profiles")
+            .select("primary_currency")
+            .eq("id", user.id)
+            .maybeSingle(),
+        ]);
+
+        transactions = (txRows ?? []) as PromptTransaction[];
+        wallets = walletRows ?? [];
+        primaryCurrency = profile?.primary_currency ?? "EUR";
+      }
+
+      system = buildSystemPrompt(transactions, wallets, primaryCurrency, {
+        isDemoSample,
+      });
+    }
 
     const groq = createGroq({ apiKey: process.env.GROQ_API_KEY });
 
     const result = streamText({
       model: groq("llama-3.3-70b-versatile"),
-      system: buildSystemPrompt(
-        transactions ?? [],
-        wallets ?? [],
-        profile?.primary_currency ?? "EUR"
-      ),
+      system,
       messages,
     });
 

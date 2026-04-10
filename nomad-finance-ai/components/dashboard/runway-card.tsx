@@ -12,34 +12,19 @@ interface CityConfig {
   readonly city: string;
   readonly flag: string;
   readonly dailyCostUSD: number;
-  readonly rgb: string;
-  readonly numberColor: string;
 }
 
-/* --- Mock data: estimated daily living costs (USD) per city --- */
 const CITY_COSTS: readonly CityConfig[] = [
-  {
-    city: "Ho Chi Minh City",
-    flag: "\u{1F1FB}\u{1F1F3}",
-    dailyCostUSD: 38,
-    rgb: "74,222,128",
-    numberColor: "#4ade80",
-  },
-  {
-    city: "Bangkok",
-    flag: "\u{1F1F9}\u{1F1ED}",
-    dailyCostUSD: 65,
-    rgb: "251,191,36",
-    numberColor: "#fbbf24",
-  },
-  {
-    city: "Berlin",
-    flag: "\u{1F1E9}\u{1F1EA}",
-    dailyCostUSD: 120,
-    rgb: "248,113,113",
-    numberColor: "#f87171",
-  },
+  { city: "Ho Chi Minh City", flag: "\u{1F1FB}\u{1F1F3}", dailyCostUSD: 38 },
+  { city: "Bangkok", flag: "\u{1F1F9}\u{1F1ED}", dailyCostUSD: 65 },
+  { city: "Berlin", flag: "\u{1F1E9}\u{1F1EA}", dailyCostUSD: 120 },
 ];
+
+function getUrgency(days: number): { label: string; color: string } {
+  if (days >= 200) return { label: "comfortable", color: "#4ECDC4" };
+  if (days >= 100) return { label: "moderate", color: "#D4A054" };
+  return { label: "limited", color: "#E07A5F" };
+}
 
 function toDateKey(d: Date): string {
   return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
@@ -96,17 +81,18 @@ export function RunwayCard() {
       style={{
         width: "100%",
         background: "rgba(255,255,255,0.03)",
-        border: "1px solid rgba(184,149,106,0.15)",
-        borderRadius: 14,
-        padding: 20,
+        border: "1px solid rgba(255,255,255,0.06)",
+        borderRadius: 16,
+        padding: 24,
       }}
     >
       <p
         style={{
-          fontSize: 10,
+          fontSize: 11,
           textTransform: "uppercase",
-          letterSpacing: "0.1em",
-          color: "rgba(184,149,106,0.6)",
+          letterSpacing: "1.8px",
+          color: "#8B7355",
+          fontWeight: 500,
           margin: 0,
         }}
       >
@@ -115,7 +101,7 @@ export function RunwayCard() {
       <p
         style={{
           fontSize: 12,
-          color: "rgba(245,240,232,0.35)",
+          color: "#6B6560",
           margin: "2px 0 0",
         }}
       >
@@ -124,7 +110,7 @@ export function RunwayCard() {
       <p
         style={{
           fontSize: 12,
-          color: "rgba(245,240,232,0.3)",
+          color: "#6B6560",
           margin: "6px 0 0",
         }}
       >
@@ -146,6 +132,7 @@ export function RunwayCard() {
             balanceInUSD > 0 && city.dailyCostUSD > 0
               ? Math.floor(balanceInUSD / city.dailyCostUSD)
               : 0;
+          const urgency = getUrgency(days);
 
           return (
             <motion.div
@@ -157,8 +144,8 @@ export function RunwayCard() {
               style={{
                 minHeight: 160,
                 borderRadius: 12,
-                background: `rgba(${city.rgb}, 0.08)`,
-                border: `1px solid rgba(${city.rgb}, 0.25)`,
+                background: "rgba(255,255,255,0.03)",
+                border: "1px solid rgba(255,255,255,0.06)",
                 padding: "16px 20px",
                 textAlign: "center",
               }}
@@ -166,7 +153,7 @@ export function RunwayCard() {
               <p
                 style={{
                   fontSize: 13,
-                  color: "rgba(245,240,232,0.75)",
+                  color: "#6B6560",
                   margin: 0,
                   whiteSpace: "nowrap",
                   overflow: "hidden",
@@ -178,8 +165,8 @@ export function RunwayCard() {
               <p
                 style={{
                   fontSize: 64,
-                  fontWeight: 300,
-                  color: city.numberColor,
+                  fontWeight: 500,
+                  color: "#E0D8C8",
                   margin: "8px 0 0",
                   lineHeight: 1.1,
                 }}
@@ -189,7 +176,16 @@ export function RunwayCard() {
               <p
                 style={{
                   fontSize: 12,
-                  color: "rgba(245,240,232,0.35)",
+                  color: urgency.color,
+                  margin: "4px 0 0",
+                }}
+              >
+                {urgency.label}
+              </p>
+              <p
+                style={{
+                  fontSize: 12,
+                  color: "#6B6560",
                   margin: "4px 0 0",
                 }}
               >

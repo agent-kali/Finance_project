@@ -98,10 +98,10 @@ export function RecentActivity() {
       style={{ padding: "0 4px" }}
       className="flex flex-row items-center justify-between space-y-0"
     >
-      <p className="text-xs font-semibold uppercase tracking-[0.15em] text-muted-foreground">
+      <p style={{ fontSize: 11, fontWeight: 500, textTransform: "uppercase", letterSpacing: "1.8px", color: "#8B7355", margin: 0 }}>
         Recent Activity
       </p>
-      <Link href="/transactions" className="text-xs font-medium text-primary">
+      <Link href="/transactions" className="text-xs font-medium" style={{ color: "#8B7355" }}>
         View all &rarr;
       </Link>
     </div>
@@ -195,9 +195,8 @@ export function RecentActivity() {
                   </div>
                 </div>
                 <span
-                  className={`shrink-0 whitespace-nowrap text-right text-sm font-medium tabular-nums transition-transform duration-200 ease-in-out group-hover:translate-x-[2px] ${
-                    tx.type === "income" ? "text-primary" : "text-foreground"
-                  }`}
+                  className="shrink-0 whitespace-nowrap text-right text-sm font-medium tabular-nums transition-transform duration-200 ease-in-out group-hover:translate-x-[2px]"
+                  style={{ color: tx.type === "income" ? "#D4A054" : "#A09080" }}
                 >
                   <span className="sr-only">
                     {tx.type === "income" ? "Income" : "Expense"}{" "}

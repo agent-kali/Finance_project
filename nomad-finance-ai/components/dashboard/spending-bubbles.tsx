@@ -4,13 +4,10 @@ import { useMemo } from "react";
 import { motion, type Variants } from "framer-motion";
 import { useTransactions } from "@/lib/hooks/use-transactions";
 import { useDisplayCurrency } from "@/lib/hooks/use-profile";
-import { useTimeRange } from "@/lib/time-range-context";
-import { getDateRange } from "@/lib/date-utils";
-import { convertCurrency, formatForCard } from "@/lib/currency";
+import { convertCurrency, formatCurrency, formatForCard } from "@/lib/currency";
 import type { SupportedCurrency } from "@/lib/constants";
 
 const MAX_BUBBLE = 120;
-const MIN_BUBBLE = 56;
 const FLOAT_DURATIONS = [5, 6, 7, 8];
 
 function getCategoryEmoji(category: string): string {
@@ -87,18 +84,20 @@ interface CategoryBubble {
 
 export function SpendingBubbles() {
   const { data: transactions } = useTransactions();
-  const { timeRange } = useTimeRange();
   const displayCurrency = useDisplayCurrency();
 
-  const categories: CategoryBubble[] = useMemo(() => {
+  const { categories, total } = useMemo(() => {
     const txs = transactions ?? [];
-    const { start, end } = getDateRange(timeRange);
     const byCategory: Record<string, number> = {};
+    const now = new Date();
+    const weekStart = new Date(now);
+    weekStart.setHours(0, 0, 0, 0);
+    weekStart.setDate(weekStart.getDate() - 6);
 
     for (const tx of txs) {
       if (tx.type !== "expense") continue;
       const d = new Date(tx.date);
-      if (d < start || d > end) continue;
+      if (d < weekStart || d > now) continue;
       const amount = convertCurrency(
         tx.amount,
         tx.currency as SupportedCurrency,
@@ -107,25 +106,40 @@ export function SpendingBubbles() {
       byCategory[tx.category] = (byCategory[tx.category] || 0) + amount;
     }
 
-    const entries = Object.entries(byCategory)
+    const sortedEntries = Object.entries(byCategory)
       .map(([name, value]) => ({
         name,
         value: Math.round(value * 100) / 100,
       }))
       .sort((a, b) => b.value - a.value);
 
-    const total = entries.reduce((s, e) => s + e.value, 0);
-    const maxVal = entries[0]?.value ?? 0;
-    const secondVal = entries[1]?.value ?? 0;
+    const limitedEntries =
+      sortedEntries.length > 5
+        ? [
+            ...sortedEntries.slice(0, 4),
+            {
+              name: "Other",
+              value:
+                Math.round(
+                  sortedEntries
+                    .slice(4)
+                    .reduce((sum, entry) => sum + entry.value, 0) * 100
+                ) / 100,
+            },
+          ]
+        : sortedEntries.slice(0, 5);
 
-    return entries.map((entry, index) => {
-      let size = MIN_BUBBLE;
-      if (index === 0) {
-        size = MAX_BUBBLE;
-      } else if (index === 1) {
-        size = 80;
-      } else if (secondVal > 0) {
-        size = Math.max(MIN_BUBBLE, (entry.value / secondVal) * 80);
+    const total = limitedEntries.reduce((sum, entry) => sum + entry.value, 0);
+    const maxVal = limitedEntries[0]?.value ?? 0;
+
+    const categories = limitedEntries.map((entry, index) => {
+      let size = MAX_BUBBLE;
+      if (index === 1) {
+        size = maxVal > 0 ? Math.max(64, (entry.value / maxVal) * MAX_BUBBLE) : 64;
+      } else if (index === 2) {
+        size = maxVal > 0 ? Math.max(52, (entry.value / maxVal) * MAX_BUBBLE) : 52;
+      } else if (index >= 3) {
+        size = maxVal > 0 ? Math.max(44, (entry.value / maxVal) * MAX_BUBBLE) : 44;
       }
 
       return {
@@ -137,22 +151,25 @@ export function SpendingBubbles() {
         rgb: getCategoryRgb(entry.name),
       };
     });
-  }, [transactions, timeRange, displayCurrency]);
+
+    return { categories, total };
+  }, [transactions, displayCurrency]);
 
   return (
     <div
       style={{
         width: "100%",
-        background: "rgba(255,255,255,0.03)",
-        border: "1px solid rgba(184,149,106,0.15)",
-        borderRadius: 14,
-        padding: 20,
-        display: "flex",
-        alignItems: "center",
-        gap: 16,
       }}
     >
-      <div style={{ width: "30%", flexShrink: 0 }}>
+      <div
+        style={{
+          width: "100%",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "space-between",
+          gap: 16,
+        }}
+      >
         <p
           style={{
             fontSize: 10,
@@ -168,20 +185,21 @@ export function SpendingBubbles() {
           style={{
             fontSize: 12,
             color: "rgba(245,240,232,0.35)",
-            margin: "2px 0 0",
+            margin: 0,
+            whiteSpace: "nowrap",
           }}
         >
-          bigger bubble = more spent
+          this week &middot; {formatCurrency(total, displayCurrency)} total
         </p>
       </div>
 
       {categories.length === 0 ? (
         <div
           style={{
-            flex: 1,
             display: "flex",
             alignItems: "center",
             justifyContent: "center",
+            padding: "20px 0",
             minHeight: 80,
           }}
         >
@@ -196,11 +214,12 @@ export function SpendingBubbles() {
           whileInView="visible"
           viewport={{ once: true }}
           style={{
-            flex: 1,
+            width: "100%",
             display: "flex",
-            alignItems: "center",
+            alignItems: "flex-end",
             justifyContent: "center",
-            gap: "32px",
+            gap: 20,
+            padding: "20px 0",
           }}
         >
           {categories.map((cat, i) => (

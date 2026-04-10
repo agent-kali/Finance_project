@@ -152,7 +152,7 @@ export function SummaryCards() {
       {/* Hero balance with warm glow */}
       <div className="relative flex flex-col items-center text-center">
         <div className="balance-glow" aria-hidden="true" />
-        <p className="relative z-10 text-[11px] font-medium uppercase tracking-[0.2em] text-muted-foreground">
+        <p className="relative z-10 uppercase" style={{ fontSize: 11, letterSpacing: "1.8px", color: "#8B7355", fontWeight: 500 }}>
           Balance
         </p>
         <div
@@ -168,8 +168,8 @@ export function SummaryCards() {
       </div>
 
       {/* Metrics row */}
-      <div className="mx-auto max-w-lg">
-        <div className="grid grid-cols-3 divide-x divide-border/30">
+      <div className="mx-auto max-w-lg" style={{ borderTop: "1px solid rgba(255,255,255,0.06)", paddingTop: 16 }}>
+        <div className="grid grid-cols-3">
           <div className="min-w-0 px-3 text-center first:pl-0 last:pr-0 sm:px-6">
             <p className="text-[11px] font-medium uppercase tracking-[0.15em] text-muted-foreground">
               Income

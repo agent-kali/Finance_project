@@ -28,6 +28,7 @@ import {
   Settings,
 } from "lucide-react";
 import Link from "next/link";
+import { DashboardGeometry } from "@/components/dashboard/DashboardGeometry";
 import { cn } from "@/lib/utils";
 import { type ReactNode, useState } from "react";
 import { useMounted } from "@/lib/hooks/use-mounted";
@@ -149,7 +150,7 @@ export function DashboardShell({
 
   return (
     <CommandPaletteProvider>
-      <div className="relative flex h-svh overflow-x-hidden bg-gradient-nomad">
+      <div className="relative flex h-svh select-none overflow-x-hidden bg-gradient-nomad">
         <div className="bg-ambient-glow" aria-hidden="true" />
         <div className="bg-particles" aria-hidden="true" />
 
@@ -277,6 +278,9 @@ export function DashboardShell({
           {/* Page content */}
           <main id="main-content" className="relative z-10 min-h-0 flex-1 overflow-x-hidden overflow-y-auto p-4 md:p-6">{children}</main>
         </div>
+
+        {/* Above z-10 chrome so shapes show; pointer-events-none keeps UI clickable */}
+        <DashboardGeometry />
       </div>
 
       <CommandPalette />

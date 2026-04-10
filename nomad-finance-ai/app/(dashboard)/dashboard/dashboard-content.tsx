@@ -7,7 +7,7 @@ import { AiInsightCard } from "@/components/dashboard/ai-insight-card";
 import { RecentActivity } from "@/components/dashboard/recent-activity";
 import { MobileFab } from "@/components/dashboard/mobile-fab";
 import { RunwayCard } from "@/components/dashboard/runway-card";
-import { SpendingBubbles } from "@/components/dashboard/spending-bubbles";
+import { DashboardSpendingBreakdown } from "@/components/dashboard/spending-breakdown";
 import { WalletChart } from "@/components/dashboard/wallet-chart";
 import { TimeRangeToggle } from "@/components/dashboard/time-range-toggle";
 import { useTimeRange } from "@/lib/time-range-context";
@@ -29,23 +29,26 @@ function TimeRangeContent() {
     <div
       className={`space-y-8 transition-opacity duration-150 ease-out ${isTransitioning ? "opacity-60" : "opacity-100"}`}
     >
-      {/* 1. Balance hero + AI insight */}
+      {/* 1. Balance hero, recent activity, AI insight */}
       <section aria-label="Summary">
         <ErrorBoundary fallbackTitle="Failed to load summary">
           <SummaryCards />
         </ErrorBoundary>
       </section>
+      <ErrorBoundary fallbackTitle="Failed to load recent activity">
+        <RecentActivity />
+      </ErrorBoundary>
       <ErrorBoundary fallbackTitle="Failed to load AI insight">
         <AiInsightCard />
       </ErrorBoundary>
 
-      {/* 2. Wallet Balances + Recent Activity — stacked */}
+      {/* 2. Wallet balances */}
       <motion.section
-        aria-label="Activity and wallets"
+        aria-label="Wallets"
         style={{
           display: "flex",
           flexDirection: "column",
-          gap: 16,
+          gap: 32,
           alignItems: "stretch",
         }}
         initial="hidden"
@@ -57,23 +60,18 @@ function TimeRangeContent() {
             <WalletChart />
           </ErrorBoundary>
         </motion.div>
-        <motion.div variants={cardVariants} custom={1}>
-          <ErrorBoundary fallbackTitle="Failed to load recent activity">
-            <RecentActivity />
-          </ErrorBoundary>
-        </motion.div>
       </motion.section>
 
       {/* 3. Where it went — full width */}
       <motion.section
-        aria-label="Spending bubbles"
+        aria-label="Spending breakdown"
         initial="hidden"
         whileInView="visible"
         viewport={viewportConfig}
       >
         <motion.div variants={cardVariants} custom={0}>
-          <ErrorBoundary fallbackTitle="Failed to load spending bubbles">
-            <SpendingBubbles />
+          <ErrorBoundary fallbackTitle="Failed to load spending breakdown">
+            <DashboardSpendingBreakdown />
           </ErrorBoundary>
         </motion.div>
       </motion.section>

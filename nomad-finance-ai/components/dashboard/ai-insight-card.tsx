@@ -1,15 +1,31 @@
 "use client";
 
-import { useMemo } from "react";
-import Link from "next/link";
-import { Sparkles } from "lucide-react";
+import {
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+  type CSSProperties,
+} from "react";
+import { motion } from "framer-motion";
+import { ArrowUp, Sparkles } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useTransactions } from "@/lib/hooks/use-transactions";
+import { useWallets } from "@/lib/hooks/use-wallets";
 import { useTimeRange, type TimeRange } from "@/lib/time-range-context";
 import { useDisplayCurrency } from "@/lib/hooks/use-profile";
 import { getDateRange } from "@/lib/date-utils";
 import { convertCurrency, formatCurrency } from "@/lib/currency";
 import type { SupportedCurrency } from "@/lib/constants";
+
+const MAX_MESSAGES = 6;
+
+type ChatMessage = {
+  id: string;
+  role: "user" | "assistant";
+  content: string;
+};
 
 function getPreviousPeriodRange(timeRange: TimeRange): { start: Date; end: Date } {
   const { start, end } = getDateRange(timeRange);
@@ -20,12 +36,64 @@ function getPreviousPeriodRange(timeRange: TimeRange): { start: Date; end: Date 
   };
 }
 
+function toDateKey(d: Date): string {
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
+}
+
+function trimMessages(msgs: ChatMessage[]): ChatMessage[] {
+  return msgs.length <= MAX_MESSAGES ? msgs : msgs.slice(-MAX_MESSAGES);
+}
+
 export function AiInsightCard() {
   const { data: transactions, isLoading: txLoading } = useTransactions();
+  const { data: wallets, isLoading: walletsLoading } = useWallets();
   const { timeRange } = useTimeRange();
   const displayCurrency = useDisplayCurrency();
 
-  const { insight, topCategory } = useMemo(() => {
+  const [expanded, setExpanded] = useState(false);
+  const [messages, setMessages] = useState<ChatMessage[]>([]);
+  const [input, setInput] = useState("");
+  const [isStreaming, setIsStreaming] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const scrollRef = useRef<HTMLDivElement>(null);
+
+  const totalBalance = useMemo(
+    () =>
+      (wallets ?? []).reduce(
+        (sum, w) =>
+          sum +
+          convertCurrency(
+            w.balance,
+            w.currency as SupportedCurrency,
+            displayCurrency,
+          ),
+        0,
+      ),
+    [wallets, displayCurrency],
+  );
+
+  const todaySpendingAmount = useMemo(() => {
+    const txs = transactions ?? [];
+    const todayKey = toDateKey(new Date());
+    return txs
+      .filter(
+        (t) =>
+          t.type === "expense" &&
+          toDateKey(new Date(t.date)) === todayKey,
+      )
+      .reduce(
+        (sum, t) =>
+          sum +
+          convertCurrency(
+            t.amount,
+            t.currency as SupportedCurrency,
+            displayCurrency,
+          ),
+        0,
+      );
+  }, [transactions, displayCurrency]);
+
+  const { insight, topCategory, topCategoryPct } = useMemo(() => {
     const convert = (amount: number, currency: string) =>
       convertCurrency(amount, currency as SupportedCurrency, displayCurrency);
 
@@ -37,7 +105,8 @@ export function AiInsightCard() {
     if (!transactions?.length) {
       return {
         insight: `No activity yet ${periodLabel}. Start tracking your finances.`,
-        topCategory: null,
+        topCategory: null as string | null,
+        topCategoryPct: 0,
       };
     }
 
@@ -50,7 +119,7 @@ export function AiInsightCard() {
     });
     const currentExpenses = currentExpenseTransactions.reduce(
       (s, t) => s + convert(t.amount, t.currency),
-      0
+      0,
     );
 
     const currentIncomeTransactions = transactions.filter((t) => {
@@ -59,7 +128,7 @@ export function AiInsightCard() {
     });
     const currentIncome = currentIncomeTransactions.reduce(
       (s, t) => s + convert(t.amount, t.currency),
-      0
+      0,
     );
 
     const previousExpenses = transactions
@@ -76,31 +145,30 @@ export function AiInsightCard() {
     });
 
     const categories = Object.entries(currentByCategory).sort(
-      (a, b) => b[1] - a[1]
+      (a, b) => b[1] - a[1],
     );
     const topCat = categories[0]?.[0] ?? null;
-    const topCategoryPct =
+    const pct =
       categories[0] && currentExpenses > 0
         ? Math.round((categories[0][1] / currentExpenses) * 100)
         : 0;
 
-    // (a) Zero expenses, positive income
     if (currentExpenses === 0 && currentIncome > 0) {
       return {
         insight: `Zero expenses ${periodLabel} \u2014 all income saved.`,
         topCategory: topCat,
+        topCategoryPct: pct,
       };
     }
 
-    // (b) No activity at all in range
     if (currentExpenses === 0 && currentIncome === 0) {
       return {
         insight: `No activity yet ${periodLabel}. Start tracking your finances.`,
         topCategory: topCat,
+        topCategoryPct: pct,
       };
     }
 
-    // (c) / (d) Expense change vs previous period
     if (previousExpenses > 0 && currentExpenses > 0) {
       const change =
         ((currentExpenses - previousExpenses) / previousExpenses) * 100;
@@ -109,6 +177,7 @@ export function AiInsightCard() {
         return {
           insight: `Your spending dropped ${changePct}% compared to last ${previousPeriodLabel}.`,
           topCategory: topCat,
+          topCategoryPct: pct,
         };
       }
       if (changePct > 0 && change > 0) {
@@ -116,53 +185,192 @@ export function AiInsightCard() {
         return {
           insight: `Spending is up ${changePct}% this ${previousPeriodLabel}${driver}`,
           topCategory: topCat,
+          topCategoryPct: pct,
         };
       }
     }
 
-    // (e) One category dominates
-    if (categories[0] && topCategoryPct >= 50) {
+    if (categories[0] && pct >= 50) {
       return {
-        insight: `${categories[0][0]} accounts for ${topCategoryPct}% of your spending this ${previousPeriodLabel}.`,
+        insight: `${categories[0][0]} accounts for ${pct}% of your spending this ${previousPeriodLabel}.`,
         topCategory: topCat,
+        topCategoryPct: pct,
       };
     }
 
-    // (f) Fallback — earned income
     if (currentIncome > 0) {
       const txCount = currentIncomeTransactions.length;
       return {
         insight: `You earned ${formatCurrency(currentIncome, displayCurrency)} across ${txCount} transaction${txCount === 1 ? "" : "s"} ${periodLabel}.`,
         topCategory: topCat,
+        topCategoryPct: pct,
       };
     }
 
-    // Final safety net — always produce text
     return {
       insight: `Track your income and spending to unlock personalised insights.`,
       topCategory: topCat,
+      topCategoryPct: pct,
     };
   }, [transactions, timeRange, displayCurrency]);
 
-  if (txLoading) {
+  const dashboardInlineContext = useMemo(
+    () => ({
+      balance: formatCurrency(totalBalance, displayCurrency),
+      todaySpending: formatCurrency(todaySpendingAmount, displayCurrency),
+      topCategory: topCategory ?? "none",
+      topPercent: topCategoryPct,
+      insightText: insight,
+    }),
+    [
+      totalBalance,
+      todaySpendingAmount,
+      displayCurrency,
+      topCategory,
+      topCategoryPct,
+      insight,
+    ],
+  );
+
+  useEffect(() => {
+    const el = scrollRef.current;
+    if (!el) return;
+    el.scrollTop = el.scrollHeight;
+  }, [messages, isStreaming]);
+
+  const sendMessage = useCallback(
+    async (userContent: string) => {
+      if (!userContent.trim() || isStreaming) return;
+
+      setError(null);
+      const userMsg: ChatMessage = {
+        id: `user-${Date.now()}`,
+        role: "user",
+        content: userContent.trim(),
+      };
+
+      const withoutEmptyAssistant = messages.filter(
+        (m) => !(m.role === "assistant" && m.content === ""),
+      );
+      const trimmedTurns = trimMessages([...withoutEmptyAssistant, userMsg]);
+      const forApi = trimmedTurns.map(({ role, content }) => ({ role, content }));
+
+      const assistantId = `assistant-${Date.now()}`;
+      setMessages([
+        ...trimmedTurns,
+        { id: assistantId, role: "assistant", content: "" },
+      ]);
+      setInput("");
+
+      setIsStreaming(true);
+
+      try {
+        const response = await fetch("/api/ai", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          credentials: "same-origin",
+          body: JSON.stringify({
+            messages: forApi,
+            dashboardInlineContext,
+          }),
+        });
+
+        if (!response.ok) {
+          const text = await response.text();
+          let errorMessage = `Request failed (${response.status})`;
+          try {
+            const data = JSON.parse(text) as { error?: string };
+            if (data?.error && typeof data.error === "string") {
+              errorMessage = data.error;
+            }
+          } catch {
+            if (text) errorMessage = text.slice(0, 200);
+          }
+          throw new Error(errorMessage);
+        }
+
+        const reader = response.body?.getReader();
+        if (!reader) throw new Error("No response stream");
+
+        const decoder = new TextDecoder();
+        let accumulated = "";
+
+        while (true) {
+          const { done, value } = await reader.read();
+          if (done) break;
+
+          accumulated += decoder.decode(value, { stream: true });
+          const current = accumulated;
+          setMessages((prev) =>
+            prev.map((m) =>
+              m.id === assistantId ? { ...m, content: current } : m,
+            ),
+          );
+        }
+
+        if (!accumulated.trim()) {
+          setMessages((prev) => prev.filter((m) => m.id !== assistantId));
+          setError("No response from the advisor. Please try again.");
+        } else {
+          setMessages((prev) => trimMessages(prev));
+        }
+      } catch (err) {
+        setError(err instanceof Error ? err.message : "Something went wrong");
+        setMessages((prev) => prev.filter((m) => m.id !== assistantId));
+      } finally {
+        setIsStreaming(false);
+      }
+    },
+    [messages, isStreaming, dashboardInlineContext],
+  );
+
+  const sendMessageRef = useRef(sendMessage);
+  sendMessageRef.current = sendMessage;
+
+  const queueExpandAndSend = useCallback((text: string) => {
+    setExpanded(true);
+    window.setTimeout(() => {
+      void sendMessageRef.current(text);
+    }, 0);
+  }, []);
+
+  const openExpandedOnly = useCallback(() => {
+    setExpanded(true);
+  }, []);
+
+  const pillStyle: CSSProperties = {
+    border: "1px solid rgba(255,255,255,0.08)",
+    borderRadius: 8,
+    padding: "8px 16px",
+    fontSize: 12,
+    color: "#A09080",
+    transition: "border-color 0.15s",
+    background: "transparent",
+    cursor: "pointer",
+  };
+
+  const isLoading = txLoading || walletsLoading;
+
+  if (isLoading) {
     return (
-      <section aria-label="AI insight" className="px-4 py-6 sm:px-0">
+      <section aria-label="AI insight">
         <div
-          className="mx-auto w-full max-w-2xl rounded-xl border px-6 py-5 text-center"
           style={{
-            borderColor: "rgba(201, 169, 110, 0.28)",
-            backgroundColor: "rgba(201, 169, 110, 0.03)",
-            boxShadow:
-              "0 0 20px rgba(201, 169, 110, 0.08), 0 0 40px rgba(201, 169, 110, 0.04)",
+            width: "100%",
+            background: "rgba(255,255,255,0.03)",
+            border: "1px solid rgba(255,255,255,0.06)",
+            borderRadius: 16,
+            padding: 24,
+            textAlign: "center",
           }}
         >
           <div className="space-y-4">
             <Skeleton className="mx-auto h-5 w-5 rounded-full" />
             <Skeleton className="mx-auto h-4 w-72 max-w-full" />
             <div className="flex flex-wrap items-center justify-center gap-2">
-              <Skeleton className="h-8 w-32 rounded-full" />
-              <Skeleton className="h-8 w-28 rounded-full" />
-              <Skeleton className="h-8 w-36 rounded-full" />
+              <Skeleton className="h-8 w-32 rounded-lg" />
+              <Skeleton className="h-8 w-28 rounded-lg" />
+              <Skeleton className="h-8 w-36 rounded-lg" />
             </div>
           </div>
         </div>
@@ -170,42 +378,336 @@ export function AiInsightCard() {
     );
   }
 
-  const pills = [
-    { label: "Analyze spending", href: "/ai-advisor" },
-    ...(topCategory
-      ? [{ label: `Set budget for ${topCategory}`, href: "/ai-advisor" }]
-      : [{ label: "Savings tips", href: "/ai-advisor" }]),
-    { label: "Ask AI advisor", href: "/ai-advisor" },
-  ];
+  const typingDotStyle = (delayMs: number): CSSProperties => ({
+    width: 6,
+    height: 6,
+    borderRadius: "50%",
+    background: "rgba(184,149,106,0.6)",
+    animation: "aiInsightDotBounce 0.55s ease-in-out infinite",
+    animationDelay: `${delayMs}ms`,
+  });
 
   return (
-    <section aria-label="AI insight" className="px-4 py-6 sm:px-0">
+    <section aria-label="AI insight">
+      <style>{`
+        @keyframes aiInsightDotBounce {
+          0%, 100% { transform: translateY(0); }
+          50% { transform: translateY(-5px); }
+        }
+      `}</style>
       <div
-        className="mx-auto w-full max-w-2xl rounded-xl border px-6 py-5 text-center"
+        aria-expanded={expanded}
         style={{
-          borderColor: "rgba(201, 169, 110, 0.28)",
-          backgroundColor: "rgba(201, 169, 110, 0.03)",
-          boxShadow:
-            "0 0 20px rgba(201, 169, 110, 0.08), 0 0 40px rgba(201, 169, 110, 0.04)",
+          width: "100%",
+          background: "rgba(255,255,255,0.03)",
+          border: "1px solid rgba(255,255,255,0.06)",
+          borderRadius: 16,
+          padding: 24,
+          textAlign: "center",
+          position: "relative",
         }}
       >
         <div className="space-y-5">
-          <Sparkles className="mx-auto h-5 w-5 text-[oklch(0.68_0.12_72)] dark:text-[#D8B67B]" aria-hidden="true" />
-          <p className="text-sm leading-relaxed italic text-[oklch(0.50_0.08_72)] dark:text-[#C9A96E]">
+          <Sparkles className="mx-auto h-5 w-5" style={{ color: "#C8A96E" }} aria-hidden="true" />
+          <p
+            className="select-text"
+            style={{
+              fontSize: 14,
+              lineHeight: 1.6,
+              color: "#C8B898",
+              fontStyle: "italic",
+              margin: 0,
+            }}
+          >
             {insight}
           </p>
           <div className="flex flex-wrap items-center justify-center gap-2">
-            {pills.map((pill) => (
-              <Link
-                key={pill.label}
-                href={pill.href}
-                className="rounded-full border border-[rgba(201,169,110,0.28)] px-4 py-1.5 text-xs text-[oklch(0.38_0.02_60)] transition-colors hover:border-[rgba(201,169,110,0.45)] hover:text-foreground dark:text-muted-foreground"
+            <button
+              type="button"
+              style={pillStyle}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.borderColor = "rgba(255,255,255,0.15)";
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.borderColor = "rgba(255,255,255,0.08)";
+              }}
+              onClick={() =>
+                queueExpandAndSend("Analyze my spending patterns this week")
+              }
+            >
+              Analyze spending
+            </button>
+            {topCategory ? (
+              <button
+                type="button"
+                style={pillStyle}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.borderColor = "rgba(255,255,255,0.15)";
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.borderColor = "rgba(255,255,255,0.08)";
+                }}
+                onClick={() =>
+                  queueExpandAndSend(
+                    `Help me set a budget for ${topCategory}`,
+                  )
+                }
               >
-                {pill.label}
-              </Link>
-            ))}
+                {`Set budget for ${topCategory}`}
+              </button>
+            ) : (
+              <button
+                type="button"
+                style={pillStyle}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.borderColor = "rgba(255,255,255,0.15)";
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.borderColor = "rgba(255,255,255,0.08)";
+                }}
+                onClick={openExpandedOnly}
+              >
+                Savings tips
+              </button>
+            )}
+            <button
+              type="button"
+              style={pillStyle}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.borderColor = "rgba(255,255,255,0.15)";
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.borderColor = "rgba(255,255,255,0.08)";
+              }}
+              onClick={openExpandedOnly}
+            >
+              Ask AI advisor
+            </button>
           </div>
+          <button
+            type="button"
+            onClick={openExpandedOnly}
+            style={{
+              display: "block",
+              width: "100%",
+              marginTop: 4,
+              fontSize: 11,
+              color: "rgba(184,149,106,0.4)",
+              background: "none",
+              border: "none",
+              cursor: "pointer",
+              fontStyle: "normal",
+            }}
+          >
+            Ask anything →
+          </button>
         </div>
+
+        <motion.div
+          initial={false}
+          animate={{
+            height: expanded ? "auto" : 0,
+            opacity: expanded ? 1 : 0,
+          }}
+          transition={{ duration: 0.28, ease: [0.4, 0, 0.2, 1] }}
+          style={{ overflow: "hidden" }}
+        >
+          <div
+            style={{
+              position: "relative",
+              paddingTop: 20,
+              marginTop: 8,
+              borderTop: "1px solid rgba(255,255,255,0.06)",
+              textAlign: "left",
+            }}
+          >
+            <button
+              type="button"
+              aria-label="Close chat"
+              onClick={() => setExpanded(false)}
+              style={{
+                position: "absolute",
+                top: 12,
+                right: 0,
+                width: 28,
+                height: 28,
+                border: "none",
+                background: "transparent",
+                color: "rgba(245,240,232,0.45)",
+                fontSize: 20,
+                lineHeight: 1,
+                cursor: "pointer",
+                padding: 0,
+              }}
+            >
+              ×
+            </button>
+
+            <div
+              ref={scrollRef}
+              className="min-h-0"
+              style={{
+                maxHeight: 280,
+                overflowY: "auto",
+                paddingRight: 8,
+                marginBottom: 12,
+              }}
+            >
+              <ul className="m-0 flex list-none flex-col gap-3 p-0">
+                {messages.map((m, index) => (
+                  <motion.li
+                    key={m.id}
+                    layout
+                    initial={{ opacity: 0, y: 8 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{
+                      duration: 0.2,
+                      ease: "easeOut",
+                      delay: Math.min(index, 5) * 0.06,
+                    }}
+                    style={{
+                      display: "flex",
+                      justifyContent:
+                        m.role === "user" ? "flex-end" : "flex-start",
+                    }}
+                  >
+                      {m.role === "assistant" &&
+                      m.content === "" &&
+                      isStreaming ? (
+                        <div
+                          role="status"
+                          aria-live="polite"
+                          aria-label="Advisor is typing"
+                          style={{
+                            display: "flex",
+                            alignItems: "center",
+                            gap: 5,
+                            padding: "10px 14px",
+                          }}
+                        >
+                          <span style={typingDotStyle(0)} />
+                          <span style={typingDotStyle(150)} />
+                          <span style={typingDotStyle(300)} />
+                        </div>
+                      ) : (
+                        <div
+                          className="select-text"
+                          style={{
+                            maxWidth: "88%",
+                            padding: "8px 12px",
+                            fontSize: 13,
+                            borderRadius:
+                              m.role === "user"
+                                ? "12px 12px 2px 12px"
+                                : "12px 12px 12px 2px",
+                            border:
+                              m.role === "user"
+                                ? "1px solid rgba(184,149,106,0.2)"
+                                : "1px solid rgba(255,255,255,0.07)",
+                            background:
+                              m.role === "user"
+                                ? "rgba(184,149,106,0.12)"
+                                : "rgba(255,255,255,0.04)",
+                            color:
+                              m.role === "user"
+                                ? "#f5f0e8"
+                                : "rgba(245,240,232,0.85)",
+                            fontStyle:
+                              m.role === "assistant" ? "italic" : "normal",
+                            whiteSpace: "pre-wrap",
+                            wordBreak: "break-word",
+                          }}
+                        >
+                          {m.content}
+                        </div>
+                      )}
+                  </motion.li>
+                ))}
+              </ul>
+            </div>
+
+            {error ? (
+              <p
+                role="alert"
+                className="select-text"
+                style={{
+                  fontSize: 12,
+                  color: "#E07A5F",
+                  marginBottom: 8,
+                  textAlign: "center",
+                }}
+              >
+                {error}
+              </p>
+            ) : null}
+
+            <form
+              onSubmit={(e) => {
+                e.preventDefault();
+                void sendMessage(input);
+              }}
+              style={{
+                display: "flex",
+                alignItems: "center",
+                gap: 10,
+              }}
+            >
+              <input
+                type="text"
+                className="select-text"
+                value={input}
+                onChange={(e) => setInput(e.target.value)}
+                placeholder="Ask about your spending..."
+                disabled={isStreaming}
+                aria-busy={isStreaming}
+                style={{
+                  flex: 1,
+                  minWidth: 0,
+                  background: "rgba(255,255,255,0.04)",
+                  border: "1px solid rgba(184,149,106,0.2)",
+                  borderRadius: 100,
+                  padding: "10px 16px",
+                  fontSize: 13,
+                  color: "#f5f0e8",
+                  outline: "none",
+                }}
+              />
+              <button
+                type="submit"
+                disabled={isStreaming || !input.trim()}
+                aria-label="Send message"
+                style={{
+                  width: 36,
+                  height: 36,
+                  borderRadius: "50%",
+                  border: "none",
+                  background: "#b8956a",
+                  color: "#1a1a1a",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  cursor:
+                    isStreaming || !input.trim() ? "not-allowed" : "pointer",
+                  opacity: isStreaming || !input.trim() ? 0.45 : 1,
+                  flexShrink: 0,
+                  transition: "opacity 0.15s",
+                }}
+                onMouseEnter={(e) => {
+                  if (!isStreaming && input.trim()) {
+                    e.currentTarget.style.opacity = "0.85";
+                  }
+                }}
+                onMouseLeave={(e) => {
+                  if (!isStreaming && input.trim()) {
+                    e.currentTarget.style.opacity = "1";
+                  }
+                }}
+              >
+                <ArrowUp className="h-4 w-4" strokeWidth={2.5} aria-hidden />
+              </button>
+            </form>
+          </div>
+        </motion.div>
       </div>
     </section>
   );

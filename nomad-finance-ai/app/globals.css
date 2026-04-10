@@ -131,6 +131,12 @@
   body {
     @apply bg-background text-foreground;
   }
+
+  /* Dashboard shell uses select-none; keep form fields and editable regions copyable */
+  :where(input, textarea, select, [contenteditable="true"]) {
+    -webkit-user-select: text;
+    user-select: text;
+  }
   @media (max-width: 640px) {
     html {
       font-size: 14px;
