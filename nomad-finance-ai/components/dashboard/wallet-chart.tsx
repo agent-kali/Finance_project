@@ -1,255 +1,500 @@
 "use client";
 
 import { useMemo } from "react";
-import { motion } from "framer-motion";
-import {
-  BarChart,
-  Bar,
-  XAxis,
-  YAxis,
-  CartesianGrid,
-  Tooltip,
-  LabelList,
-} from "recharts";
-import { useTheme } from "next-themes";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { motion, type Variants } from "framer-motion";
+import { Wallet } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
+import { EmptyState } from "@/components/ui/empty-state";
 import { useWallets } from "@/lib/hooks/use-wallets";
-import { useChartDimensions } from "@/lib/hooks/use-chart-dimensions";
+import { useTransactions } from "@/lib/hooks/use-transactions";
 import { useDisplayCurrency } from "@/lib/hooks/use-profile";
 import { useReducedMotion } from "@/lib/hooks/use-reduced-motion";
-import { convertCurrency, formatCurrency, formatCompact } from "@/lib/currency";
-import { CURRENCY_SYMBOLS, type SupportedCurrency } from "@/lib/constants";
-import { EmptyState } from "@/components/ui/empty-state";
-import { Wallet } from "lucide-react";
+import { convertCurrency, formatCurrency } from "@/lib/currency";
+import { type SupportedCurrency } from "@/lib/constants";
 
-const CHART_LIGHT = {
-  gridStroke: "oklch(0.88 0.01 55 / 0.12)",
-  tickFill: "oklch(0.5 0.02 55)",
-};
-const CHART_DARK = {
-  gridStroke: "oklch(0.25 0.008 55 / 0.12)",
-  tickFill: "oklch(0.55 0.02 60)",
-};
+interface WalletPalette {
+  readonly background: string;
+  readonly border: string;
+  readonly barGradient: string;
+  readonly glow: string;
+  readonly tag: string;
+}
 
-const TOOLTIP_STYLE = {
-  backgroundColor: "#1a1814",
-  border: "1px solid rgba(184, 149, 106, 0.3)",
-  borderRadius: 10,
-  padding: "8px 12px",
-  boxShadow: "0 8px 24px rgba(0, 0, 0, 0.12)",
+interface WalletCardData {
+  readonly id: string;
+  readonly currency: SupportedCurrency;
+  readonly name: string;
+  readonly flag: string;
+  readonly tag: string;
+  readonly originalBalance: number;
+  readonly comparableBalance: number;
+  readonly width: number;
+  readonly todayActivity: number;
+  readonly hasTodayActivity: boolean;
+  readonly lastUsedLabel: string;
+  readonly palette: WalletPalette;
+}
+
+const cardStyle = {
+  width: "100%",
+  background: "rgba(255,255,255,0.03)",
+  border: "1px solid rgba(184,149,106,0.15)",
+  borderRadius: 14,
+  padding: 20,
 } as const;
 
-function roundedTopRect(x: number, y: number, w: number, h: number, r: number): string {
-  const cr = Math.min(r, w / 2, h);
-  return [
-    `M${x},${y + h}`,
-    `V${y + cr}`,
-    `Q${x},${y} ${x + cr},${y}`,
-    `H${x + w - cr}`,
-    `Q${x + w},${y} ${x + w},${y + cr}`,
-    `V${y + h}`,
-    `Z`,
-  ].join(" ");
+const titleStyle = {
+  fontSize: 10,
+  textTransform: "uppercase",
+  letterSpacing: "0.1em",
+  color: "rgba(184,149,106,0.6)",
+  margin: 0,
+} as const;
+
+const defaultPalette: WalletPalette = {
+  background: "linear-gradient(135deg,#1a1710,#221e12)",
+  border: "rgba(184,149,106,0.2)",
+  barGradient: "linear-gradient(90deg, #b8956a, #d4b48a)",
+  glow: "rgba(184,149,106,0.1)",
+  tag: "Primary",
+};
+
+const walletPalettes: Partial<Record<SupportedCurrency, WalletPalette>> = {
+  EUR: defaultPalette,
+  USD: {
+    background: "linear-gradient(135deg,#111209,#161a0e)",
+    border: "rgba(99,153,34,0.15)",
+    barGradient: "linear-gradient(90deg, #639922, #97c459)",
+    glow: "rgba(99,153,34,0.07)",
+    tag: "Freelance",
+  },
+  PLN: {
+    background: "linear-gradient(135deg,#120f11,#1a1218)",
+    border: "rgba(167,139,250,0.12)",
+    barGradient: "linear-gradient(90deg, #a78bfa, #c4b5fd)",
+    glow: "rgba(167,139,250,0.06)",
+    tag: "Local cash",
+  },
+};
+
+const currencyFlags: Partial<Record<SupportedCurrency, string>> = {
+  EUR: "🇪🇺",
+  USD: "🇺🇸",
+  GBP: "🇬🇧",
+  VND: "🇻🇳",
+  PLN: "🇵🇱",
+  THB: "🇹🇭",
+  IDR: "🇮🇩",
+  MYR: "🇲🇾",
+  SGD: "🇸🇬",
+  JPY: "🇯🇵",
+  TRY: "🇹🇷",
+  AED: "🇦🇪",
+  MXN: "🇲🇽",
+  BRL: "🇧🇷",
+  CHF: "🇨🇭",
+  AUD: "🇦🇺",
+  CAD: "🇨🇦",
+  HKD: "🇭🇰",
+  KRW: "🇰🇷",
+  INR: "🇮🇳",
+  PHP: "🇵🇭",
+  NZD: "🇳🇿",
+  ZAR: "🇿🇦",
+};
+
+const currencyDisplayNames =
+  typeof Intl !== "undefined" && typeof Intl.DisplayNames === "function"
+    ? new Intl.DisplayNames(["en"], { type: "currency" })
+    : null;
+
+function getCurrencyName(currency: SupportedCurrency): string {
+  return currencyDisplayNames?.of(currency) ?? currency;
+}
+
+function getWalletPalette(currency: SupportedCurrency): WalletPalette {
+  return walletPalettes[currency] ?? defaultPalette;
+}
+
+function parseTxDate(value: string): Date {
+  return value.includes("T") ? new Date(value) : new Date(`${value}T00:00:00`);
+}
+
+function isSameDay(a: Date, b: Date): boolean {
+  return (
+    a.getFullYear() === b.getFullYear() &&
+    a.getMonth() === b.getMonth() &&
+    a.getDate() === b.getDate()
+  );
+}
+
+function getLastUsedLabel(lastUsedAt?: string): string {
+  if (!lastUsedAt) return "last used never";
+
+  const now = new Date();
+  const used = parseTxDate(lastUsedAt);
+  const diffMs = now.getTime() - used.getTime();
+  const dayMs = 24 * 60 * 60 * 1000;
+  const dayDiff = Math.max(0, Math.floor(diffMs / dayMs));
+
+  if (dayDiff === 0) return "last used today";
+  if (dayDiff === 1) return "last used 1d ago";
+  if (dayDiff < 7) return `last used ${dayDiff}d ago`;
+
+  const weekDiff = Math.floor(dayDiff / 7);
+  if (weekDiff < 5) return `last used ${weekDiff}w ago`;
+
+  const monthDiff =
+    (now.getFullYear() - used.getFullYear()) * 12 + (now.getMonth() - used.getMonth());
+  if (monthDiff <= 1) return "last used 1mo ago";
+  return `last used ${monthDiff}mo ago`;
 }
 
 export function WalletChart() {
-  const { resolvedTheme } = useTheme();
-  const isDark = resolvedTheme === "dark";
-  const chartColors = isDark ? CHART_DARK : CHART_LIGHT;
-  const { data: wallets, isLoading } = useWallets();
+  const { data: wallets, isLoading: walletsLoading } = useWallets();
+  const { data: transactions, isLoading: transactionsLoading } = useTransactions();
   const displayCurrency = useDisplayCurrency();
-  const { ref, width, height } = useChartDimensions();
   const prefersReducedMotion = useReducedMotion();
 
-  const chartData = useMemo(() => {
-    if (!wallets?.length) return [];
-    return wallets.map((w) => ({
-      name: `${w.currency} ${CURRENCY_SYMBOLS[w.currency as SupportedCurrency] ?? ""}`,
-      balance: Math.round(convertCurrency(w.balance, w.currency as SupportedCurrency, displayCurrency) * 100) / 100,
-      original: w.balance,
-      currency: w.currency as SupportedCurrency,
-    }));
-  }, [wallets, displayCurrency]);
+  const stripVariants: Variants = prefersReducedMotion
+    ? { hidden: {}, visible: {} }
+    : { hidden: {}, visible: { transition: { staggerChildren: 0.1 } } };
 
-  if (isLoading) {
-    return (
-      <Card className="glass-card flex min-h-[360px] flex-col">
-        <CardHeader>
-          <Skeleton className="h-3 w-48" />
-        </CardHeader>
-        <CardContent className="flex-1">
-          <Skeleton className="min-h-[220px] w-full rounded-lg" />
-        </CardContent>
-      </Card>
+  const cardVariants: Variants = prefersReducedMotion
+    ? { hidden: { opacity: 1, y: 0 }, visible: { opacity: 1, y: 0 } }
+    : {
+        hidden: { opacity: 0, y: 16 },
+        visible: {
+          opacity: 1,
+          y: 0,
+          transition: { duration: 0.6, ease: "easeOut" },
+        },
+      };
+
+  const walletCards = useMemo((): WalletCardData[] => {
+    if (!wallets?.length) return [];
+
+    const txsByWallet = new Map<string, typeof transactions>();
+    for (const tx of transactions ?? []) {
+      const walletTxs = txsByWallet.get(tx.wallet_id) ?? [];
+      walletTxs.push(tx);
+      txsByWallet.set(tx.wallet_id, walletTxs);
+    }
+
+    const comparableBalances = wallets.map((wallet) =>
+      Math.max(
+        convertCurrency(
+          wallet.balance,
+          wallet.currency as SupportedCurrency,
+          displayCurrency
+        ),
+        0
+      )
     );
-  }
+    const maxBalance = Math.max(...comparableBalances, 0);
+    const today = new Date();
+
+    return wallets
+      .map((wallet, index) => {
+        const currency = wallet.currency as SupportedCurrency;
+        const walletTxs = txsByWallet.get(wallet.id) ?? [];
+
+        let todayActivity = 0;
+        let hasTodayActivity = false;
+        let lastUsedAt: string | undefined;
+        let lastUsedTime = -Infinity;
+
+        for (const tx of walletTxs) {
+          const txDate = parseTxDate(tx.date);
+
+          if (isSameDay(txDate, today)) {
+            hasTodayActivity = true;
+            todayActivity += tx.type === "income" ? tx.amount : -tx.amount;
+          }
+
+          const txTime = txDate.getTime();
+          if (txTime > lastUsedTime) {
+            lastUsedTime = txTime;
+            lastUsedAt = tx.date;
+          }
+        }
+
+        const comparableBalance = comparableBalances[index];
+
+        return {
+          id: wallet.id,
+          currency,
+          name: getCurrencyName(currency),
+          flag: currencyFlags[currency] ?? "💱",
+          tag: getWalletPalette(currency).tag,
+          originalBalance: wallet.balance,
+          comparableBalance,
+          width: maxBalance > 0 ? (comparableBalance / maxBalance) * 100 : 0,
+          todayActivity,
+          hasTodayActivity,
+          lastUsedLabel: getLastUsedLabel(lastUsedAt),
+          palette: getWalletPalette(currency),
+        };
+      })
+      .sort((a, b) => b.comparableBalance - a.comparableBalance)
+      .slice(0, 3);
+  }, [wallets, transactions, displayCurrency]);
+
+  const accessibilitySummary = useMemo(
+    () =>
+      walletCards
+        .map((card) => {
+          const activityText = !card.hasTodayActivity
+            ? "quiet today"
+            : card.todayActivity > 0
+              ? `up ${formatCurrency(card.todayActivity, card.currency)} today`
+              : card.todayActivity < 0
+                ? `down ${formatCurrency(Math.abs(card.todayActivity), card.currency)} today`
+                : "flat today";
+
+          return `${card.name}: balance ${formatCurrency(card.originalBalance, card.currency)}, ${activityText}, ${card.lastUsedLabel}.`;
+        })
+        .join(" "),
+    [walletCards]
+  );
+
+  const isLoading = walletsLoading || transactionsLoading;
 
   return (
-    <Card className="glass-card flex min-h-[360px] flex-col overflow-hidden">
-      <CardHeader>
-        <CardTitle className="text-xs font-semibold uppercase tracking-[0.15em] text-muted-foreground">
-          Wallet Balances
-        </CardTitle>
-      </CardHeader>
-      <CardContent className="flex min-w-0 flex-1 overflow-hidden px-4 sm:px-6">
-        {chartData.length === 0 ? (
+    <motion.div
+      initial={prefersReducedMotion ? false : { opacity: 0, y: 16 }}
+      whileInView={{ opacity: 1, y: 0 }}
+      viewport={{ once: true }}
+      transition={{ duration: prefersReducedMotion ? 0 : 0.8, ease: "easeOut" }}
+      style={cardStyle}
+    >
+      <p style={titleStyle}>WALLET BALANCES</p>
+
+      {isLoading ? (
+        <div
+          style={{
+            marginTop: 18,
+            display: "grid",
+            gridTemplateColumns: "1fr 1fr 1fr",
+            gap: 10,
+          }}
+        >
+          {Array.from({ length: 3 }).map((_, index) => (
+            <div
+              key={index}
+              style={{
+                borderRadius: 12,
+                border: "1px solid rgba(255,255,255,0.06)",
+                padding: 16,
+              }}
+            >
+              <div style={{ display: "flex", alignItems: "flex-start", gap: 10 }}>
+                <Skeleton className="h-5 w-5 rounded-full" />
+                <div style={{ flex: 1 }}>
+                  <Skeleton className="h-3 w-20" />
+                  <Skeleton className="mt-2 h-2 w-14" />
+                </div>
+                <Skeleton className="h-6 w-14 rounded-full" />
+              </div>
+              <Skeleton className="mt-6 h-7 w-24" />
+              <Skeleton className="mt-4 h-[3px] w-full rounded-full" />
+              <Skeleton className="mt-4 h-2 w-20" />
+            </div>
+          ))}
+        </div>
+      ) : walletCards.length === 0 ? (
+        <div className="mt-4 flex min-h-[220px] items-center justify-center">
           <EmptyState
             icon={Wallet}
             heading="No wallets yet"
             subtext="Create a wallet to see your balance breakdown"
             className="min-h-[220px]"
           />
-        ) : chartData.length === 1 ? (
-          <div className="flex min-h-[220px] w-full items-center justify-center">
-            <div className="w-full max-w-sm rounded-2xl border border-border/30 bg-card/35 px-5 py-5 text-center">
-              <p className="text-[11px] font-medium uppercase tracking-[0.15em] text-muted-foreground">
-                {chartData[0].currency} Wallet
-              </p>
-              <p className="mt-2 text-2xl font-semibold tabular-nums text-foreground">
-                {formatCurrency(chartData[0].original, chartData[0].currency)}
-              </p>
-              <p className="mt-2 text-sm text-muted-foreground">
-                {chartData[0].currency} {CURRENCY_SYMBOLS[chartData[0].currency] ?? ""}
-              </p>
-              {chartData[0].currency !== displayCurrency ? (
-                <p className="mt-1 text-xs tabular-nums text-muted-foreground">
-                  Approx. {formatCurrency(chartData[0].balance, displayCurrency)}
-                </p>
-              ) : null}
-            </div>
-          </div>
-        ) : (
-          <div
-            ref={ref}
-            className="h-[220px] min-w-0 w-full px-1 sm:px-0"
-            role="img"
-            aria-label={`Wallet balances in ${displayCurrency} equivalent`}
-          >
-            <p className="sr-only">
-              {chartData
-                .map(
-                  (w) =>
-                    `${w.name}: ${formatCurrency(w.balance, displayCurrency)}`
-                )
-                .join(". ")}
-            </p>
-            {width > 0 && height > 0 && (() => {
-              const isNarrow = width < 400;
-              const tickFontSize = isNarrow ? 10 : 12;
-              const tickMargin = isNarrow ? 6 : 10;
-              const formatTick = (v: number) =>
-                isNarrow ? formatCompact(v, displayCurrency) : formatCurrency(v, displayCurrency);
-              return (
-              <BarChart
-                width={width}
-                height={height}
-                data={chartData}
-                margin={{ top: 24, right: isNarrow ? 2 : 8, left: isNarrow ? 30 : 32, bottom: 0 }}
-                barSize={48}
-                barCategoryGap={isNarrow ? "22%" : "30%"}
+        </div>
+      ) : (
+        <motion.div
+          role="list"
+          aria-label="Top wallet balances"
+          variants={stripVariants}
+          initial="hidden"
+          whileInView="visible"
+          viewport={{ once: true }}
+          style={{
+            width: "100%",
+            marginTop: 18,
+            display: "grid",
+            gridTemplateColumns: "1fr 1fr 1fr",
+            gap: 10,
+          }}
+        >
+          <p className="sr-only">{accessibilitySummary}</p>
+          {walletCards.map((card, index) => {
+            const badgeText = !card.hasTodayActivity
+              ? "quiet"
+              : card.todayActivity > 0
+                ? `+${formatCurrency(card.todayActivity, card.currency)}`
+                : card.todayActivity < 0
+                  ? `−${formatCurrency(Math.abs(card.todayActivity), card.currency)}`
+                  : "quiet";
+
+            const badgeStyle = !card.hasTodayActivity
+              ? {
+                  background: "rgba(255,255,255,0.04)",
+                  border: "1px solid rgba(255,255,255,0.06)",
+                  color: "rgba(245,240,232,0.3)",
+                }
+              : card.todayActivity > 0
+                ? {
+                    background: "rgba(74,222,128,0.1)",
+                    border: "1px solid rgba(74,222,128,0.2)",
+                    color: "#4ade80",
+                  }
+                : {
+                    background: "rgba(248,113,113,0.1)",
+                    border: "1px solid rgba(248,113,113,0.2)",
+                    color: "#f87171",
+                  };
+
+            return (
+              <motion.article
+                key={card.id}
+                role="listitem"
+                variants={cardVariants}
+                style={{
+                  position: "relative",
+                  overflow: "hidden",
+                  borderRadius: 12,
+                  padding: 16,
+                  background: card.palette.background,
+                  border: `1px solid ${card.palette.border}`,
+                }}
               >
-                <defs>
-                  <linearGradient id="walletBarGrad" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="0%" stopColor="#d4b48a" />
-                    <stop offset="100%" stopColor="#b8956a" />
-                  </linearGradient>
-                </defs>
-                <CartesianGrid
-                  strokeDasharray="3 3"
-                  stroke={chartColors.gridStroke}
-                  vertical={false}
-                />
-                <XAxis
-                  dataKey="name"
-                  axisLine={false}
-                  tickLine={false}
-                  tick={{ fill: chartColors.tickFill, fontSize: tickFontSize }}
-                  tickMargin={tickMargin}
-                />
-                <YAxis
-                  axisLine={false}
-                  tickLine={false}
-                  tick={{ fill: chartColors.tickFill, fontSize: tickFontSize }}
-                  tickFormatter={(v: number) => formatTick(v)}
-                  tickMargin={tickMargin}
-                />
-                <Tooltip
-                  cursor={false}
-                  wrapperStyle={{ background: "transparent" }}
-                  contentStyle={{ background: "transparent", border: "none", padding: 0 }}
-                  content={({ active, payload }) => {
-                    if (!active || !payload?.length) return null;
-                    const item = payload[0].payload as (typeof chartData)[number];
-                    return (
-                      <div style={TOOLTIP_STYLE} title="Converted at Frankfurter rate">
-                        <p style={{ color: "rgba(245, 240, 232, 0.6)", fontSize: 12, marginBottom: 4 }}>
-                          {item.name}
-                        </p>
-                        <p style={{ color: "#f5f0e8", fontSize: 14, fontWeight: 500 }}>
-                          {formatCurrency(item.original, item.currency)}
-                        </p>
-                        <p style={{ color: "rgba(245, 240, 232, 0.6)", fontSize: 12 }}>
-                          &asymp; {formatCurrency(item.balance, displayCurrency)}
-                        </p>
-                      </div>
-                    );
+                <div
+                  aria-hidden="true"
+                  style={{
+                    position: "absolute",
+                    top: -20,
+                    right: -20,
+                    width: 80,
+                    height: 80,
+                    borderRadius: "50%",
+                    background: card.palette.glow,
+                    pointerEvents: "none",
                   }}
                 />
-                <Bar
-                  dataKey="balance"
-                  radius={[6, 6, 0, 0]}
-                  isAnimationActive={false}
-                  minPointSize={6}
-                  fill="url(#walletBarGrad)"
-                  shape={(
-                    props: {
-                      x?: number;
-                      y?: number;
-                      width?: number;
-                      height?: number;
-                      index?: number;
-                    }
-                  ) => {
-                    const { x = 0, y = 0, width = 0, height: rawH = 0, index = 0 } = props;
-                    const h = Math.max(rawH, 4);
-                    const ny = rawH > 0 ? y : y + rawH - h;
-                    const d = roundedTopRect(x, ny, width, h, 6);
 
-                    if (prefersReducedMotion) {
-                      return <path d={d} fill="url(#walletBarGrad)" />;
-                    }
-
-                    return (
-                      <motion.path
-                        d={d}
-                        fill="url(#walletBarGrad)"
-                        initial={{ scaleY: 0 }}
-                        animate={{ scaleY: 1 }}
-                        style={{ transformOrigin: `${x + width / 2}px ${ny + h}px` }}
-                        transition={{
-                          type: "spring",
-                          stiffness: 120,
-                          damping: 20,
-                          delay: (index ?? 0) * 0.1,
-                        }}
-                      />
-                    );
+                <div
+                  style={{
+                    position: "relative",
+                    display: "flex",
+                    alignItems: "flex-start",
+                    gap: 10,
                   }}
                 >
-                  <LabelList
-                    dataKey="balance"
-                    position="top"
-                    style={{ fontSize: 12, fill: "rgba(245, 240, 232, 0.6)" }}
-                    formatter={(v: unknown) => formatCompact(Number(v), displayCurrency)}
+                  <span style={{ fontSize: 20, lineHeight: 1 }}>{card.flag}</span>
+                  <div style={{ minWidth: 0 }}>
+                    <p
+                      style={{
+                        margin: 0,
+                        fontSize: 12,
+                        fontWeight: 500,
+                        color: "#f5f0e8",
+                        lineHeight: 1.2,
+                      }}
+                    >
+                      {card.name}
+                    </p>
+                    <p
+                      style={{
+                        margin: "4px 0 0",
+                        fontSize: 9,
+                        color: "rgba(245,240,232,0.35)",
+                        lineHeight: 1.2,
+                      }}
+                    >
+                      {card.tag}
+                    </p>
+                  </div>
+                  <span
+                    style={{
+                      marginLeft: "auto",
+                      position: "relative",
+                      zIndex: 1,
+                      padding: "5px 8px",
+                      borderRadius: 999,
+                      fontSize: 10,
+                      fontWeight: 500,
+                      lineHeight: 1,
+                      whiteSpace: "nowrap",
+                      ...badgeStyle,
+                    }}
+                  >
+                    {badgeText}
+                  </span>
+                </div>
+
+                <p
+                  style={{
+                    position: "relative",
+                    zIndex: 1,
+                    margin: "18px 0 10px",
+                    fontSize: 22,
+                    fontWeight: 300,
+                    color: "#f5f0e8",
+                    letterSpacing: "-0.02em",
+                    lineHeight: 1.1,
+                  }}
+                >
+                  {formatCurrency(card.originalBalance, card.currency)}
+                </p>
+
+                <div
+                  aria-hidden="true"
+                  style={{
+                    position: "relative",
+                    zIndex: 1,
+                    width: "100%",
+                    height: 3,
+                    borderRadius: 999,
+                    background: "rgba(255,255,255,0.08)",
+                    overflow: "hidden",
+                  }}
+                >
+                  <motion.div
+                    initial={prefersReducedMotion ? false : { width: 0 }}
+                    whileInView={{ width: `${card.width}%` }}
+                    viewport={{ once: true }}
+                    transition={{
+                      duration: prefersReducedMotion ? 0 : 0.9,
+                      ease: "easeOut",
+                      delay: prefersReducedMotion ? 0 : index * 0.15,
+                    }}
+                    style={{
+                      height: "100%",
+                      borderRadius: 999,
+                      background: card.palette.barGradient,
+                      minWidth: card.width > 0 ? 4 : 0,
+                    }}
                   />
-                </Bar>
-              </BarChart>
-              );
-            })()}
-          </div>
-        )}
-      </CardContent>
-    </Card>
+                </div>
+
+                <p
+                  style={{
+                    position: "relative",
+                    zIndex: 1,
+                    margin: "10px 0 0",
+                    fontSize: 9,
+                    color: "rgba(245,240,232,0.2)",
+                    lineHeight: 1.2,
+                  }}
+                >
+                  {card.lastUsedLabel}
+                </p>
+              </motion.article>
+            );
+          })}
+        </motion.div>
+      )}
+    </motion.div>
   );
 }

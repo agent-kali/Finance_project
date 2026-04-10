@@ -3,7 +3,6 @@
 import { useMemo } from "react";
 import Link from "next/link";
 import { motion } from "framer-motion";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { EmptyState } from "@/components/ui/empty-state";
 import { cn } from "@/lib/utils";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -89,23 +88,41 @@ export function RecentActivity() {
       if (da !== db) return db - da;
       return new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
     });
-    return sorted.slice(0, 5);
+    return sorted.slice(0, 3);
   }, [transactions]);
 
   if (timeRange === "This Month") return null;
 
+  const header = (
+    <div
+      style={{ padding: "0 4px" }}
+      className="flex flex-row items-center justify-between space-y-0"
+    >
+      <p className="text-xs font-semibold uppercase tracking-[0.15em] text-muted-foreground">
+        Recent Activity
+      </p>
+      <Link href="/transactions" className="text-xs font-medium text-primary">
+        View all &rarr;
+      </Link>
+    </div>
+  );
+
   if (isLoading) {
     return (
-      <Card className="glass-card mx-auto max-w-[860px] min-h-[280px]">
-        <CardHeader>
+      <div className="mx-auto max-w-[860px] min-h-[280px]" style={{ padding: "0 4px" }}>
+        <div className="flex flex-row items-center justify-between space-y-0">
           <Skeleton className="h-3 w-36" />
-        </CardHeader>
-        <CardContent>
-          <ul className="space-y-0 divide-y divide-border/50">
-            {Array.from({ length: 5 }).map((_, i) => (
+          <Skeleton className="h-3 w-16" />
+        </div>
+        <div className="mt-6">
+          <ul className="space-y-0">
+            {Array.from({ length: 3 }).map((_, i) => (
               <li
                 key={i}
-                className="flex items-center gap-3 py-3 first:pt-0 last:pb-0"
+                className={cn(
+                  "flex items-center gap-3 py-3 first:pt-0 last:pb-0",
+                  i !== 2 && "border-b border-[rgba(255,255,255,0.04)]"
+                )}
               >
                 <Skeleton className="h-2 w-2 shrink-0 rounded-full" />
                 <div className="min-w-0 flex-1">
@@ -116,23 +133,16 @@ export function RecentActivity() {
               </li>
             ))}
           </ul>
-        </CardContent>
-      </Card>
+        </div>
+      </div>
     );
   }
 
   if (recent.length === 0) {
     return (
-      <Card className="glass-card mx-auto max-w-[860px]">
-        <CardHeader className="flex flex-row items-center justify-between space-y-0">
-          <CardTitle className="text-xs font-semibold uppercase tracking-[0.15em] text-muted-foreground">
-            Recent Activity
-          </CardTitle>
-          <Link href="/transactions" className="text-xs font-medium text-primary">
-            View all &rarr;
-          </Link>
-        </CardHeader>
-        <CardContent className="p-0">
+      <div className="mx-auto max-w-[860px]">
+        {header}
+        <div className="mt-6">
           <EmptyState
             icon={Activity}
             heading="No recent activity"
@@ -140,29 +150,22 @@ export function RecentActivity() {
             ctaLabel="Add transaction"
             ctaHref="/transactions?action=create"
           />
-        </CardContent>
-      </Card>
+        </div>
+      </div>
     );
   }
 
   return (
-    <Card className="glass-card mx-auto max-w-[860px]">
-      <CardHeader className="flex flex-row items-center justify-between space-y-0">
-        <CardTitle className="text-xs font-semibold uppercase tracking-[0.15em] text-muted-foreground">
-          Recent Activity
-        </CardTitle>
-        <Link href="/transactions" className="text-xs font-medium text-primary">
-          View all &rarr;
-        </Link>
-      </CardHeader>
-      <CardContent>
+    <div className="mx-auto max-w-[860px]">
+      {header}
+      <div style={{ padding: "0 4px" }} className="mt-6">
         <motion.ul
-          className="divide-y divide-border/30"
+          className="space-y-0"
           variants={listVariants}
           initial="hidden"
           animate="visible"
         >
-          {recent.map((tx) => {
+          {recent.map((tx, index) => {
             const isOptimistic = tx.id.startsWith("temp-");
             const merchant = getMerchant(tx);
             const showCategory = merchant !== tx.category;
@@ -172,6 +175,7 @@ export function RecentActivity() {
                 variants={itemVariants}
                 className={cn(
                   "group flex items-center gap-3 rounded-[10px] px-2 py-3 first:pt-0 last:pb-0 transition-[background,opacity] duration-200 ease-in-out hover:bg-[rgba(184,149,106,0.06)]",
+                  index !== recent.length - 1 && "border-b border-[rgba(255,255,255,0.04)]",
                   isOptimistic && "animate-pulse pointer-events-none opacity-50"
                 )}
               >
@@ -213,7 +217,7 @@ export function RecentActivity() {
             Add more transactions to see trends and insights.
           </p>
         ) : null}
-      </CardContent>
-    </Card>
+      </div>
+    </div>
   );
 }

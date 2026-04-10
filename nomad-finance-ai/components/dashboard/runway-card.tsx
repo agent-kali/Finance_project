@@ -13,13 +13,32 @@ interface CityConfig {
   readonly flag: string;
   readonly dailyCostUSD: number;
   readonly rgb: string;
+  readonly numberColor: string;
 }
 
 /* --- Mock data: estimated daily living costs (USD) per city --- */
 const CITY_COSTS: readonly CityConfig[] = [
-  { city: "Ho Chi Minh City", flag: "\u{1F1FB}\u{1F1F3}", dailyCostUSD: 38, rgb: "74,222,128" },
-  { city: "Bangkok", flag: "\u{1F1F9}\u{1F1ED}", dailyCostUSD: 65, rgb: "251,191,36" },
-  { city: "Berlin", flag: "\u{1F1E9}\u{1F1EA}", dailyCostUSD: 120, rgb: "248,113,113" },
+  {
+    city: "Ho Chi Minh City",
+    flag: "\u{1F1FB}\u{1F1F3}",
+    dailyCostUSD: 38,
+    rgb: "74,222,128",
+    numberColor: "#4ade80",
+  },
+  {
+    city: "Bangkok",
+    flag: "\u{1F1F9}\u{1F1ED}",
+    dailyCostUSD: 65,
+    rgb: "251,191,36",
+    numberColor: "#fbbf24",
+  },
+  {
+    city: "Berlin",
+    flag: "\u{1F1E9}\u{1F1EA}",
+    dailyCostUSD: 120,
+    rgb: "248,113,113",
+    numberColor: "#f87171",
+  },
 ];
 
 function toDateKey(d: Date): string {
@@ -75,6 +94,7 @@ export function RunwayCard() {
   return (
     <div
       style={{
+        width: "100%",
         background: "rgba(255,255,255,0.03)",
         border: "1px solid rgba(184,149,106,0.15)",
         borderRadius: 14,
@@ -101,10 +121,22 @@ export function RunwayCard() {
       >
         how long your balance lasts
       </p>
+      <p
+        style={{
+          fontSize: 12,
+          color: "rgba(245,240,232,0.3)",
+          margin: "6px 0 0",
+        }}
+      >
+        balance {formatCurrency(totalBalance, displayCurrency)} &middot; spending{" "}
+        {formatCurrency(todaySpending, displayCurrency)} today
+      </p>
 
       <div
         style={{
-          display: "flex",
+          width: "100%",
+          display: "grid",
+          gridTemplateColumns: "1fr 1fr 1fr",
           gap: 12,
           marginTop: 16,
         }}
@@ -123,19 +155,18 @@ export function RunwayCard() {
               viewport={{ once: true }}
               transition={{ duration: 0.5, delay: i * 0.12 }}
               style={{
-                flex: 1,
-                minWidth: 0,
+                minHeight: 160,
                 borderRadius: 12,
                 background: `rgba(${city.rgb}, 0.08)`,
                 border: `1px solid rgba(${city.rgb}, 0.25)`,
-                padding: 16,
+                padding: "16px 20px",
                 textAlign: "center",
               }}
             >
               <p
                 style={{
                   fontSize: 13,
-                  color: "rgba(245,240,232,0.7)",
+                  color: "rgba(245,240,232,0.75)",
                   margin: 0,
                   whiteSpace: "nowrap",
                   overflow: "hidden",
@@ -146,10 +177,10 @@ export function RunwayCard() {
               </p>
               <p
                 style={{
-                  fontSize: 28,
+                  fontSize: 64,
                   fontWeight: 300,
-                  color: `rgba(${city.rgb}, 0.9)`,
-                  margin: "8px 0 4px",
+                  color: city.numberColor,
+                  margin: "8px 0 0",
                   lineHeight: 1.1,
                 }}
               >
@@ -157,30 +188,17 @@ export function RunwayCard() {
               </p>
               <p
                 style={{
-                  fontSize: 11,
+                  fontSize: 12,
                   color: "rgba(245,240,232,0.35)",
-                  margin: 0,
+                  margin: "4px 0 0",
                 }}
               >
-                days in {city.city}
+                ${city.dailyCostUSD} / day
               </p>
             </motion.div>
           );
         })}
       </div>
-
-      <p
-        style={{
-          fontSize: 12,
-          color: "rgba(245,240,232,0.3)",
-          textAlign: "center",
-          marginTop: 14,
-          margin: "14px 0 0",
-        }}
-      >
-        balance {formatCurrency(totalBalance, displayCurrency)} &middot; spending{" "}
-        {formatCurrency(todaySpending, displayCurrency)} today
-      </p>
     </div>
   );
 }

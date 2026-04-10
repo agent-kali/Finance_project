@@ -6,11 +6,11 @@ import { useTransactions } from "@/lib/hooks/use-transactions";
 import { useDisplayCurrency } from "@/lib/hooks/use-profile";
 import { useTimeRange } from "@/lib/time-range-context";
 import { getDateRange } from "@/lib/date-utils";
-import { convertCurrency, formatCurrency } from "@/lib/currency";
+import { convertCurrency, formatForCard } from "@/lib/currency";
 import type { SupportedCurrency } from "@/lib/constants";
 
-const MAX_BUBBLE = 88;
-const MIN_BUBBLE = 28;
+const MAX_BUBBLE = 120;
+const MIN_BUBBLE = 56;
 const FLOAT_DURATIONS = [5, 6, 7, 8];
 
 function getCategoryEmoji(category: string): string {
@@ -38,6 +38,29 @@ function getCategoryRgb(category: string): string {
   return "59,130,246";
 }
 
+function getCategoryAlias(category: string): string {
+  const lower = category.toLowerCase();
+  if (lower.includes("food") || lower.includes("dining")) return "Food";
+  if (lower.includes("transport")) return "Transport";
+  if (lower.includes("coffee") || lower.includes("cafe")) return "Coffee";
+  if (lower.includes("housing") || lower.includes("rent")) return "Housing";
+  if (lower.includes("cowork")) return "Cowork";
+  if (lower.includes("health") || lower.includes("insurance")) return "Health";
+  if (lower.includes("entertain")) return "Fun";
+  if (lower.includes("shop")) return "Shopping";
+  if (lower.includes("saas") || lower.includes("tool")) return "Tools";
+  if (lower.includes("travel")) return "Travel";
+  if (lower.includes("education")) return "Learning";
+  if (lower.includes("utilit")) return "Utilities";
+
+  return category
+    .replace(/[&/]+/g, " ")
+    .split(/\s+/)
+    .filter(Boolean)
+    .slice(0, 2)
+    .join(" ");
+}
+
 const containerVariants: Variants = {
   hidden: {},
   visible: { transition: { staggerChildren: 0.1 } },
@@ -57,6 +80,7 @@ interface CategoryBubble {
   value: number;
   pct: number;
   size: number;
+  alias: string;
   emoji: string;
   rgb: string;
 }
@@ -92,59 +116,76 @@ export function SpendingBubbles() {
 
     const total = entries.reduce((s, e) => s + e.value, 0);
     const maxVal = entries[0]?.value ?? 0;
+    const secondVal = entries[1]?.value ?? 0;
 
-    return entries.map((entry) => ({
-      ...entry,
-      pct: total > 0 ? Math.round((entry.value / total) * 100) : 0,
-      size:
-        maxVal > 0
-          ? Math.max(MIN_BUBBLE, (entry.value / maxVal) * MAX_BUBBLE)
-          : MIN_BUBBLE,
-      emoji: getCategoryEmoji(entry.name),
-      rgb: getCategoryRgb(entry.name),
-    }));
+    return entries.map((entry, index) => {
+      let size = MIN_BUBBLE;
+      if (index === 0) {
+        size = MAX_BUBBLE;
+      } else if (index === 1) {
+        size = 80;
+      } else if (secondVal > 0) {
+        size = Math.max(MIN_BUBBLE, (entry.value / secondVal) * 80);
+      }
+
+      return {
+        ...entry,
+        pct: total > 0 ? Math.round((entry.value / total) * 100) : 0,
+        size,
+        alias: getCategoryAlias(entry.name),
+        emoji: getCategoryEmoji(entry.name),
+        rgb: getCategoryRgb(entry.name),
+      };
+    });
   }, [transactions, timeRange, displayCurrency]);
 
   return (
     <div
       style={{
+        width: "100%",
         background: "rgba(255,255,255,0.03)",
         border: "1px solid rgba(184,149,106,0.15)",
         borderRadius: 14,
         padding: 20,
+        display: "flex",
+        alignItems: "center",
+        gap: 16,
       }}
     >
-      <p
-        style={{
-          fontSize: 10,
-          textTransform: "uppercase",
-          letterSpacing: "0.1em",
-          color: "rgba(184,149,106,0.6)",
-          margin: 0,
-        }}
-      >
-        WHERE IT WENT
-      </p>
-      <p
-        style={{
-          fontSize: 12,
-          color: "rgba(245,240,232,0.35)",
-          margin: "2px 0 0",
-        }}
-      >
-        bigger bubble = more spent
-      </p>
+      <div style={{ width: "30%", flexShrink: 0 }}>
+        <p
+          style={{
+            fontSize: 10,
+            textTransform: "uppercase",
+            letterSpacing: "0.1em",
+            color: "rgba(184,149,106,0.6)",
+            margin: 0,
+          }}
+        >
+          WHERE IT WENT
+        </p>
+        <p
+          style={{
+            fontSize: 12,
+            color: "rgba(245,240,232,0.35)",
+            margin: "2px 0 0",
+          }}
+        >
+          bigger bubble = more spent
+        </p>
+      </div>
 
       {categories.length === 0 ? (
         <div
           style={{
-            height: 160,
+            flex: 1,
             display: "flex",
             alignItems: "center",
             justifyContent: "center",
+            minHeight: 80,
           }}
         >
-          <p style={{ fontSize: 12, color: "rgba(245,240,232,0.3)" }}>
+          <p style={{ fontSize: 14, color: "rgba(245,240,232,0.3)" }}>
             No spending data yet
           </p>
         </div>
@@ -155,13 +196,11 @@ export function SpendingBubbles() {
           whileInView="visible"
           viewport={{ once: true }}
           style={{
-            height: 160,
+            flex: 1,
             display: "flex",
-            alignItems: "flex-end",
+            alignItems: "center",
             justifyContent: "center",
-            gap: 16,
-            marginTop: 12,
-            overflow: "hidden",
+            gap: "32px",
           }}
         >
           {categories.map((cat, i) => (
@@ -170,10 +209,8 @@ export function SpendingBubbles() {
               variants={bubbleEntrance}
               style={{
                 display: "flex",
-                flexDirection: "column",
                 alignItems: "center",
-                gap: 6,
-                minWidth: 0,
+                justifyContent: "center",
               }}
             >
               <motion.div
@@ -185,59 +222,56 @@ export function SpendingBubbles() {
                   delay: i * 0.5,
                 }}
                 style={{
-                  width: cat.size,
-                  height: cat.size,
-                  borderRadius: "50%",
-                  background: `rgba(${cat.rgb}, 0.15)`,
-                  border: `1px solid rgba(${cat.rgb}, 0.3)`,
-                  display: "flex",
-                  flexDirection: "column",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  flexShrink: 0,
-                }}
+                width: cat.size,
+                height: cat.size,
+                borderRadius: "50%",
+                background: `rgba(${cat.rgb}, 0.15)`,
+                border: `1px solid rgba(${cat.rgb}, 0.3)`,
+                display: "flex",
+                flexDirection: "column",
+                alignItems: "center",
+                justifyContent: "center",
+                flexShrink: 0,
+                padding: 4,
+                textAlign: "center",
+              }}
               >
-                <span style={{ fontSize: cat.size > 50 ? 16 : 12, lineHeight: 1 }}>
-                  {cat.emoji}
+                <span style={{ fontSize: 18, lineHeight: 1 }}>{cat.emoji}</span>
+                <span
+                  style={{
+                    marginTop: 3,
+                    fontSize: 13,
+                    fontWeight: 500,
+                    color: `rgba(${cat.rgb}, 0.95)`,
+                    lineHeight: 1,
+                    maxWidth: cat.size - 10,
+                    whiteSpace: "nowrap",
+                  }}
+                >
+                  {formatForCard(cat.value, displayCurrency)}
                 </span>
-                {cat.size > 44 && (
-                  <>
-                    <span
-                      style={{
-                        fontSize: 10,
-                        fontWeight: 600,
-                        color: `rgba(${cat.rgb}, 0.9)`,
-                        lineHeight: 1,
-                        marginTop: 2,
-                      }}
-                    >
-                      {formatCurrency(cat.value, displayCurrency)}
-                    </span>
-                    <span
-                      style={{
-                        fontSize: 8,
-                        color: "rgba(245,240,232,0.4)",
-                        lineHeight: 1,
-                      }}
-                    >
-                      {cat.pct}%
-                    </span>
-                  </>
-                )}
+                <span
+                  style={{
+                    marginTop: 3,
+                    fontSize: 10,
+                    color: "rgba(245,240,232,0.72)",
+                    lineHeight: 1.1,
+                    maxWidth: cat.size - 14,
+                  }}
+                >
+                  {cat.alias}
+                </span>
+                <span
+                  style={{
+                    marginTop: 2,
+                    fontSize: 10,
+                    color: "rgba(245,240,232,0.45)",
+                    lineHeight: 1,
+                  }}
+                >
+                  {cat.pct}%
+                </span>
               </motion.div>
-              <span
-                style={{
-                  fontSize: 10,
-                  color: "rgba(245,240,232,0.4)",
-                  textAlign: "center",
-                  maxWidth: cat.size + 20,
-                  overflow: "hidden",
-                  textOverflow: "ellipsis",
-                  whiteSpace: "nowrap",
-                }}
-              >
-                {cat.name}
-              </span>
             </motion.div>
           ))}
         </motion.div>
@@ -245,3 +279,4 @@ export function SpendingBubbles() {
     </div>
   );
 }
+
