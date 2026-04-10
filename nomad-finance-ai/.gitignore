@@ -24,10 +24,7 @@ yarn-error.log*
 # IDE / OS
 .idea/
 .vscode/
-# Cursor: keep shared agent rules; ignore local-only artifacts under .cursor/
-.cursor/*
-!.cursor/rules/
-!.cursor/rules/**
+.cursor/
 *.swp
 .DS_Store
 
