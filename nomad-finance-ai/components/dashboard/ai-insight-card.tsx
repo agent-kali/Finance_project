@@ -98,9 +98,9 @@ export function AiInsightCard() {
       convertCurrency(amount, currency as SupportedCurrency, displayCurrency);
 
     const periodLabel =
-      timeRange === "Today" ? "today" : timeRange === "This Week" ? "this week" : "this month";
+      timeRange === "Today" ? "today" : timeRange === "Week" ? "this week" : "this month";
     const previousPeriodLabel =
-      timeRange === "Today" ? "day" : timeRange === "This Week" ? "week" : "month";
+      timeRange === "Today" ? "day" : timeRange === "Week" ? "week" : "month";
 
     if (!transactions?.length) {
       return {

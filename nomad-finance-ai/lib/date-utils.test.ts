@@ -35,8 +35,8 @@ describe("getDateRange", () => {
     expect(end.getMilliseconds()).toBe(999);
   });
 
-  it("This Week: start is Monday of current week", () => {
-    const { start } = getDateRange("This Week");
+  it("Week: start is Monday of current week", () => {
+    const { start } = getDateRange("Week");
     // 2025-03-05 is Wednesday; Monday is 2025-03-03
     expect(start.getDay()).toBe(1);
     expect(start.getDate()).toBe(3);
@@ -44,23 +44,23 @@ describe("getDateRange", () => {
     expect(start.getFullYear()).toBe(2025);
   });
 
-  it("This Month: start is first day of month", () => {
-    const { start } = getDateRange("This Month");
+  it("Month: start is first day of month", () => {
+    const { start } = getDateRange("Month");
     expect(start.getDate()).toBe(1);
     expect(start.getMonth()).toBe(2);
     expect(start.getFullYear()).toBe(2025);
     expect(start.getHours()).toBe(0);
   });
 
-  it("This Week when today is Sunday uses previous Monday", () => {
+  it("Week when today is Sunday uses previous Monday", () => {
     vi.setSystemTime(new Date(2025, 2, 9)); // Sunday 2025-03-09
-    const { start } = getDateRange("This Week");
+    const { start } = getDateRange("Week");
     expect(start.getDay()).toBe(1);
     expect(start.getDate()).toBe(3); // Monday 2025-03-03
   });
 
   it("returns start before end for all ranges", () => {
-    (["Today", "This Week", "This Month"] as TimeRange[]).forEach((range) => {
+    (["Today", "Week", "Month"] as TimeRange[]).forEach((range) => {
       const { start, end } = getDateRange(range);
       expect(start.getTime()).toBeLessThanOrEqual(end.getTime());
     });
@@ -70,8 +70,8 @@ describe("getDateRange", () => {
 describe("getPeriodLabel", () => {
   it.each([
     ["Today", "Today"],
-    ["This Week", "This Week"],
-    ["This Month", "This Month"],
+    ["Week", "Week"],
+    ["Month", "Month"],
   ] as [TimeRange, string][])("returns %s for %s", (input, expected) => {
     expect(getPeriodLabel(input)).toBe(expected);
   });
@@ -79,15 +79,15 @@ describe("getPeriodLabel", () => {
 
 describe("getSavingsSubtitle", () => {
   it("returns 'No income yet' when hasIncome is false", () => {
-    (["Today", "This Week", "This Month"] as TimeRange[]).forEach((range) => {
+    (["Today", "Week", "Month"] as TimeRange[]).forEach((range) => {
       expect(getSavingsSubtitle(range, false)).toBe("No income yet");
     });
   });
 
   it.each([
     ["Today", true, "Of daily income"],
-    ["This Week", true, "Of weekly income"],
-    ["This Month", true, "Of monthly income"],
+    ["Week", true, "Of weekly income"],
+    ["Month", true, "Of monthly income"],
   ] as [TimeRange, boolean, string][])(
     "returns correct subtitle for %s with income",
     (range, hasIncome, expected) => {
@@ -99,8 +99,8 @@ describe("getSavingsSubtitle", () => {
 describe("getEmptyMessage", () => {
   it.each([
     ["Today", "No spending today yet!"],
-    ["This Week", "No spending this week yet!"],
-    ["This Month", "No spending this month yet!"],
+    ["Week", "No spending this week yet!"],
+    ["Month", "No spending this month yet!"],
   ] as [TimeRange, string][])("returns correct message for %s", (input, expected) => {
     expect(getEmptyMessage(input)).toBe(expected);
   });

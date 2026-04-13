@@ -91,7 +91,7 @@ export function RecentActivity() {
     return sorted.slice(0, 3);
   }, [transactions]);
 
-  if (timeRange === "This Month") return null;
+  if (timeRange === "Month") return null;
 
   const header = (
     <div

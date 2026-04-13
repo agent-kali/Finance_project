@@ -11,18 +11,29 @@ import {
   type ReactNode,
 } from "react";
 
-export type TimeRange = "Today" | "This Week" | "This Month";
+export type TimeRange = "Today" | "Week" | "Month";
 
 const STORAGE_KEY = "nomad-finance-time-range";
 const STORAGE_SYNC_EVENT = "nomad-finance-time-range-change";
 
-const VALID_RANGES: TimeRange[] = ["Today", "This Week", "This Month"];
+const VALID_RANGES: TimeRange[] = ["Today", "Week", "Month"];
+
+const LEGACY_STORED: Record<string, TimeRange> = {
+  "This Week": "Week",
+  "This Month": "Month",
+};
 
 function readStored(): TimeRange | null {
   if (typeof window === "undefined") return null;
   try {
     const s = localStorage.getItem(STORAGE_KEY);
-    if (s && VALID_RANGES.includes(s as TimeRange)) return s as TimeRange;
+    if (!s) return null;
+    const migrated = LEGACY_STORED[s];
+    if (migrated) {
+      localStorage.setItem(STORAGE_KEY, migrated);
+      return migrated;
+    }
+    if (VALID_RANGES.includes(s as TimeRange)) return s as TimeRange;
   } catch {
     /* ignore */
   }

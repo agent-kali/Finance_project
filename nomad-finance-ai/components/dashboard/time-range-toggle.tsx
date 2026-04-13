@@ -3,7 +3,7 @@
 import { useTimeRange, type TimeRange } from "@/lib/time-range-context";
 import { cn } from "@/lib/utils";
 
-const OPTIONS: TimeRange[] = ["Today", "This Week", "This Month"];
+const OPTIONS: TimeRange[] = ["Today", "Week", "Month"];
 
 export function TimeRangeToggle() {
   const { timeRange, setTimeRange } = useTimeRange();

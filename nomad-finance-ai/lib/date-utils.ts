@@ -28,7 +28,7 @@ export function getDateRange(timeRange: TimeRange): { start: Date; end: Date } {
       );
       return { start, end };
     }
-    case "This Week": {
+    case "Week": {
       const day = now.getDay();
       const mondayOffset = day === 0 ? 6 : day - 1;
       const monday = new Date(now);
@@ -44,7 +44,7 @@ export function getDateRange(timeRange: TimeRange): { start: Date; end: Date } {
       );
       return { start, end };
     }
-    case "This Month": {
+    case "Month": {
       const start = new Date(
         now.getFullYear(),
         now.getMonth(),
@@ -66,10 +66,10 @@ export function getPeriodLabel(timeRange: TimeRange): string {
   switch (timeRange) {
     case "Today":
       return "Today";
-    case "This Week":
-      return "This Week";
-    case "This Month":
-      return "This Month";
+    case "Week":
+      return "Week";
+    case "Month":
+      return "Month";
   }
 }
 
@@ -84,9 +84,9 @@ export function getSavingsSubtitle(
   switch (timeRange) {
     case "Today":
       return "Of daily income";
-    case "This Week":
+    case "Week":
       return "Of weekly income";
-    case "This Month":
+    case "Month":
       return "Of monthly income";
   }
 }
@@ -98,9 +98,9 @@ export function getEmptyMessage(timeRange: TimeRange): string {
   switch (timeRange) {
     case "Today":
       return "No spending today yet!";
-    case "This Week":
+    case "Week":
       return "No spending this week yet!";
-    case "This Month":
+    case "Month":
       return "No spending this month yet!";
   }
 }
