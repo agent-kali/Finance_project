@@ -150,7 +150,7 @@ export function SummaryCards() {
   return (
     <div aria-live="polite" aria-atomic="true" className="space-y-12">
       {/* Hero balance with warm glow */}
-      <div className="relative flex w-full max-w-full min-w-0 flex-col items-center overflow-x-hidden text-center">
+      <div className="relative flex w-full max-w-full min-w-0 flex-col items-center overflow-hidden text-center">
         <div className="balance-glow" aria-hidden="true" />
         <p className="relative z-10 uppercase" style={{ fontSize: 11, letterSpacing: "1.8px", color: "#8B7355", fontWeight: 500 }}>
           Balance

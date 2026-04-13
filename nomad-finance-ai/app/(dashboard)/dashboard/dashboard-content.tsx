@@ -98,7 +98,7 @@ function TimeRangeContent() {
 
 export function DashboardContent() {
   return (
-    <div className="mx-auto w-full min-w-0 max-w-[1200px] overflow-x-hidden px-4 md:px-6">
+    <div className="mx-auto w-full min-w-0 max-w-[1200px] overflow-hidden px-4 md:px-6">
       <div className="min-w-0 max-w-full space-y-8">
         <div className="flex min-w-0 max-w-full items-center gap-3">
           <h1 className="sr-only">Dashboard</h1>

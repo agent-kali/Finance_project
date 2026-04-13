@@ -150,7 +150,7 @@ export function DashboardShell({
 
   return (
     <CommandPaletteProvider>
-      <div className="relative flex h-svh select-none overflow-x-hidden bg-gradient-nomad">
+      <div className="relative flex h-svh select-none overflow-hidden bg-gradient-nomad">
         <div className="bg-ambient-glow" aria-hidden="true" />
         <div className="bg-particles" aria-hidden="true" />
 
@@ -195,9 +195,9 @@ export function DashboardShell({
           </div>
         </aside>
 
-        <div className="relative z-10 flex min-h-0 min-w-0 flex-1 flex-col overflow-x-hidden">
+        <div className="relative z-10 flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden">
           {/* Top bar — minimal */}
-          <header className="glass-header flex min-h-14 min-w-0 items-center gap-2 overflow-x-hidden px-4 md:px-6">
+          <header className="glass-header flex min-h-14 min-w-0 items-center gap-2 overflow-hidden px-4 md:px-6">
             {mounted ? (
               <Sheet open={mobileOpen} onOpenChange={setMobileOpen}>
                 <SheetTrigger asChild>
