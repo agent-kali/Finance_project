@@ -35,23 +35,6 @@ interface WalletCardData {
   readonly palette: WalletPalette;
 }
 
-const cardStyle = {
-  width: "100%",
-  background: "rgba(255,255,255,0.03)",
-  border: "1px solid rgba(255,255,255,0.06)",
-  borderRadius: 16,
-  padding: 24,
-} as const;
-
-const titleStyle = {
-  fontSize: 11,
-  textTransform: "uppercase",
-  letterSpacing: "1.8px",
-  color: "#8B7355",
-  fontWeight: 500,
-  margin: 0,
-} as const;
-
 const defaultPalette: WalletPalette = {
   background: "linear-gradient(135deg,#1a1710,#221e12)",
   border: "rgba(184,149,106,0.2)",
@@ -263,17 +246,14 @@ export function WalletChart() {
 
   return (
     <motion.div
-      className="min-w-0 max-w-full"
+      className="min-w-0 max-w-full w-full"
       initial={prefersReducedMotion ? false : { opacity: 0, y: 16 }}
       whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: true }}
       transition={{ duration: prefersReducedMotion ? 0 : 0.8, ease: "easeOut" }}
-      style={cardStyle}
     >
-      <p style={titleStyle}>WALLET BALANCES</p>
-
       {isLoading ? (
-        <div className="mt-[18px] grid w-full grid-cols-1 gap-[10px] md:grid-cols-3">
+        <div className="grid w-full grid-cols-1 gap-[10px] md:grid-cols-3">
           {Array.from({ length: 3 }).map((_, index) => (
             <div
               key={index}
@@ -298,7 +278,7 @@ export function WalletChart() {
           ))}
         </div>
       ) : walletCards.length === 0 ? (
-        <div className="mt-4 flex min-h-[220px] items-center justify-center">
+        <div className="flex min-h-[220px] items-center justify-center">
           <EmptyState
             icon={Wallet}
             heading="No wallets yet"
@@ -314,7 +294,7 @@ export function WalletChart() {
           initial="hidden"
           whileInView="visible"
           viewport={{ once: true }}
-          className="mt-[18px] grid w-full grid-cols-1 gap-[10px] md:grid-cols-3"
+          className="grid w-full grid-cols-1 gap-[10px] md:grid-cols-3"
         >
           <p className="sr-only">{accessibilitySummary}</p>
           {walletCards.map((card, index) => {

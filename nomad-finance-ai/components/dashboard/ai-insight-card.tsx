@@ -357,9 +357,6 @@ export function AiInsightCard() {
         <div
           style={{
             width: "100%",
-            background: "rgba(255,255,255,0.03)",
-            border: "1px solid rgba(255,255,255,0.06)",
-            borderRadius: 16,
             padding: 24,
             textAlign: "center",
           }}
@@ -400,9 +397,6 @@ export function AiInsightCard() {
         className="min-w-0 max-w-full"
         style={{
           width: "100%",
-          background: "rgba(255,255,255,0.03)",
-          border: "1px solid rgba(255,255,255,0.06)",
-          borderRadius: 16,
           padding: 24,
           textAlign: "center",
           position: "relative",
