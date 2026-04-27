@@ -7,9 +7,10 @@ import {
   useRef,
   useState,
   type CSSProperties,
+  type ReactNode,
 } from "react";
 import { motion } from "framer-motion";
-import { ArrowUp, Sparkles } from "lucide-react";
+import { ArrowUp } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useTransactions } from "@/lib/hooks/use-transactions";
 import { useWallets } from "@/lib/hooks/use-wallets";
@@ -42,6 +43,37 @@ function toDateKey(d: Date): string {
 
 function trimMessages(msgs: ChatMessage[]): ChatMessage[] {
   return msgs.length <= MAX_MESSAGES ? msgs : msgs.slice(-MAX_MESSAGES);
+}
+
+function insightWithHighlightedCategory(
+  insight: string,
+  category: string | null,
+): ReactNode {
+  if (!category) return insight;
+
+  const nodes: ReactNode[] = [];
+  let rest = insight;
+  let key = 0;
+
+  for (;;) {
+    const i = rest.indexOf(category);
+    if (i === -1) {
+      nodes.push(rest);
+      break;
+    }
+    if (i > 0) {
+      nodes.push(rest.slice(0, i));
+    }
+    nodes.push(
+      <span key={`insight-cat-${key}`} style={{ color: "#b8956a", fontWeight: 500 }}>
+        {category}
+      </span>,
+    );
+    key += 1;
+    rest = rest.slice(i + category.length);
+  }
+
+  return nodes.length === 1 ? nodes[0] : <>{nodes}</>;
 }
 
 export function AiInsightCard() {
@@ -183,7 +215,7 @@ export function AiInsightCard() {
       if (changePct > 0 && change > 0) {
         const driver = topCat ? ` \u2014 ${topCat} is the biggest driver.` : ".";
         return {
-          insight: `Spending is up ${changePct}% this ${previousPeriodLabel}${driver}`,
+          insight: `Spending is up ${changePct}% ${periodLabel}${driver}`,
           topCategory: topCat,
           topCategoryPct: pct,
         };
@@ -192,7 +224,7 @@ export function AiInsightCard() {
 
     if (categories[0] && pct >= 50) {
       return {
-        insight: `${categories[0][0]} accounts for ${pct}% of your spending this ${previousPeriodLabel}.`,
+        insight: `${categories[0][0]} accounts for ${pct}% of your spending ${periodLabel}.`,
         topCategory: topCat,
         topCategoryPct: pct,
       };
@@ -338,15 +370,35 @@ export function AiInsightCard() {
     setExpanded(true);
   }, []);
 
-  const pillStyle: CSSProperties = {
-    border: "1px solid rgba(255,255,255,0.08)",
-    borderRadius: 8,
-    padding: "8px 16px",
-    fontSize: 12,
-    color: "#A09080",
-    transition: "border-color 0.15s",
-    background: "transparent",
+  const insightContent = useMemo(
+    () => insightWithHighlightedCategory(insight, topCategory),
+    [insight, topCategory],
+  );
+
+  const primaryButtonStyle: CSSProperties = {
+    background: "#b8956a",
+    color: "#0d0b09",
+    fontWeight: 600,
+    borderRadius: 100,
+    padding: "11px 24px",
+    border: "none",
     cursor: "pointer",
+    fontSize: 14,
+    lineHeight: 1.2,
+    boxShadow: "0 10px 24px rgba(184,149,106,0.18)",
+    transition: "opacity 0.15s, transform 0.15s",
+  };
+
+  const secondaryButtonStyle: CSSProperties = {
+    background: "rgba(255,255,255,0.035)",
+    border: "1px solid rgba(184,149,106,0.22)",
+    color: "rgba(245,240,232,0.68)",
+    borderRadius: 100,
+    padding: "11px 18px",
+    cursor: "pointer",
+    fontSize: 14,
+    lineHeight: 1.2,
+    transition: "background 0.15s, border-color 0.15s, color 0.15s",
   };
 
   const isLoading = txLoading || walletsLoading;
@@ -355,19 +407,21 @@ export function AiInsightCard() {
     return (
       <section aria-label="AI insight" className="min-w-0 max-w-full">
         <div
+          className="glass-card"
           style={{
             width: "100%",
-            padding: 24,
+            padding: 28,
+            borderRadius: 24,
             textAlign: "center",
           }}
         >
-          <div className="space-y-4">
-            <Skeleton className="mx-auto h-5 w-5 rounded-full" />
-            <Skeleton className="mx-auto h-4 w-72 max-w-full" />
-            <div className="flex flex-wrap items-center justify-center gap-2">
-              <Skeleton className="h-8 w-32 rounded-lg" />
-              <Skeleton className="h-8 w-28 rounded-lg" />
-              <Skeleton className="h-8 w-36 rounded-lg" />
+          <div className="mx-auto flex max-w-2xl flex-col items-center gap-5">
+            <Skeleton className="h-11 w-11 rounded-full" />
+            <Skeleton className="h-[26px] w-full max-w-[620px]" />
+            <div className="flex flex-wrap items-center justify-center gap-3">
+              <Skeleton className="h-10 w-36 rounded-full" />
+              <Skeleton className="h-10 w-40 rounded-full" />
+              <Skeleton className="h-10 w-36 rounded-full" />
             </div>
           </div>
         </div>
@@ -391,40 +445,112 @@ export function AiInsightCard() {
           0%, 100% { transform: translateY(0); }
           50% { transform: translateY(-5px); }
         }
+        @keyframes aiInsightIconPulse {
+          0%, 100% { opacity: 0.7; }
+          50% { opacity: 1; }
+        }
       `}</style>
       <div
         aria-expanded={expanded}
         className="min-w-0 max-w-full"
         style={{
           width: "100%",
-          padding: 24,
+          padding: "28px 24px 24px",
           textAlign: "center",
           position: "relative",
+          overflow: "hidden",
+          borderRadius: 24,
+          border: "1px solid rgba(184,149,106,0.16)",
+          background:
+            "linear-gradient(135deg, rgba(255,255,255,0.055), rgba(255,255,255,0.02))",
+          boxShadow:
+            "inset 0 1px 0 rgba(255,255,255,0.05), 0 18px 45px -32px rgba(0,0,0,0.65)",
         }}
       >
-        <div className="space-y-5">
-          <Sparkles className="mx-auto h-5 w-5" style={{ color: "#C8A96E" }} aria-hidden="true" />
-          <p
-            className="select-text"
+        <div
+          aria-hidden="true"
+          style={{
+            position: "absolute",
+            top: -90,
+            left: "50%",
+            width: 360,
+            height: 180,
+            transform: "translateX(-50%)",
+            borderRadius: "50%",
+            background:
+              "radial-gradient(ellipse at center, rgba(184,149,106,0.16), transparent 68%)",
+            pointerEvents: "none",
+          }}
+        />
+        <div className="relative z-10 mx-auto flex max-w-2xl flex-col items-center gap-6">
+          <span
+            className="mx-auto flex select-none items-center justify-center"
             style={{
-              fontSize: 14,
-              lineHeight: 1.6,
-              color: "#C8B898",
-              fontStyle: "italic",
-              margin: 0,
+              width: 46,
+              height: 46,
+              borderRadius: "50%",
+              border: "1px solid rgba(184,149,106,0.28)",
+              background: "rgba(184,149,106,0.09)",
+              boxShadow: "0 0 40px rgba(184,149,106,0.12)",
+              fontSize: 26,
+              lineHeight: 1,
+              color: "#b8956a",
+              animation: "aiInsightIconPulse 2s ease-in-out infinite",
+            }}
+            aria-hidden
+          >
+            ✦
+          </span>
+          <div className="space-y-3">
+            <p
+              style={{
+                margin: 0,
+                fontSize: 11,
+                fontWeight: 600,
+                letterSpacing: "0.18em",
+                color: "rgba(184,149,106,0.68)",
+                textTransform: "uppercase",
+              }}
+            >
+              AI insight
+            </p>
+            <p
+              className="select-text text-pretty"
+              style={{
+                fontSize: 20,
+                fontWeight: 300,
+                lineHeight: 1.55,
+                color: "#f5f0e8",
+                maxWidth: 680,
+                margin: "0 auto",
+                textAlign: "center",
+              }}
+            >
+              {insightContent}
+            </p>
+          </div>
+          <div
+            className="flex flex-wrap items-center justify-center"
+            style={{
+              gap: 10,
+              padding: 8,
+              borderRadius: 999,
+              border: "1px solid rgba(255,255,255,0.06)",
+              background: "rgba(13,11,9,0.18)",
             }}
           >
-            {insight}
-          </p>
-          <div className="flex flex-wrap items-center justify-center gap-2">
             <button
               type="button"
-              style={pillStyle}
+              style={secondaryButtonStyle}
               onMouseEnter={(e) => {
-                e.currentTarget.style.borderColor = "rgba(255,255,255,0.15)";
+                e.currentTarget.style.borderColor = "rgba(184,149,106,0.45)";
+                e.currentTarget.style.color = "rgba(245,240,232,0.85)";
+                e.currentTarget.style.background = "rgba(184,149,106,0.08)";
               }}
               onMouseLeave={(e) => {
-                e.currentTarget.style.borderColor = "rgba(255,255,255,0.08)";
+                e.currentTarget.style.borderColor = "rgba(184,149,106,0.22)";
+                e.currentTarget.style.color = "rgba(245,240,232,0.68)";
+                e.currentTarget.style.background = "rgba(255,255,255,0.035)";
               }}
               onClick={() =>
                 queueExpandAndSend("Analyze my spending patterns this week")
@@ -435,12 +561,16 @@ export function AiInsightCard() {
             {topCategory ? (
               <button
                 type="button"
-                style={pillStyle}
+                style={secondaryButtonStyle}
                 onMouseEnter={(e) => {
-                  e.currentTarget.style.borderColor = "rgba(255,255,255,0.15)";
+                  e.currentTarget.style.borderColor = "rgba(184,149,106,0.45)";
+                  e.currentTarget.style.color = "rgba(245,240,232,0.85)";
+                  e.currentTarget.style.background = "rgba(184,149,106,0.08)";
                 }}
                 onMouseLeave={(e) => {
-                  e.currentTarget.style.borderColor = "rgba(255,255,255,0.08)";
+                  e.currentTarget.style.borderColor = "rgba(184,149,106,0.22)";
+                  e.currentTarget.style.color = "rgba(245,240,232,0.68)";
+                  e.currentTarget.style.background = "rgba(255,255,255,0.035)";
                 }}
                 onClick={() =>
                   queueExpandAndSend(
@@ -453,12 +583,16 @@ export function AiInsightCard() {
             ) : (
               <button
                 type="button"
-                style={pillStyle}
+                style={secondaryButtonStyle}
                 onMouseEnter={(e) => {
-                  e.currentTarget.style.borderColor = "rgba(255,255,255,0.15)";
+                  e.currentTarget.style.borderColor = "rgba(184,149,106,0.45)";
+                  e.currentTarget.style.color = "rgba(245,240,232,0.85)";
+                  e.currentTarget.style.background = "rgba(184,149,106,0.08)";
                 }}
                 onMouseLeave={(e) => {
-                  e.currentTarget.style.borderColor = "rgba(255,255,255,0.08)";
+                  e.currentTarget.style.borderColor = "rgba(184,149,106,0.22)";
+                  e.currentTarget.style.color = "rgba(245,240,232,0.68)";
+                  e.currentTarget.style.background = "rgba(255,255,255,0.035)";
                 }}
                 onClick={openExpandedOnly}
               >
@@ -467,12 +601,14 @@ export function AiInsightCard() {
             )}
             <button
               type="button"
-              style={pillStyle}
+              style={primaryButtonStyle}
               onMouseEnter={(e) => {
-                e.currentTarget.style.borderColor = "rgba(255,255,255,0.15)";
+                e.currentTarget.style.opacity = "0.9";
+                e.currentTarget.style.transform = "translateY(-1px)";
               }}
               onMouseLeave={(e) => {
-                e.currentTarget.style.borderColor = "rgba(255,255,255,0.08)";
+                e.currentTarget.style.opacity = "1";
+                e.currentTarget.style.transform = "translateY(0)";
               }}
               onClick={openExpandedOnly}
             >
@@ -483,15 +619,18 @@ export function AiInsightCard() {
             type="button"
             onClick={openExpandedOnly}
             style={{
-              display: "block",
-              width: "100%",
-              marginTop: 4,
+              display: "inline-flex",
+              alignItems: "center",
+              justifyContent: "center",
+              marginTop: -2,
               fontSize: 11,
-              color: "rgba(184,149,106,0.4)",
+              color: "rgba(184,149,106,0.62)",
+              letterSpacing: "0.08em",
               background: "none",
               border: "none",
               cursor: "pointer",
               fontStyle: "normal",
+              textTransform: "uppercase",
             }}
           >
             Ask anything →
@@ -505,7 +644,7 @@ export function AiInsightCard() {
             opacity: expanded ? 1 : 0,
           }}
           transition={{ duration: 0.28, ease: [0.4, 0, 0.2, 1] }}
-          style={{ overflow: "hidden" }}
+          style={{ overflow: "hidden", position: "relative", zIndex: 10 }}
         >
           <div
             style={{
