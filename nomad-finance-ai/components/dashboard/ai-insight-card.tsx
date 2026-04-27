@@ -9,7 +9,7 @@ import {
   type CSSProperties,
   type ReactNode,
 } from "react";
-import { motion } from "framer-motion";
+import { motion, type Variants } from "framer-motion";
 import { ArrowUp } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useTransactions } from "@/lib/hooks/use-transactions";
@@ -28,6 +28,47 @@ type ChatMessage = {
   content: string;
 };
 
+const KEYFRAMES = `
+  @keyframes aiAmbientGlow {
+    0%, 100% { opacity: 0.12; }
+    50% { opacity: 0.2; }
+  }
+  @keyframes aiFloat {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-6px); }
+  }
+  @keyframes aiOrbit1 {
+    from { transform: translate(-50%, -50%) rotate(0deg) translateX(28px) rotate(0deg); }
+    to   { transform: translate(-50%, -50%) rotate(360deg) translateX(28px) rotate(-360deg); }
+  }
+  @keyframes aiOrbit2 {
+    from { transform: translate(-50%, -50%) rotate(180deg) translateX(38px) rotate(-180deg); }
+    to   { transform: translate(-50%, -50%) rotate(540deg) translateX(38px) rotate(-540deg); }
+  }
+  @keyframes aiCenterPulse {
+    0%, 100% { opacity: 0.6; }
+    50% { opacity: 1; }
+  }
+  @keyframes aiShimmer {
+    from { background-position: 200% center; }
+    to   { background-position: 0% center; }
+  }
+  @keyframes aiInsightDotBounce {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-5px); }
+  }
+`;
+
+const fadeUp: Variants = {
+  hidden: { opacity: 0, y: 16 },
+  visible: { opacity: 1, y: 0, transition: { duration: 0.5, ease: "easeOut" } },
+};
+
+const stagger: Variants = {
+  hidden: {},
+  visible: { transition: { staggerChildren: 0.1 } },
+};
+
 function getPreviousPeriodRange(timeRange: TimeRange): { start: Date; end: Date } {
   const { start, end } = getDateRange(timeRange);
   const durationMs = end.getTime() - start.getTime();
@@ -44,6 +85,16 @@ function toDateKey(d: Date): string {
 function trimMessages(msgs: ChatMessage[]): ChatMessage[] {
   return msgs.length <= MAX_MESSAGES ? msgs : msgs.slice(-MAX_MESSAGES);
 }
+
+const shimmerSpanStyle: CSSProperties = {
+  background: "linear-gradient(90deg,#b8956a,#d4b48a,#b8956a)",
+  backgroundSize: "200% auto",
+  WebkitBackgroundClip: "text",
+  backgroundClip: "text",
+  color: "transparent",
+  fontWeight: 500,
+  animation: "aiShimmer 3s linear infinite",
+};
 
 function insightWithHighlightedCategory(
   insight: string,
@@ -65,7 +116,7 @@ function insightWithHighlightedCategory(
       nodes.push(rest.slice(0, i));
     }
     nodes.push(
-      <span key={`insight-cat-${key}`} style={{ color: "#b8956a", fontWeight: 500 }}>
+      <span key={`insight-cat-${key}`} style={shimmerSpanStyle}>
         {category}
       </span>,
     );
@@ -76,17 +127,113 @@ function insightWithHighlightedCategory(
   return nodes.length === 1 ? nodes[0] : <>{nodes}</>;
 }
 
+function Divider() {
+  return (
+    <div
+      aria-hidden
+      style={{
+        position: "relative",
+        height: 1,
+        margin: 0,
+        background:
+          "linear-gradient(90deg, transparent, rgba(184,149,106,0.15), rgba(184,149,106,0.15), transparent)",
+      }}
+    >
+      <span
+        style={{
+          position: "absolute",
+          top: "50%",
+          left: "50%",
+          transform: "translate(-50%, -50%)",
+          width: 5,
+          height: 5,
+          borderRadius: "50%",
+          background: "#b8956a",
+          opacity: 0.5,
+          boxShadow: "0 0 8px rgba(184,149,106,0.6)",
+        }}
+      />
+    </div>
+  );
+}
+
+function OrbitIcon() {
+  return (
+    <div
+      aria-hidden
+      style={{
+        position: "relative",
+        width: 56,
+        height: 56,
+        margin: "0 auto 20px",
+        animation: "aiFloat 4s ease-in-out infinite",
+      }}
+    >
+      <span
+        style={{
+          position: "absolute",
+          inset: -12,
+          borderRadius: "50%",
+          border: "1px solid rgba(184,149,106,0.12)",
+        }}
+      />
+      <span
+        style={{
+          position: "absolute",
+          top: "50%",
+          left: "50%",
+          width: 4,
+          height: 4,
+          borderRadius: "50%",
+          background: "#b8956a",
+          boxShadow: "0 0 6px rgba(184,149,106,0.8)",
+          opacity: 0.7,
+          animation: "aiOrbit1 6s linear infinite",
+        }}
+      />
+      <span
+        style={{
+          position: "absolute",
+          top: "50%",
+          left: "50%",
+          width: 3,
+          height: 3,
+          borderRadius: "50%",
+          background: "#b8956a",
+          boxShadow: "0 0 6px rgba(184,149,106,0.8)",
+          opacity: 0.4,
+          animation: "aiOrbit2 9s linear infinite",
+        }}
+      />
+      <span
+        style={{
+          position: "absolute",
+          top: "50%",
+          left: "50%",
+          transform: "translate(-50%, -50%)",
+          fontSize: 24,
+          lineHeight: 1,
+          color: "#b8956a",
+          animation: "aiCenterPulse 3s ease-in-out infinite",
+        }}
+      >
+        ✦
+      </span>
+    </div>
+  );
+}
+
 export function AiInsightCard() {
   const { data: transactions, isLoading: txLoading } = useTransactions();
   const { data: wallets, isLoading: walletsLoading } = useWallets();
   const { timeRange } = useTimeRange();
   const displayCurrency = useDisplayCurrency();
 
-  const [expanded, setExpanded] = useState(false);
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [input, setInput] = useState("");
   const [isStreaming, setIsStreaming] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [inputFocused, setInputFocused] = useState(false);
   const scrollRef = useRef<HTMLDivElement>(null);
 
   const totalBalance = useMemo(
@@ -356,78 +503,68 @@ export function AiInsightCard() {
     [messages, isStreaming, dashboardInlineContext],
   );
 
-  const sendMessageRef = useRef(sendMessage);
-  sendMessageRef.current = sendMessage;
-
-  const queueExpandAndSend = useCallback((text: string) => {
-    setExpanded(true);
-    window.setTimeout(() => {
-      void sendMessageRef.current(text);
-    }, 0);
-  }, []);
-
-  const openExpandedOnly = useCallback(() => {
-    setExpanded(true);
-  }, []);
-
   const insightContent = useMemo(
     () => insightWithHighlightedCategory(insight, topCategory),
     [insight, topCategory],
   );
 
-  const primaryButtonStyle: CSSProperties = {
-    background: "#b8956a",
-    color: "#0d0b09",
-    fontWeight: 600,
-    borderRadius: 100,
-    padding: "11px 24px",
-    border: "none",
-    cursor: "pointer",
-    fontSize: 14,
-    lineHeight: 1.2,
-    boxShadow: "0 10px 24px rgba(184,149,106,0.18)",
-    transition: "opacity 0.15s, transform 0.15s",
-  };
-
-  const secondaryButtonStyle: CSSProperties = {
-    background: "rgba(255,255,255,0.035)",
-    border: "1px solid rgba(184,149,106,0.22)",
-    color: "rgba(245,240,232,0.68)",
-    borderRadius: 100,
-    padding: "11px 18px",
-    cursor: "pointer",
-    fontSize: 14,
-    lineHeight: 1.2,
-    transition: "background 0.15s, border-color 0.15s, color 0.15s",
-  };
-
   const isLoading = txLoading || walletsLoading;
+  const showThread = messages.length > 0 || isStreaming;
 
   if (isLoading) {
     return (
       <section aria-label="AI insight" className="min-w-0 max-w-full">
+        <Divider />
         <div
-          className="glass-card"
           style={{
-            width: "100%",
-            padding: 28,
-            borderRadius: 24,
+            position: "relative",
             textAlign: "center",
+            padding: "40px 0 32px",
           }}
         >
-          <div className="mx-auto flex max-w-2xl flex-col items-center gap-5">
-            <Skeleton className="h-11 w-11 rounded-full" />
-            <Skeleton className="h-[26px] w-full max-w-[620px]" />
+          <div className="mx-auto flex max-w-xl flex-col items-center gap-5">
+            <Skeleton className="h-14 w-14 rounded-full" />
+            <Skeleton className="h-3 w-20" />
+            <Skeleton className="h-[26px] w-full max-w-[420px]" />
             <div className="flex flex-wrap items-center justify-center gap-3">
-              <Skeleton className="h-10 w-36 rounded-full" />
-              <Skeleton className="h-10 w-40 rounded-full" />
-              <Skeleton className="h-10 w-36 rounded-full" />
+              <Skeleton className="h-9 w-32 rounded-full" />
+              <Skeleton className="h-9 w-40 rounded-full" />
             </div>
+            <Skeleton className="h-10 w-full max-w-[480px] rounded-full" />
           </div>
         </div>
+        <Divider />
       </section>
     );
   }
+
+  const ghostPillStyle: CSSProperties = {
+    background: "transparent",
+    border: "1px solid rgba(184,149,106,0.25)",
+    color: "rgba(245,240,232,0.6)",
+    borderRadius: 100,
+    padding: "9px 20px",
+    fontSize: 12,
+    lineHeight: 1.2,
+    cursor: "pointer",
+    transition: "background 0.15s, border-color 0.15s, color 0.15s",
+  };
+
+  const inputBaseStyle: CSSProperties = {
+    flex: 1,
+    minWidth: 0,
+    background: "rgba(255,255,255,0.04)",
+    border: `1px solid ${inputFocused ? "rgba(184,149,106,0.5)" : "rgba(184,149,106,0.2)"}`,
+    borderRadius: 100,
+    padding: "11px 20px",
+    fontSize: 13,
+    color: "#f5f0e8",
+    outline: "none",
+    boxShadow: inputFocused ? "0 0 0 3px rgba(184,149,106,0.08)" : "none",
+    transition: "all 0.2s ease",
+  };
+
+  const sendButtonDisabled = isStreaming || !input.trim();
 
   const typingDotStyle = (delayMs: number): CSSProperties => ({
     width: 6,
@@ -438,245 +575,219 @@ export function AiInsightCard() {
     animationDelay: `${delayMs}ms`,
   });
 
+  const secondaryActionLabel = topCategory
+    ? `Set budget for ${topCategory}`
+    : "Savings tips";
+  const secondaryActionPrompt = topCategory
+    ? `Help me set a budget for ${topCategory}`
+    : "Give me savings tips";
+
   return (
     <section aria-label="AI insight" className="min-w-0 max-w-full">
-      <style>{`
-        @keyframes aiInsightDotBounce {
-          0%, 100% { transform: translateY(0); }
-          50% { transform: translateY(-5px); }
-        }
-        @keyframes aiInsightIconPulse {
-          0%, 100% { opacity: 0.7; }
-          50% { opacity: 1; }
-        }
-      `}</style>
+      <style>{KEYFRAMES}</style>
+
+      <Divider />
+
       <div
-        aria-expanded={expanded}
-        className="min-w-0 max-w-full"
         style={{
-          width: "100%",
-          padding: "28px 24px 24px",
-          textAlign: "center",
           position: "relative",
-          overflow: "hidden",
-          borderRadius: 24,
-          border: "1px solid rgba(184,149,106,0.16)",
-          background:
-            "linear-gradient(135deg, rgba(255,255,255,0.055), rgba(255,255,255,0.02))",
-          boxShadow:
-            "inset 0 1px 0 rgba(255,255,255,0.05), 0 18px 45px -32px rgba(0,0,0,0.65)",
+          overflow: "visible",
+          textAlign: "center",
+          padding: "40px 0 32px",
         }}
       >
         <div
-          aria-hidden="true"
+          aria-hidden
           style={{
             position: "absolute",
-            top: -90,
+            top: 0,
             left: "50%",
-            width: 360,
-            height: 180,
             transform: "translateX(-50%)",
-            borderRadius: "50%",
+            width: 600,
+            height: 280,
             background:
-              "radial-gradient(ellipse at center, rgba(184,149,106,0.16), transparent 68%)",
+              "radial-gradient(ellipse at 50% 0%, rgba(184,149,106,0.1) 0%, transparent 70%)",
+            animation: "aiAmbientGlow 4s ease-in-out infinite",
             pointerEvents: "none",
+            zIndex: 0,
           }}
         />
-        <div className="relative z-10 mx-auto flex max-w-2xl flex-col items-center gap-6">
-          <span
-            className="mx-auto flex select-none items-center justify-center"
+        <div
+          aria-hidden
+          style={{
+            position: "absolute",
+            top: 0,
+            left: "50%",
+            transform: "translateX(-50%)",
+            width: 160,
+            height: 100,
+            background:
+              "radial-gradient(ellipse at 50% 0%, rgba(184,149,106,0.07) 0%, transparent 70%)",
+            pointerEvents: "none",
+            zIndex: 0,
+          }}
+        />
+
+        <motion.div
+          initial="hidden"
+          whileInView="visible"
+          viewport={{ once: true, margin: "-80px" }}
+          variants={stagger}
+          style={{ position: "relative", zIndex: 1 }}
+        >
+          <motion.div variants={fadeUp}>
+            <OrbitIcon />
+          </motion.div>
+
+          <motion.p
+            variants={fadeUp}
             style={{
-              width: 46,
-              height: 46,
-              borderRadius: "50%",
-              border: "1px solid rgba(184,149,106,0.28)",
-              background: "rgba(184,149,106,0.09)",
-              boxShadow: "0 0 40px rgba(184,149,106,0.12)",
-              fontSize: 26,
-              lineHeight: 1,
-              color: "#b8956a",
-              animation: "aiInsightIconPulse 2s ease-in-out infinite",
+              margin: "0 0 12px",
+              fontSize: 9,
+              letterSpacing: "0.15em",
+              textTransform: "uppercase",
+              color: "rgba(184,149,106,0.5)",
             }}
-            aria-hidden
           >
-            ✦
-          </span>
-          <div className="space-y-3">
-            <p
-              style={{
-                margin: 0,
-                fontSize: 11,
-                fontWeight: 600,
-                letterSpacing: "0.18em",
-                color: "rgba(184,149,106,0.68)",
-                textTransform: "uppercase",
-              }}
-            >
-              AI insight
-            </p>
-            <p
-              className="select-text text-pretty"
-              style={{
-                fontSize: 20,
-                fontWeight: 300,
-                lineHeight: 1.55,
-                color: "#f5f0e8",
-                maxWidth: 680,
-                margin: "0 auto",
-                textAlign: "center",
-              }}
-            >
-              {insightContent}
-            </p>
-          </div>
-          <div
-            className="flex flex-wrap items-center justify-center"
+            AI INSIGHT
+          </motion.p>
+
+          <motion.p
+            variants={fadeUp}
+            className="select-text text-pretty"
             style={{
-              gap: 10,
-              padding: 8,
-              borderRadius: 999,
-              border: "1px solid rgba(255,255,255,0.06)",
-              background: "rgba(13,11,9,0.18)",
+              fontSize: 20,
+              fontWeight: 300,
+              color: "#f5f0e8",
+              lineHeight: 1.5,
+              maxWidth: 520,
+              margin: "0 auto 28px",
             }}
+          >
+            {insightContent}
+          </motion.p>
+
+          <motion.div
+            variants={fadeUp}
+            className="flex flex-wrap items-center justify-center"
+            style={{ gap: 10 }}
           >
             <button
               type="button"
-              style={secondaryButtonStyle}
+              style={ghostPillStyle}
               onMouseEnter={(e) => {
                 e.currentTarget.style.borderColor = "rgba(184,149,106,0.45)";
                 e.currentTarget.style.color = "rgba(245,240,232,0.85)";
-                e.currentTarget.style.background = "rgba(184,149,106,0.08)";
+                e.currentTarget.style.background = "rgba(184,149,106,0.06)";
               }}
               onMouseLeave={(e) => {
-                e.currentTarget.style.borderColor = "rgba(184,149,106,0.22)";
-                e.currentTarget.style.color = "rgba(245,240,232,0.68)";
-                e.currentTarget.style.background = "rgba(255,255,255,0.035)";
+                e.currentTarget.style.borderColor = "rgba(184,149,106,0.25)";
+                e.currentTarget.style.color = "rgba(245,240,232,0.6)";
+                e.currentTarget.style.background = "transparent";
               }}
               onClick={() =>
-                queueExpandAndSend("Analyze my spending patterns this week")
+                void sendMessage("Analyze my spending patterns this week")
               }
             >
               Analyze spending
             </button>
-            {topCategory ? (
-              <button
-                type="button"
-                style={secondaryButtonStyle}
-                onMouseEnter={(e) => {
-                  e.currentTarget.style.borderColor = "rgba(184,149,106,0.45)";
-                  e.currentTarget.style.color = "rgba(245,240,232,0.85)";
-                  e.currentTarget.style.background = "rgba(184,149,106,0.08)";
-                }}
-                onMouseLeave={(e) => {
-                  e.currentTarget.style.borderColor = "rgba(184,149,106,0.22)";
-                  e.currentTarget.style.color = "rgba(245,240,232,0.68)";
-                  e.currentTarget.style.background = "rgba(255,255,255,0.035)";
-                }}
-                onClick={() =>
-                  queueExpandAndSend(
-                    `Help me set a budget for ${topCategory}`,
-                  )
-                }
-              >
-                {`Set budget for ${topCategory}`}
-              </button>
-            ) : (
-              <button
-                type="button"
-                style={secondaryButtonStyle}
-                onMouseEnter={(e) => {
-                  e.currentTarget.style.borderColor = "rgba(184,149,106,0.45)";
-                  e.currentTarget.style.color = "rgba(245,240,232,0.85)";
-                  e.currentTarget.style.background = "rgba(184,149,106,0.08)";
-                }}
-                onMouseLeave={(e) => {
-                  e.currentTarget.style.borderColor = "rgba(184,149,106,0.22)";
-                  e.currentTarget.style.color = "rgba(245,240,232,0.68)";
-                  e.currentTarget.style.background = "rgba(255,255,255,0.035)";
-                }}
-                onClick={openExpandedOnly}
-              >
-                Savings tips
-              </button>
-            )}
             <button
               type="button"
-              style={primaryButtonStyle}
+              style={ghostPillStyle}
               onMouseEnter={(e) => {
-                e.currentTarget.style.opacity = "0.9";
-                e.currentTarget.style.transform = "translateY(-1px)";
+                e.currentTarget.style.borderColor = "rgba(184,149,106,0.45)";
+                e.currentTarget.style.color = "rgba(245,240,232,0.85)";
+                e.currentTarget.style.background = "rgba(184,149,106,0.06)";
               }}
               onMouseLeave={(e) => {
-                e.currentTarget.style.opacity = "1";
-                e.currentTarget.style.transform = "translateY(0)";
+                e.currentTarget.style.borderColor = "rgba(184,149,106,0.25)";
+                e.currentTarget.style.color = "rgba(245,240,232,0.6)";
+                e.currentTarget.style.background = "transparent";
               }}
-              onClick={openExpandedOnly}
+              onClick={() => void sendMessage(secondaryActionPrompt)}
             >
-              Ask AI advisor
+              {secondaryActionLabel}
             </button>
-          </div>
-          <button
-            type="button"
-            onClick={openExpandedOnly}
+          </motion.div>
+
+          <motion.form
+            variants={fadeUp}
+            onSubmit={(e) => {
+              e.preventDefault();
+              void sendMessage(input);
+            }}
             style={{
-              display: "inline-flex",
+              maxWidth: 480,
+              margin: "20px auto 0",
+              display: "flex",
+              gap: 8,
               alignItems: "center",
-              justifyContent: "center",
-              marginTop: -2,
-              fontSize: 11,
-              color: "rgba(184,149,106,0.62)",
-              letterSpacing: "0.08em",
-              background: "none",
-              border: "none",
-              cursor: "pointer",
-              fontStyle: "normal",
-              textTransform: "uppercase",
             }}
           >
-            Ask anything →
-          </button>
-        </div>
+            <input
+              type="text"
+              className="select-text"
+              value={input}
+              onChange={(e) => setInput(e.target.value)}
+              onFocus={() => setInputFocused(true)}
+              onBlur={() => setInputFocused(false)}
+              placeholder="Ask about your finances..."
+              disabled={isStreaming}
+              aria-busy={isStreaming}
+              aria-label="Ask about your finances"
+              style={inputBaseStyle}
+            />
+            <button
+              type="submit"
+              disabled={sendButtonDisabled}
+              aria-label="Send message"
+              style={{
+                width: 38,
+                height: 38,
+                flexShrink: 0,
+                borderRadius: "50%",
+                border: "none",
+                background: "#b8956a",
+                color: "#0a0a0a",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                fontSize: 16,
+                cursor: sendButtonDisabled ? "not-allowed" : "pointer",
+                opacity: sendButtonDisabled ? 0.45 : 1,
+                transition: "all 0.15s ease",
+              }}
+              onMouseEnter={(e) => {
+                if (!sendButtonDisabled) {
+                  e.currentTarget.style.opacity = "0.85";
+                  e.currentTarget.style.transform = "scale(1.05)";
+                }
+              }}
+              onMouseLeave={(e) => {
+                if (!sendButtonDisabled) {
+                  e.currentTarget.style.opacity = "1";
+                  e.currentTarget.style.transform = "scale(1)";
+                }
+              }}
+            >
+              <ArrowUp className="h-4 w-4" strokeWidth={2.5} aria-hidden />
+            </button>
+          </motion.form>
 
-        <motion.div
-          initial={false}
-          animate={{
-            height: expanded ? "auto" : 0,
-            opacity: expanded ? 1 : 0,
-          }}
-          transition={{ duration: 0.28, ease: [0.4, 0, 0.2, 1] }}
-          style={{ overflow: "hidden", position: "relative", zIndex: 10 }}
-        >
-          <div
+          <motion.div
+            initial={false}
+            animate={{
+              height: showThread ? "auto" : 0,
+              opacity: showThread ? 1 : 0,
+            }}
+            transition={{ duration: 0.28, ease: [0.4, 0, 0.2, 1] }}
             style={{
-              position: "relative",
-              paddingTop: 20,
-              marginTop: 8,
-              borderTop: "1px solid rgba(255,255,255,0.06)",
+              overflow: "hidden",
+              maxWidth: 560,
+              margin: "16px auto 0",
               textAlign: "left",
             }}
           >
-            <button
-              type="button"
-              aria-label="Close chat"
-              onClick={() => setExpanded(false)}
-              style={{
-                position: "absolute",
-                top: 12,
-                right: 0,
-                width: 28,
-                height: 28,
-                border: "none",
-                background: "transparent",
-                color: "rgba(245,240,232,0.45)",
-                fontSize: 20,
-                lineHeight: 1,
-                cursor: "pointer",
-                padding: 0,
-              }}
-            >
-              ×
-            </button>
-
             <div
               ref={scrollRef}
               className="min-h-0"
@@ -684,7 +795,6 @@ export function AiInsightCard() {
                 maxHeight: 280,
                 overflowY: "auto",
                 paddingRight: 8,
-                marginBottom: 12,
               }}
             >
               <ul className="m-0 flex list-none flex-col gap-3 p-0">
@@ -705,56 +815,56 @@ export function AiInsightCard() {
                         m.role === "user" ? "flex-end" : "flex-start",
                     }}
                   >
-                      {m.role === "assistant" &&
-                      m.content === "" &&
-                      isStreaming ? (
-                        <div
-                          role="status"
-                          aria-live="polite"
-                          aria-label="Advisor is typing"
-                          style={{
-                            display: "flex",
-                            alignItems: "center",
-                            gap: 5,
-                            padding: "10px 14px",
-                          }}
-                        >
-                          <span style={typingDotStyle(0)} />
-                          <span style={typingDotStyle(150)} />
-                          <span style={typingDotStyle(300)} />
-                        </div>
-                      ) : (
-                        <div
-                          className="select-text"
-                          style={{
-                            maxWidth: "88%",
-                            padding: "8px 12px",
-                            fontSize: 13,
-                            borderRadius:
-                              m.role === "user"
-                                ? "12px 12px 2px 12px"
-                                : "12px 12px 12px 2px",
-                            border:
-                              m.role === "user"
-                                ? "1px solid rgba(184,149,106,0.2)"
-                                : "1px solid rgba(255,255,255,0.07)",
-                            background:
-                              m.role === "user"
-                                ? "rgba(184,149,106,0.12)"
-                                : "rgba(255,255,255,0.04)",
-                            color:
-                              m.role === "user"
-                                ? "#f5f0e8"
-                                : "rgba(245,240,232,0.85)",
-                            fontStyle:
-                              m.role === "assistant" ? "italic" : "normal",
-                            whiteSpace: "pre-wrap",
-                            wordBreak: "break-word",
-                          }}
-                        >
-                          {m.content}
-                        </div>
-                      )}
+                    {m.role === "assistant" &&
+                    m.content === "" &&
+                    isStreaming ? (
+                      <div
+                        role="status"
+                        aria-live="polite"
+                        aria-label="Advisor is typing"
+                        style={{
+                          display: "flex",
+                          alignItems: "center",
+                          gap: 5,
+                          padding: "10px 14px",
+                        }}
+                      >
+                        <span style={typingDotStyle(0)} />
+                        <span style={typingDotStyle(150)} />
+                        <span style={typingDotStyle(300)} />
+                      </div>
+                    ) : (
+                      <div
+                        className="select-text"
+                        style={{
+                          maxWidth: "88%",
+                          padding: "8px 12px",
+                          fontSize: 13,
+                          borderRadius:
+                            m.role === "user"
+                              ? "12px 12px 2px 12px"
+                              : "12px 12px 12px 2px",
+                          border:
+                            m.role === "user"
+                              ? "1px solid rgba(184,149,106,0.2)"
+                              : "1px solid rgba(255,255,255,0.07)",
+                          background:
+                            m.role === "user"
+                              ? "rgba(184,149,106,0.12)"
+                              : "rgba(255,255,255,0.04)",
+                          color:
+                            m.role === "user"
+                              ? "#f5f0e8"
+                              : "rgba(245,240,232,0.85)",
+                          fontStyle:
+                            m.role === "assistant" ? "italic" : "normal",
+                          whiteSpace: "pre-wrap",
+                          wordBreak: "break-word",
+                        }}
+                      >
+                        {m.content}
+                      </div>
+                    )}
                   </motion.li>
                 ))}
               </ul>
@@ -767,82 +877,18 @@ export function AiInsightCard() {
                 style={{
                   fontSize: 12,
                   color: "#E07A5F",
-                  marginBottom: 8,
+                  marginTop: 8,
                   textAlign: "center",
                 }}
               >
                 {error}
               </p>
             ) : null}
-
-            <form
-              onSubmit={(e) => {
-                e.preventDefault();
-                void sendMessage(input);
-              }}
-              style={{
-                display: "flex",
-                alignItems: "center",
-                gap: 10,
-              }}
-            >
-              <input
-                type="text"
-                className="select-text"
-                value={input}
-                onChange={(e) => setInput(e.target.value)}
-                placeholder="Ask about your spending..."
-                disabled={isStreaming}
-                aria-busy={isStreaming}
-                style={{
-                  flex: 1,
-                  minWidth: 0,
-                  background: "rgba(255,255,255,0.04)",
-                  border: "1px solid rgba(184,149,106,0.2)",
-                  borderRadius: 100,
-                  padding: "10px 16px",
-                  fontSize: 13,
-                  color: "#f5f0e8",
-                  outline: "none",
-                }}
-              />
-              <button
-                type="submit"
-                disabled={isStreaming || !input.trim()}
-                aria-label="Send message"
-                style={{
-                  width: 36,
-                  height: 36,
-                  borderRadius: "50%",
-                  border: "none",
-                  background: "#b8956a",
-                  color: "#1a1a1a",
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  cursor:
-                    isStreaming || !input.trim() ? "not-allowed" : "pointer",
-                  opacity: isStreaming || !input.trim() ? 0.45 : 1,
-                  flexShrink: 0,
-                  transition: "opacity 0.15s",
-                }}
-                onMouseEnter={(e) => {
-                  if (!isStreaming && input.trim()) {
-                    e.currentTarget.style.opacity = "0.85";
-                  }
-                }}
-                onMouseLeave={(e) => {
-                  if (!isStreaming && input.trim()) {
-                    e.currentTarget.style.opacity = "1";
-                  }
-                }}
-              >
-                <ArrowUp className="h-4 w-4" strokeWidth={2.5} aria-hidden />
-              </button>
-            </form>
-          </div>
+          </motion.div>
         </motion.div>
       </div>
+
+      <Divider />
     </section>
   );
 }
