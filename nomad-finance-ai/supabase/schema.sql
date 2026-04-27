@@ -79,6 +79,7 @@ create table public.transactions (
   category text not null,
   description text,
   date date default current_date,
+  external_id text,
   created_at timestamptz default now()
 );
 
@@ -103,4 +104,7 @@ create policy "Users can delete their own transactions"
 -- Indexes for common queries
 create index idx_transactions_user_date on public.transactions(user_id, date desc);
 create index idx_transactions_user_category on public.transactions(user_id, category);
+create unique index idx_transactions_user_external_id
+  on public.transactions(user_id, external_id)
+  where external_id is not null;
 create index idx_wallets_user on public.wallets(user_id);

@@ -10,6 +10,7 @@ import { RunwayCard } from "@/components/dashboard/runway-card";
 import { DashboardSpendingBreakdown } from "@/components/dashboard/spending-breakdown";
 import { WalletChart } from "@/components/dashboard/wallet-chart";
 import { TimeRangeToggle } from "@/components/dashboard/time-range-toggle";
+import { ImportModal } from "@/components/import/import-modal";
 import { useTimeRange } from "@/lib/time-range-context";
 
 const cardVariants: Variants = {
@@ -100,9 +101,10 @@ export function DashboardContent() {
   return (
     <div className="mx-auto w-full min-w-0 max-w-[1200px] overflow-hidden px-4 md:px-6">
       <div className="min-w-0 max-w-full space-y-8">
-        <div className="flex min-w-0 max-w-full items-center gap-3">
+        <div className="flex min-w-0 max-w-full flex-wrap items-center justify-between gap-3">
           <h1 className="sr-only">Dashboard</h1>
           <TimeRangeToggle />
+          <ImportModal />
         </div>
         <TimeRangeContent />
         <MobileFab />

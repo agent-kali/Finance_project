@@ -25,6 +25,12 @@ export type Transaction = {
   category: string;
   description: string | null;
   date: string;
+  /**
+   * Deterministic hash of (date + amount + description) used to detect
+   * duplicate rows during CSV imports. Optional because the column is
+   * nullable for transactions created manually.
+   */
+  external_id?: string | null;
   created_at: string;
 };
 
