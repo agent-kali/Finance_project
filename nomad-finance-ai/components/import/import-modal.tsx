@@ -27,6 +27,7 @@ import {
   importTransactions,
   type ImportTransactionsResult,
 } from "@/app/actions/import-transactions";
+import { DEMO_USER_ID } from "@/lib/demo";
 import { detectFormat } from "@/lib/csv/detect-format";
 import { parseGenericRows } from "@/lib/csv/parsers/generic";
 import { parseRevolutRows } from "@/lib/csv/parsers/revolut";
@@ -38,6 +39,8 @@ import type {
   ParsedTransaction,
 } from "@/lib/csv/types";
 import { useDemoMode } from "@/lib/demo-context";
+import { useWallets } from "@/lib/hooks/use-wallets";
+import type { Transaction } from "@/types/database.types";
 
 const importFormSchema = z.object({
   file: z.custom<File>(
@@ -143,6 +146,7 @@ export function ImportModal() {
     useState<ImportTransactionsResult | null>(null);
   const queryClient = useQueryClient();
   const { isDemo } = useDemoMode();
+  const { data: wallets } = useWallets();
 
   const form = useForm<ImportFormValues>({
     resolver: zodResolver(importFormSchema),
@@ -153,12 +157,67 @@ export function ImportModal() {
     Error,
     ParsedTransaction[]
   >({
-    mutationFn: importTransactions,
-    onSuccess: (result) => {
+    mutationFn: async (transactions) => {
+      if (!isDemo) {
+        return importTransactions(transactions);
+      }
+
+      const walletByCurrency = new Map(
+        (wallets ?? []).map((wallet) => [wallet.currency, wallet])
+      );
+      const errors: string[] = [];
+      let inserted = 0;
+
+      for (const [index, transaction] of transactions.entries()) {
+        if (walletByCurrency.has(transaction.currency)) {
+          inserted++;
+          continue;
+        }
+
+        errors.push(
+          `Row ${index + 1}: no wallet found for ${transaction.currency}; skipped.`
+        );
+      }
+
+      return { inserted, skipped: transactions.length - inserted, errors };
+    },
+    onSuccess: (result, transactions) => {
+      if (isDemo) {
+        const walletByCurrency = new Map(
+          (wallets ?? []).map((wallet) => [wallet.currency, wallet])
+        );
+        const importedTransactions: Transaction[] = transactions.flatMap(
+          (transaction, index) => {
+            const wallet = walletByCurrency.get(transaction.currency);
+            if (!wallet) return [];
+
+            return {
+              id: `demo-import-${Date.now()}-${index}`,
+              user_id: DEMO_USER_ID,
+              wallet_id: wallet.id,
+              type: transaction.type,
+              amount: Math.abs(transaction.amount),
+              currency: wallet.currency,
+              category: transaction.category ?? "Other",
+              description: transaction.description || null,
+              date: transaction.date.slice(0, 10),
+              created_at: new Date().toISOString(),
+            };
+          }
+        );
+
+        queryClient.setQueryData<Transaction[]>(
+          ["transactions", true],
+          (current) => [...importedTransactions, ...(current ?? [])]
+        );
+      }
+
       setImportResult(result);
       setStep("success");
-      queryClient.invalidateQueries({ queryKey: ["transactions", isDemo] });
-      queryClient.invalidateQueries({ queryKey: ["wallets", isDemo] });
+      if (!isDemo) {
+        queryClient.invalidateQueries({ queryKey: ["transactions", isDemo] });
+        queryClient.invalidateQueries({ queryKey: ["wallets", isDemo] });
+      }
     },
   });
 

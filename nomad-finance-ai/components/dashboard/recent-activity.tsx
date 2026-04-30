@@ -2,7 +2,6 @@
 
 import { useMemo } from "react";
 import Link from "next/link";
-import { motion } from "framer-motion";
 import { EmptyState } from "@/components/ui/empty-state";
 import { cn } from "@/lib/utils";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -13,16 +12,6 @@ import { convertCurrency, formatCurrency } from "@/lib/currency";
 import type { SupportedCurrency } from "@/lib/constants";
 import type { Transaction } from "@/types/database.types";
 import { Activity } from "lucide-react";
-
-const listVariants = {
-  hidden: {},
-  visible: { transition: { staggerChildren: 0.06 } },
-};
-
-const itemVariants = {
-  hidden: { opacity: 0, y: 10 },
-  visible: { opacity: 1, y: 0, transition: { duration: 0.4, ease: "easeOut" as const } },
-};
 
 const CATEGORY_DOT_COLORS: Record<string, string> = {
   Housing: "#C9A96E",
@@ -109,7 +98,7 @@ export function RecentActivity() {
 
   if (isLoading) {
     return (
-      <div className="mx-auto min-h-[280px] w-full min-w-0 max-w-[860px]" style={{ padding: "0 4px" }}>
+    <div className="mx-auto min-h-[280px] w-full min-w-0 max-w-[860px]" style={{ padding: "0 4px" }}>
         <div className="flex flex-row items-center justify-between space-y-0">
           <Skeleton className="h-3 w-36" />
           <Skeleton className="h-3 w-16" />
@@ -159,20 +148,14 @@ export function RecentActivity() {
     <div className="mx-auto w-full min-w-0 max-w-[860px]">
       {header}
       <div style={{ padding: "0 4px" }} className="mt-6 min-w-0 max-w-full">
-        <motion.ul
-          className="space-y-0"
-          variants={listVariants}
-          initial="hidden"
-          animate="visible"
-        >
+        <ul className="space-y-0">
           {recent.map((tx, index) => {
             const isOptimistic = tx.id.startsWith("temp-");
             const merchant = getMerchant(tx);
             const showCategory = merchant !== tx.category;
             return (
-              <motion.li
+              <li
                 key={tx.id}
-                variants={itemVariants}
                 className={cn(
                   "group flex w-full min-w-0 max-w-full items-center gap-2 rounded-[10px] px-1 py-3 first:pt-0 last:pb-0 transition-[background,opacity] duration-200 ease-in-out hover:bg-[rgba(184,149,106,0.06)] sm:gap-3 sm:px-2",
                   index !== recent.length - 1 && "border-b border-[rgba(255,255,255,0.04)]",
@@ -207,10 +190,10 @@ export function RecentActivity() {
                     displayCurrency
                   )}
                 </span>
-              </motion.li>
+              </li>
             );
           })}
-        </motion.ul>
+        </ul>
         {recent.length <= 2 ? (
           <p className="mt-4 text-xs text-muted-foreground">
             Add more transactions to see trends and insights.
