@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import Papa from "papaparse";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
@@ -137,6 +137,7 @@ async function categorizeTransactions(
 }
 
 export function ImportModal() {
+  const [isMounted, setIsMounted] = useState(false);
   const [open, setOpen] = useState(false);
   const [step, setStep] = useState<ImportStep>("upload");
   const [parseResult, setParseResult] = useState<ParseResult | null>(null);
@@ -147,10 +148,26 @@ export function ImportModal() {
   const queryClient = useQueryClient();
   const { isDemo } = useDemoMode();
   const { data: wallets } = useWallets();
+  const triggerButtonRef = useRef<HTMLButtonElement>(null);
 
   const form = useForm<ImportFormValues>({
     resolver: zodResolver(importFormSchema),
   });
+
+  // #region agent log
+  fetch('http://127.0.0.1:7275/ingest/7034276d-4c3f-45c5-87de-28cdb9aa5856',{method:'POST',headers:{'Content-Type':'application/json','X-Debug-Session-Id':'84e12d'},body:JSON.stringify({sessionId:'84e12d',runId:'pre-fix',hypothesisId:'H1,H3',location:'components/import/import-modal.tsx:ImportModal:render',message:'ImportModal render',data:{runtime:typeof window==='undefined'?'server':'client',open,step,isDemo,hasWallets:wallets!==undefined,walletCount:wallets?.length??null},timestamp:Date.now()})}).catch(()=>{});
+  // #endregion
+
+  useEffect(() => {
+    setIsMounted(true);
+  }, []);
+
+  useEffect(() => {
+    const button = triggerButtonRef.current;
+    // #region agent log
+    fetch('http://127.0.0.1:7275/ingest/7034276d-4c3f-45c5-87de-28cdb9aa5856',{method:'POST',headers:{'Content-Type':'application/json','X-Debug-Session-Id':'84e12d'},body:JSON.stringify({sessionId:'84e12d',runId:'post-fix',hypothesisId:'H1,H4',location:'components/import/import-modal.tsx:ImportModal:mounted-trigger',message:'ImportModal trigger mounted',data:{isMounted,ariaControls:button?.getAttribute('aria-controls')??null,ariaExpanded:button?.getAttribute('aria-expanded')??null,dataState:button?.getAttribute('data-state')??null},timestamp:Date.now()})}).catch(()=>{});
+    // #endregion
+  }, [isMounted]);
 
   const mutation = useMutation<
     ImportTransactionsResult,
@@ -289,10 +306,25 @@ export function ImportModal() {
     );
   };
 
+  if (!isMounted) {
+    return (
+      <Button
+        ref={triggerButtonRef}
+        type="button"
+        className="border border-[#b8956a]/30 bg-[#b8956a] text-[#171412] shadow-sm hover:bg-[#c6a276]"
+        aria-disabled="true"
+      >
+        <Upload className="size-4" aria-hidden="true" />
+        Import CSV
+      </Button>
+    );
+  }
+
   return (
     <Dialog open={open} onOpenChange={handleOpenChange}>
       <DialogTrigger asChild>
         <Button
+          ref={triggerButtonRef}
           type="button"
           className="border border-[#b8956a]/30 bg-[#b8956a] text-[#171412] shadow-sm hover:bg-[#c6a276]"
         >

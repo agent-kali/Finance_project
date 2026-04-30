@@ -8,6 +8,10 @@ const OPTIONS: TimeRange[] = ["Today", "Week", "Month"];
 export function TimeRangeToggle() {
   const { timeRange, setTimeRange } = useTimeRange();
 
+  // #region agent log
+  fetch('http://127.0.0.1:7275/ingest/7034276d-4c3f-45c5-87de-28cdb9aa5856',{method:'POST',headers:{'Content-Type':'application/json','X-Debug-Session-Id':'84e12d'},body:JSON.stringify({sessionId:'84e12d',runId:'pre-fix',hypothesisId:'H2',location:'components/dashboard/time-range-toggle.tsx:TimeRangeToggle:render',message:'TimeRangeToggle render',data:{runtime:typeof window==='undefined'?'server':'client',timeRange},timestamp:Date.now()})}).catch(()=>{});
+  // #endregion
+
   return (
     <div
       role="group"
