@@ -154,10 +154,6 @@ export async function POST(request: Request) {
       });
 
       clearTimeout(timeout);
-      console.error("[categorize] Raw Groq response before JSON.parse", {
-        text: result.text,
-      });
-
       const categories = parseCategorizationResponse(result.text);
 
       const byIndex = new Map(
