@@ -1,23 +1,16 @@
 import { createGroq } from "@ai-sdk/groq";
-import { generateObject } from "ai";
-import { z } from "zod";
+import { generateText } from "ai";
 import {
   IMPORT_CATEGORIES,
   type ImportCategory,
   type ParsedTransaction,
 } from "@/lib/csv/types";
 
-const categorizationSchema = z.object({
-  categories: z.array(
-    z.object({
-      index: z.number().int().nonnegative(),
-      category: z.enum(IMPORT_CATEGORIES),
-      confidence: z.number().min(0).max(1),
-    })
-  ),
-});
-
-type Categorization = z.infer<typeof categorizationSchema>["categories"][number];
+type Categorization = {
+  index: number;
+  category: ImportCategory;
+  confidence: number;
+};
 
 function fallback(transactions: ParsedTransaction[]): Categorization[] {
   return transactions.map((_, index) => ({
@@ -60,6 +53,8 @@ function buildPrompt(transactions: ParsedTransaction[]): string {
 
 Return one category for every transaction index.
 Allowed categories: ${IMPORT_CATEGORIES.join(", ")}.
+Return only valid JSON in this exact shape:
+{"categories":[{"index":0,"category":"Food","confidence":0.9}]}
 
 Category guidance:
 - Food: groceries, restaurants, cafes, delivery
@@ -75,6 +70,62 @@ Category guidance:
 
 Transactions:
 ${JSON.stringify(rows, null, 2)}`;
+}
+
+function stripMarkdownCodeFence(raw: string): string {
+  return raw
+    .trim()
+    .replace(/^```(?:json)?\s*/i, "")
+    .replace(/\s*```$/i, "")
+    .trim();
+}
+
+function parseCategorizationResponse(raw: string): Categorization[] {
+  const parsed = JSON.parse(stripMarkdownCodeFence(raw)) as unknown;
+
+  if (!parsed || typeof parsed !== "object") {
+    throw new Error("Categorization response is not an object");
+  }
+
+  const categories = (parsed as { categories?: unknown }).categories;
+  if (!Array.isArray(categories)) {
+    throw new Error("Categorization response is missing categories array");
+  }
+
+  return categories.map((item, position) => {
+    if (!item || typeof item !== "object") {
+      throw new Error(`Categorization item ${position} is not an object`);
+    }
+
+    const candidate = item as Record<string, unknown>;
+    if (
+      typeof candidate.index !== "number" ||
+      !Number.isInteger(candidate.index) ||
+      candidate.index < 0
+    ) {
+      throw new Error(`Categorization item ${position} has an invalid index`);
+    }
+
+    if (
+      typeof candidate.category !== "string" ||
+      !IMPORT_CATEGORIES.includes(candidate.category as ImportCategory)
+    ) {
+      throw new Error(`Categorization item ${position} has an invalid category`);
+    }
+
+    if (
+      typeof candidate.confidence !== "number" ||
+      !Number.isFinite(candidate.confidence)
+    ) {
+      throw new Error(`Categorization item ${position} has an invalid confidence`);
+    }
+
+    return {
+      index: candidate.index,
+      category: candidate.category as ImportCategory,
+      confidence: Math.min(1, Math.max(0, candidate.confidence)),
+    };
+  });
 }
 
 export async function POST(request: Request) {
@@ -96,17 +147,21 @@ export async function POST(request: Request) {
 
     try {
       const groq = createGroq({ apiKey: process.env.GROQ_API_KEY });
-      const result = await generateObject({
+      const result = await generateText({
         model: groq("llama-3.3-70b-versatile"),
-        schema: categorizationSchema,
         abortSignal: controller.signal,
         prompt: buildPrompt(transactions),
       });
 
       clearTimeout(timeout);
+      console.error("[categorize] Raw Groq response before JSON.parse", {
+        text: result.text,
+      });
+
+      const categories = parseCategorizationResponse(result.text);
 
       const byIndex = new Map(
-        result.object.categories.map((item) => [item.index, item])
+        categories.map((item) => [item.index, item])
       );
 
       return Response.json(
@@ -121,8 +176,9 @@ export async function POST(request: Request) {
           );
         })
       );
-    } catch {
+    } catch (error) {
       clearTimeout(timeout);
+      console.error("[categorize] Failed to categorize transactions", error);
       return Response.json(fallback(transactions));
     }
   } catch {
